@@ -43,14 +43,24 @@ pip3 install -r requirements.txt
 
 MacOS / Linux:
 ```
-$ export FLASK_APP=toynet-flask.py
+$ export FLASK_APP=flasksrc
+$ export FLASK_ENV=development // restarts server after code changes
 $ flask run
  * Running on http://127.0.0.1:5000/
  ```
 
 Windows:
 ```
-C:\path\to\app>set FLASK_APP=hello.py
+> set FLASK_APP=flasksrc
+> set FLASK_ENV=development // restarts server after code changes
+> flask run
+```
+
+Windows PowerShell:
+```
+> $env:FLASK_APP = "flasksrc"
+> $env:FLASK_ENV = "development" // restarts server after code changes
+> flask run
 ```
 
 ![Running App](https://github.com/Project-Reclass/toynet-flask/blob/main/images/hello-reclass.png)
