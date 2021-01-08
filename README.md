@@ -82,7 +82,18 @@ Windows PowerShell:
 > flask run
 ```
 
-![Running App](https://github.com/Project-Reclass/toynet-flask/blob/main/images/hello-reclass.png)
+Go to: `http://127.0.0.1:5000/`
+![Running App](../documentation/images/hello-reclass.png)
+
+Go to: `http://127.0.0.1:5000/values/5001`
+![Running App](../documentation/images/values-goodID.png)
+Open Network tab of Chrome DevTools (right click screen & click "Inspect")
+![Running App](../documentation/images/values-goodID-200.png)
+
+Go to: `http://127.0.0.1:5000/values/1`
+![Running App](../documentation/images/values-badID.png)
+Open Network tab of Chrome DevTools (right click screen & click "Inspect")
+![Running App](../documentation/images/values-badID-404.png)
 
 # Troubleshooting
 
