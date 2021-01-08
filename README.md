@@ -1,6 +1,10 @@
 # toynet-flask
 Backend service of ToyNet emulator and learning platform
 
+Created with:
+- https://flask.palletsprojects.com/en/1.1.x/ for application structure and SQLite database (will become PostgreSQL)
+- https://flask-restful.readthedocs.io/en/latest/quickstart.html for Flask
+
 # Requirements
 
 ## Python
@@ -44,23 +48,46 @@ pip3 install -r requirements.txt
 MacOS / Linux:
 ```
 $ export FLASK_APP=flasksrc
-$ export FLASK_ENV=development // restarts server after code changes
+
+# restarts server after code changes
+$ export FLASK_ENV=development
+
+# creates instance/flaskr.sqlite
+$ flask init-db 
+Initialized the database.
+
 $ flask run
- * Running on http://127.0.0.1:5000/
+ * Serving Flask app "flasksrc" (lazy loading)
+ * Environment: development
+ * Debug mode: on
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 220-725-712
  ```
 
 Windows:
 ```
 > set FLASK_APP=flasksrc
-> set FLASK_ENV=development // restarts server after code changes
+> set FLASK_ENV=development
+> flask init-db
 > flask run
 ```
 
 Windows PowerShell:
 ```
 > $env:FLASK_APP = "flasksrc"
-> $env:FLASK_ENV = "development" // restarts server after code changes
+> $env:FLASK_ENV = "development"
+> flask init-db
 > flask run
 ```
 
 ![Running App](https://github.com/Project-Reclass/toynet-flask/blob/main/images/hello-reclass.png)
+
+# Troubleshooting
+
+Q: How do I use a table I added in `schema.sql` or `seed_data/<resource>.sql`?
+A: delete instance/flaskr.sqlite and run flask init-db again.
+
+Q: How do I get rid of a table?
+A: delete `instance/flaskr.sqlite` and run `flask init-db` again.
