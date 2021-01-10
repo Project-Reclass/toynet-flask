@@ -40,8 +40,15 @@ On Windows:
 
 Install Python Requirements (add new requirements via `pip3 freeze > requirements.txt.`)
 ```
-pip3 install -r requirements.txt
+$ pip3 install -r requirements.txt
 ```
+
+You can exit this virtual environment anytime via running:
+```
+$ deactivate
+```
+
+More information [here](https://docs.python.org/3/library/venv.html)
 
 # Run the service
 
@@ -83,22 +90,25 @@ Windows PowerShell:
 ```
 
 Go to: `http://127.0.0.1:5000/`
-![Running App](../documentation/images/hello-reclass.png)
+<br/><img src="documentation/images/hello-reclass.png" width="300" /><br/>
 
 Go to: `http://127.0.0.1:5000/values/5001`
-![Running App](../documentation/images/values-goodID.png)
+<br/><img src="documentation/images/values-goodID.png" width="600" /><br/>
 Open Network tab of Chrome DevTools (right click screen & click "Inspect")
-![Running App](../documentation/images/values-goodID-200.png)
+<br/><img src="documentation/images/values-goodID-200.png" width="500" /><br/>
 
 Go to: `http://127.0.0.1:5000/values/1`
-![Running App](../documentation/images/values-badID.png)
+<br/><img src="documentation/images/values-badID.png" width="350" /><br/>
 Open Network tab of Chrome DevTools (right click screen & click "Inspect")
-![Running App](../documentation/images/values-badID-404.png)
+<br/><img src="documentation/images/values-badID-404.png" width="500" /><br/>
 
 # Troubleshooting
 
-Q: How do I use a table I added in `schema.sql` or `seed_data/<resource>.sql`?
-A: delete instance/flaskr.sqlite and run flask init-db again.
+**Q: How do I send REST calls to my application?**<br/>
+A: You can use something like [Postman](https://www.postman.com/downloads/) ([tutorial](https://learning.postman.com/docs/sending-requests/requests/)) or [Insomnia](https://insomnia.rest/) ([tutorial](https://support.insomnia.rest/article/11-getting-started)).
 
-Q: How do I get rid of a table?
-A: delete `instance/flaskr.sqlite` and run `flask init-db` again.
+**Q: How do I use a table I added in `schema.sql` or `seed_data/<resource>.sql`?**<br/>
+A: Delete instance/flaskr.sqlite and run flask init-db again.
+
+**Q: How do I get rid of a table?**<br/>
+A: Delete `instance/flaskr.sqlite` and run `flask init-db` again.
