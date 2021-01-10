@@ -3,7 +3,8 @@ Backend service of ToyNet emulator and learning platform
 
 Created with:
 - https://flask.palletsprojects.com/en/1.1.x/ for application structure and SQLite database (will become PostgreSQL)
-- https://flask-restful.readthedocs.io/en/latest/quickstart.html for Flask
+- https://flask-restful.readthedocs.io/en/latest/quickstart.html for Flask-RESTful
+- https://flask.palletsprojects.com/en/1.1.x/testing/ for pytest
 
 # Requirements
 
@@ -59,7 +60,7 @@ $ export FLASK_APP=flasksrc
 # restarts server after code changes
 $ export FLASK_ENV=development
 
-# creates instance/flaskr.sqlite
+# creates instance/toynet.sqlite
 $ flask init-db 
 Initialized the database.
 
@@ -102,13 +103,23 @@ Go to: `http://127.0.0.1:5000/values/1`
 Open Network tab of Chrome DevTools (right click screen & click "Inspect")
 <br/><img src="documentation/images/values-badID-404.png" width="500" /><br/>
 
+# Testing
+
+To send REST calls to local application, you can use something like [Postman](https://www.postman.com/downloads/) ([tutorial](https://learning.postman.com/docs/sending-requests/requests/)) or [Insomnia](https://insomnia.rest/) ([tutorial](https://support.insomnia.rest/article/11-getting-started)).
+
+Run our unit tests from the root directory:
+
+```
+$ pytest -v
+```
+
 # Troubleshooting
 
-**Q: How do I send REST calls to my application?**<br/>
-A: You can use something like [Postman](https://www.postman.com/downloads/) ([tutorial](https://learning.postman.com/docs/sending-requests/requests/)) or [Insomnia](https://insomnia.rest/) ([tutorial](https://support.insomnia.rest/article/11-getting-started)).
-
 **Q: How do I use a table I added in `schema.sql` or `seed_data/<resource>.sql`?**<br/>
-A: Delete instance/flaskr.sqlite and run flask init-db again.
+A: Delete instance/toynet.sqlite and run flask init-db again.
 
 **Q: How do I get rid of a table?**<br/>
-A: Delete `instance/flaskr.sqlite` and run `flask init-db` again.
+A: Delete `instance/toynet.sqlite` and run `flask init-db` again.
+
+**Q: I added a test file but it isn't being picked up by pytest**<br/>
+A: Make sure the file is named `test_***.py`
