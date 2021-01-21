@@ -8,6 +8,8 @@ CREATE TABLE user (
   password TEXT NOT NULL
 );
 
+-- values submodule
+
 CREATE TABLE toynet_values (
   id INTEGER PRIMARY KEY,
   name TEXT NOT NULL,
