@@ -93,12 +93,12 @@ Windows PowerShell:
 Go to: `http://127.0.0.1:5000/`
 <br/><img src="documentation/images/hello-reclass.png" width="300" /><br/>
 
-Go to: `http://127.0.0.1:5000/values/5001`
+Go to: `http://127.0.0.1:5000/api/value/5001`
 <br/><img src="documentation/images/values-goodID.png" width="600" /><br/>
 Open Network tab of Chrome DevTools (right click screen & click "Inspect")
 <br/><img src="documentation/images/values-goodID-200.png" width="500" /><br/>
 
-Go to: `http://127.0.0.1:5000/values/1`
+Go to: `http://127.0.0.1:5000/api/value/1`
 <br/><img src="documentation/images/values-badID.png" width="350" /><br/>
 Open Network tab of Chrome DevTools (right click screen & click "Inspect")
 <br/><img src="documentation/images/values-badID-404.png" width="500" /><br/>

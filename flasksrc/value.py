@@ -3,7 +3,7 @@ from flask_restful import Resource, Api, abort
 
 from flasksrc.db import get_db
 
-class ToyNetValue(Resource):
+class ToyNetValueById(Resource):
     def get(self, value_id):
         db = get_db()
         error = None
@@ -16,7 +16,7 @@ class ToyNetValue(Resource):
         ).fetchall()
 
         if not len(rows):
-            abort(404, message="value {} doesn't exist".format(value_id))
+            abort(404, message="value ID {} does not exist".format(value_id))
 
         return {
             'value': rows[0]['name'],

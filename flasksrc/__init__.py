@@ -37,8 +37,8 @@ def create_app(test_config=None):
     api = Api(app)
     api.add_resource(HelloReclass, '/')
 
-    from .value import ToyNetValue
-    api.add_resource(ToyNetValue, '/values/<string:value_id>')
+    from .value import ToyNetValueById
+    api.add_resource(ToyNetValueById, '/api/value/<string:value_id>')
 
     from .quiz import ToyNetQuiz
     api.add_resource(ToyNetQuiz, '/quiz/<string:quiz_id>')
