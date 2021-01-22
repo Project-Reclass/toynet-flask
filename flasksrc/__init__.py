@@ -3,10 +3,12 @@ import os
 from flask import Flask
 from flask_restful import Resource, Api
 
+
 class HelloReclass(Resource):
     def get(self):
         # return {'hello': 'reclass'}
         return 'Hello, Reclass!'
+
 
 def create_app(test_config=None):
     # create and configure the app
