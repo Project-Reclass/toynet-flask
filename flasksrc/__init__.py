@@ -5,6 +5,7 @@ from flask_restful import Resource, Api
 from flask_jwt_extended import JWTManager
 
 
+
 class HelloReclass(Resource):
     def get(self):
         # return {'hello': 'reclass'}
