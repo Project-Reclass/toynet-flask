@@ -40,4 +40,7 @@ def create_app(test_config=None):
     from .value import ToyNetValue
     api.add_resource(ToyNetValue, '/values/<string:value_id>')
 
+    from .quiz import ToyNetQuiz
+    api.add_resource(ToyNetQuiz, '/quiz/<string:quiz_id>')
+
     return app
