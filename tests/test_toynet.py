@@ -25,10 +25,11 @@ def test_hello_reclass(client):
     rv = client.get('/')
     assert b'Hello, Reclass!' in rv.data
 
-def test_value_get(client):
+def test_valueById_get(client):
     """Check the app is running"""
 
-    rv = client.get('/values/5004')
+    rv = client.get('/api/value/5004')
+    assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
 
     assert rv_json['value'] == 'Loyalty'
@@ -38,3 +39,8 @@ def test_value_get(client):
     assert inspiration['organization'] == 'U.S. Army'
     assert inspiration['definition'][:21] == 'Bear true faith and a'
     assert inspiration['definition'][-21:] == 'loyalty to your unit.'
+
+    rv = client.get('/api/value/1')
+    assert rv.status_code == 404
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['message'] == 'value ID 1 does not exist'

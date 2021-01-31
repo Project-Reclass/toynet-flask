@@ -3,10 +3,12 @@ import os
 from flask import Flask
 from flask_restful import Resource, Api
 
+
 class HelloReclass(Resource):
     def get(self):
         # return {'hello': 'reclass'}
         return 'Hello, Reclass!'
+
 
 def create_app(test_config=None):
     # create and configure the app
@@ -37,7 +39,7 @@ def create_app(test_config=None):
     api = Api(app)
     api.add_resource(HelloReclass, '/')
 
-    from .value import ToyNetValue
-    api.add_resource(ToyNetValue, '/values/<string:value_id>')
+    from .value import ToyNetValueById
+    api.add_resource(ToyNetValueById, '/api/value/<string:value_id>')
 
     return app
