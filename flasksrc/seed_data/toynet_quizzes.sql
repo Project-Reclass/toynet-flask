@@ -1,14 +1,11 @@
-
-
-INSERT INTO toynet_quizzes(quiz_id) VALUES(4001);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(0, 4001, "Which type of fiber is best suited for long distance transmission?", 1);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(1, 4001, "What level of the 7 Layer OSI model are Routers in?", 2);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(2, 4001, "What part of IP packet determines destination?", 2);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(3, 4001, "What part of IP packet determines what we seek?", 0);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(4, 4001, "What is the name of a network spanning a small area?", 0);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(5, 4001, "In order to send an IP Packet, what is the first step before it can get sent?", 3);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(6, 4001, "Which Small Factor Pluggable is capable of speeds over 40 Gbps?", 1);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(7, 4001, "Which Cable type is divided into categories abbreviated CAT?", 2);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(0, 4001, "Which type of fiber is best suited for long distance transmission?", 1);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(1, 4001, "What level of the 7 Layer OSI model are Routers in?", 2);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(2, 4001, "What part of IP packet determines destination?", 2);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(3, 4001, "What part of IP packet determines what we seek?", 0);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(4, 4001, "What is the name of a network spanning a small area?", 0);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(5, 4001, "In order to send an IP Packet, what is the first step before it can get sent?", 3);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(6, 4001, "Which Small Factor Pluggable is capable of speeds over 40 Gbps?", 1);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(7, 4001, "Which Cable type is divided into categories abbreviated CAT?", 2);
 
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(0, 4001, 0, "Multi-Mode Fiber");
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(1, 4001, 0, "Single-mode Fiber");
@@ -52,17 +49,16 @@ INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(
 
 
 
-INSERT INTO toynet_quizzes(quiz_id) VALUES(4002);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(0, 4002, "Which Protocol do Internet Browsers (Chrome, Firefox, Internet Explorer) use?", 3);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(1, 4002, "What is Layer 6 of OSI model?", 1);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(2, 4002, "Within the Session Layer, what connection allows applications to talk through ports?", 2);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(3, 4002, "When a sender wants to know the physical address of a device it broadcasts what?", 0);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(4, 4002, "What is an Internet Control Message Protocol to check if a destistination device is responding?", 3);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(5, 4002, "In 2020 nearly all websites use what type of cryptographic protocol?", 0);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(6, 4002, "What OSI layer does Chrome and other browsers use TLS to encrypt data?", 2);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(7, 4002, "Which network protocol is often used for video game streaming in which some packet drop is preferable to overall latency?", 1);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(8, 4002, "Which network protocol type can establish a secure connection before sending data?", 2);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(9, 4002, "What is the name of small pieces of information sent via TCP/IP?", 0);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(0, 4002, "Which Protocol do Internet Browsers (Chrome, Firefox, Internet Explorer) use?", 3);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(1, 4002, "What is Layer 6 of OSI model?", 1);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(2, 4002, "Within the Session Layer, what connection allows applications to talk through ports?", 2);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(3, 4002, "When a sender wants to know the physical address of a device it broadcasts what?", 0);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(4, 4002, "What is an Internet Control Message Protocol to check if a destistination device is responding?", 3);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(5, 4002, "In 2020 nearly all websites use what type of cryptographic protocol?", 0);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(6, 4002, "What OSI layer does Chrome and other browsers use TLS to encrypt data?", 2);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(7, 4002, "Which network protocol is often used for video game streaming in which some packet drop is preferable to overall latency?", 1);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(8, 4002, "Which network protocol type can establish a secure connection before sending data?", 2);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(9, 4002, "What is the name of small pieces of information sent via TCP/IP?", 0);
 
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(0, 4002, 0, "SMTP");
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(1, 4002, 0, "FTP");
@@ -116,14 +112,13 @@ INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(
 
 
 
-INSERT INTO toynet_quizzes(quiz_id) VALUES(4003);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(0, 4003, "How many nodes share a single channel on a bus topology?", 3);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(1, 4003, "Which of the following is the most fault-tolerant WAN topology?", 3);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(2, 4003, "If a full-mesh WAN consists of four locations, how many separate connections does it contain?", 2);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(3, 4003, "What makes IEEE Standards so important for business and network specialists?", 1);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(4, 4003, "Which IEEE working group oversees all LAN/MAN Standards?", 1);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(5, 4003, "What piece of hardware is usually at the center of a star network?", 0);
-INSERT INTO toynet_quiz_questions(question_id, quiz_id, question, answer) VALUES(6, 4003, "The Internet is an example of which topology?", 3);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(0, 4003, "How many nodes share a single channel on a bus topology?", 3);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(1, 4003, "Which of the following is the most fault-tolerant WAN topology?", 3);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(2, 4003, "If a full-mesh WAN consists of four locations, how many separate connections does it contain?", 2);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(3, 4003, "What makes IEEE Standards so important for business and network specialists?", 1);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(4, 4003, "Which IEEE working group oversees all LAN/MAN Standards?", 1);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(5, 4003, "What piece of hardware is usually at the center of a star network?", 0);
+INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(6, 4003, "The Internet is an example of which topology?", 3);
 
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(0, 4003, 0, "One node");
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(1, 4003, 0, "Only ones communicating");
