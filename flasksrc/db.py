@@ -40,6 +40,7 @@ def init_db():
     with current_app.open_resource('seed_data/toynet_quizzes.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
+
 @click.command('init-db')
 @with_appcontext
 def init_db_command():

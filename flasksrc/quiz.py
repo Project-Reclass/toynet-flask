@@ -1,7 +1,7 @@
-from flask import Flask, request
-from flask_restful import Resource, Api, abort
+from flask_restful import Resource, abort
 
 from flasksrc.db import get_db
+
 
 class ToyNetQuiz(Resource):
     def get(self, quiz_id):
@@ -42,7 +42,11 @@ class ToyNetQuiz(Resource):
 
         for row in rows_question:
             if len(question_id_options[row['question_id']]) <= row['answer']:
-                abort(500, message=f"The answer for question {row['question_id']} is greater than the length of its options.")
+                abort(
+                    500,
+                    message=f"The answer for question {row['question_id']} is greater than the"
+                    " length of its options."
+                )
 
         return [
             {
