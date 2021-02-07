@@ -31,17 +31,12 @@ CREATE TABLE toynet_value_inspirations (
 -- quizzes submodule
 
 CREATE TABLE toynet_quizzes (
-  quiz_id INTEGER PRIMARY KEY,
-  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE TABLE toynet_quiz_questions (
   quiz_id INTEGER NOT NULL,
   question_id  INTEGER NOT NULL,
   question TEXT NOT NULL,
   answer INTEGER NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (quiz_id, question_id)
-  FOREIGN KEY (quiz_id) REFERENCES toynet_quiz (quiz_id)
 );
 
 CREATE TABLE toynet_quiz_options (
@@ -50,7 +45,6 @@ CREATE TABLE toynet_quiz_options (
   option_id INTEGER NOT NULL,
   option TEXT NOT NULL,
   PRIMARY KEY (quiz_id, question_id, option_id)
-  FOREIGN KEY (quiz_id) REFERENCES toynet_quiz (quiz_id)
-  FOREIGN KEY (question_id) REFERENCES toynet_quiz_questions (question_id)
+  FOREIGN KEY (quiz_id, question_id) REFERENCES toynet_quizzes (quiz_id, question_id)
 );
 

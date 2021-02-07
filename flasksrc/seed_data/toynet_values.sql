@@ -20,4 +20,3 @@ INSERT INTO toynet_value_inspirations(value_id, organization, quote) VALUES(5003
 
 INSERT INTO toynet_values(id, name) VALUES(5004, "Loyalty");
 INSERT INTO toynet_value_inspirations(value_id, organization, quote) VALUES(5004, "U.S. Army", "Bear true faith and allegiance to the U.S. Constitution, the Army, your unit and other Soldiers. Bearing true faith and allegiance is a matter of believing in and devoting yourself to something or someone … By wearing the uniform of the U.S. Army you are expressing your loyalty. And by doing your share, you show your loyalty to your unit.");
-
