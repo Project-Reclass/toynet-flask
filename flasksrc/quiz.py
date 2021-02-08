@@ -19,7 +19,7 @@ class ToyNetQuiz(Resource):
             abort(500, message=f"query for quiz failed: {quiz_id}")
 
         if not len(rows_question):
-            abort(404, message=f"quiz {quiz_id} doesn't exist")
+            abort(404, message=f"quiz ID {quiz_id} doesn't exist")
 
         try:
             rows_option = db.execute(
