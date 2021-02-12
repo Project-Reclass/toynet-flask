@@ -8,51 +8,40 @@ class ToyNetQuiz(Resource):
         db = get_db()
 
         try:
-            rows_question = db.execute(
-                'SELECT q.question_id, q.question, q.answer'
+            rows = db.execute(
+                'SELECT q.question_id, q.question, q.answer, qo.option'
                 ' FROM toynet_quizzes AS q'
-                ' WHERE q.quiz_id = (?) ',
+                ' LEFT JOIN toynet_quiz_options as qo'
+                ' on q.quiz_id = qo.quiz_id AND q.question_id = qo.question_id'
+                ' WHERE q.quiz_id = (?) '
+                ' ORDER BY q.question_id, qo.option_id',
                 (str(quiz_id),)
             ).fetchall()
         except Exception as e:
             print(e.args[0])
             abort(500, message=f"query for quiz failed: {quiz_id}")
 
-        if not len(rows_question):
+        if not len(rows):
             abort(404, message=f"quiz ID {quiz_id} doesn't exist")
 
-        try:
-            rows_option = db.execute(
-                'SELECT qo.question_id, qo.option'
-                ' FROM toynet_quiz_options AS qo'
-                ' WHERE qo.quiz_id = (?)'
-                ' ORDER BY qo.question_id, qo.option_id',
-                (str(quiz_id),)
-            ).fetchall()
-        except Exception as e:
-            print(e.args[0])
-            abort(500, message=f"query for options failed for quiz_id {quiz_id}")
-
-        question_id_options = {}
-        for row in rows_option:
-            if row['question_id'] not in question_id_options:
-                question_id_options[row['question_id']] = [row['option']]
+        result = list()
+        current_question_id = None
+        for row in rows:
+            if current_question_id != row['question_id']:
+                current_question_id = row['question_id']
+                result.append({
+                    'question': row['question'],
+                    'options': [row['option']],
+                    'answer': row['answer']})
             else:
-                question_id_options[row['question_id']].append(row['option'])
+                result[-1]['options'].append(row['option'])
 
-        for row in rows_question:
-            if len(question_id_options[row['question_id']]) <= row['answer']:
+        for question in result:
+            if len(question['options']) <= question['answer']:
                 abort(
                     500,
-                    message=f"The answer for question {row['question_id']} is greater than the"
+                    message=f"The answer for question '{question['question']}' is greater than the"
                     " length of its options."
                 )
 
-        return [
-            {
-                'question': row['question'],
-                'options': question_id_options[row['question_id']],
-                'answer': row['answer']
-            }
-            for row in rows_question
-        ], 200
+        return result, 200
