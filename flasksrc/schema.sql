@@ -2,6 +2,10 @@ DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS toynet_values;
 DROP TABLE IF EXISTS toynet_value_inspirations;
 
+DROP TABLE IF EXISTS toynet_quizzes;
+DROP TABLE IF EXISTS toynet_quiz_questions;
+DROP TABLE IF EXISTS toynet_quiz_options;
+
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   username TEXT UNIQUE NOT NULL,
@@ -22,3 +26,25 @@ CREATE TABLE toynet_value_inspirations (
   quote TEXT NOT NULL,
   FOREIGN KEY (value_id) REFERENCES toynet_value (id)
 );
+
+
+-- quizzes submodule
+
+CREATE TABLE toynet_quizzes (
+  quiz_id INTEGER NOT NULL,
+  question_id  INTEGER NOT NULL,
+  question TEXT NOT NULL,
+  answer INTEGER NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (quiz_id, question_id)
+);
+
+CREATE TABLE toynet_quiz_options (
+  quiz_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
+  option_id INTEGER NOT NULL,
+  option TEXT NOT NULL,
+  PRIMARY KEY (quiz_id, question_id, option_id)
+  FOREIGN KEY (quiz_id, question_id) REFERENCES toynet_quizzes (quiz_id, question_id)
+);
+
