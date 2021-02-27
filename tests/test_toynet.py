@@ -65,3 +65,23 @@ def test_quiz_get(client):
     assert rv.status_code == 404
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['message'] == 'quiz ID 2 doesn\'t exist'
+
+def test_survey_get(client):
+    """Check the app is running"""
+
+    rv = client.get('/api/survey/6001')
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+
+    assert rv_json[0]["question"] == 'What is your first name?'
+    assert len(rv_json) == 7
+    assert len(rv_json[1]['options']) == 4
+
+    assert rv_json[1]["options"][0] == "As of now, I don't plan on it."
+    assert rv_json[3]["options"][4] == "Professional Experience"
+    assert rv_json[6]["unit"] == "months"
+
+    rv = client.get('/api/survey/4')
+    assert rv.status_code == 404
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['message'] == 'survey ID 4 doesn\'t exist'
