@@ -45,4 +45,7 @@ def create_app(test_config=None):
     from .quiz import ToyNetQuiz
     api.add_resource(ToyNetQuiz, '/api/quiz/<string:quiz_id>')
 
+    from .survey import ToyNetSurvey
+    api.add_resource(ToyNetSurvey, '/api/survey/<string:survey_id>')
+
     return app
