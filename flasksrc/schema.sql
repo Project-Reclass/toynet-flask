@@ -3,8 +3,12 @@ DROP TABLE IF EXISTS toynet_values;
 DROP TABLE IF EXISTS toynet_value_inspirations;
 
 DROP TABLE IF EXISTS toynet_quizzes;
-DROP TABLE IF EXISTS toynet_quiz_questions;
 DROP TABLE IF EXISTS toynet_quiz_options;
+
+DROP TABLE IF EXISTS toynet_surveys;
+DROP TABLE IF EXISTS toynet_survey_questions;
+DROP TABLE IF EXISTS toynet_survey_options;
+DROP TABLE IF EXISTS toynet_survey_types;
 
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,3 +52,36 @@ CREATE TABLE toynet_quiz_options (
   FOREIGN KEY (quiz_id, question_id) REFERENCES toynet_quizzes (quiz_id, question_id)
 );
 
+
+-- surveys submodule
+
+CREATE TABLE toynet_surveys (
+  survey_id INTEGER PRIMARY KEY,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE toynet_survey_questions (
+  survey_id INTEGER NOT NULL,
+  question_id  INTEGER NOT NULL,
+  type_id INTEGER NOT NULL,
+  question TEXT NOT NULL,
+  unit TEXT,
+  PRIMARY KEY (survey_id, question_id, type_id)
+  FOREIGN KEY (survey_id) REFERENCES toynet_surveys (survey_id)
+);
+
+CREATE TABLE toynet_survey_options (
+  survey_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
+  option_id INTEGER NOT NULL,
+  option TEXT NOT NULL,
+  PRIMARY KEY (survey_id, question_id, option_id)
+  FOREIGN KEY (survey_id, question_id) REFERENCES toynet_survey_questions (survey_id, question_id)
+);
+
+CREATE TABLE toynet_survey_types (
+  type_id INTEGER NOT NULL,
+  type TEXT NOT NULL,
+  PRIMARY KEY (type_id)
+  FOREIGN KEY (type_id) REFERENCES toynet_survey_questions (type_id)
+);
