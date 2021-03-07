@@ -10,6 +10,7 @@ iniconfig==1.1.1
 itsdangerous==1.1.0
 Jinja2==2.11.2
 MarkupSafe==1.1.1
+marshmallow==3.10.0
 packaging==20.8
 pluggy==0.13.1
 py==1.10.0
