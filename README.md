@@ -17,8 +17,8 @@ Create a project folder and a venv folder within:
 
 Linux / MacOS:
 ```
-$ mkdir myproject
-$ cd myproject
+$ mkdir toynet-flask
+$ cd toynet-flask
 $ python3 -m venv venv
 ```
 
