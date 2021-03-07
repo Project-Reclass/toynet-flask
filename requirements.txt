@@ -1,5 +1,7 @@
 aniso8601==8.1.0
+argon2-cffi==20.1.0
 attrs==20.3.0
+cffi==1.14.5
 click==7.1.2
 Flask==1.1.2
 Flask-RESTful==0.3.8
@@ -11,6 +13,7 @@ MarkupSafe==1.1.1
 packaging==20.8
 pluggy==0.13.1
 py==1.10.0
+pycparser==2.20
 pyparsing==2.4.7
 pytest==6.2.1
 pytz==2020.5
