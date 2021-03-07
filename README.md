@@ -17,7 +17,7 @@ Create a project folder and a venv folder within:
 
 Linux / MacOS:
 ```
-$ mkdir toynet-flask
+$ git clone https://github.com/Project-Reclass/toynet-flask
 $ cd toynet-flask
 $ python3 -m venv venv
 ```
