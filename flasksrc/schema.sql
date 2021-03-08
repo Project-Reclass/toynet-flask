@@ -1,4 +1,6 @@
-DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS usernames;
+
 DROP TABLE IF EXISTS toynet_values;
 DROP TABLE IF EXISTS toynet_value_inspirations;
 
@@ -10,11 +12,23 @@ DROP TABLE IF EXISTS toynet_survey_questions;
 DROP TABLE IF EXISTS toynet_survey_options;
 DROP TABLE IF EXISTS toynet_survey_types;
 
-CREATE TABLE user (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  username TEXT UNIQUE NOT NULL,
-  password TEXT NOT NULL
+-- user data
+
+CREATE TABLE usernames (
+  username TEXT PRIMARY KEY,
+  toynet_userid INTEGER NOT NULL,
+  UNIQUE (toynet_userid),
+  FOREIGN KEY (toynet_userid) REFERENCES users (id)
 );
+
+CREATE TABLE users (
+  id TEXT PRIMARY KEY,
+  password_hash TEXT NOT NULL,
+  first_name TEXT,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+-- TODO: avatars =D
 
 -- values submodule
 
