@@ -24,14 +24,3 @@ def test_hello_reclass(client):
 
     rv = client.get('/')
     assert b'Hello, Reclass!' in rv.data
-
-def test_user_post(client):
-    """Check users can be added"""
-
-    assert True
-
-def test_userByUsername_get(client):
-    """Check users can be retrieved by username"""
-
-    assert True
-

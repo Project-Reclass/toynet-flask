@@ -39,6 +39,11 @@ def create_app(test_config=None):
     api = Api(app)
     api.add_resource(HelloReclass, '/')
 
+    from .user import ToyNetUser, ToyNetUserByUsername, ToyNetUserLogin
+    api.add_resource(ToyNetUser, '/api/user')
+    api.add_resource(ToyNetUserByUsername, '/api/username')
+    api.add_resource(ToyNetUserLogin, '/api/login')
+
     from .value import ToyNetValueById
     api.add_resource(ToyNetValueById, '/api/value/<string:value_id>')
 
