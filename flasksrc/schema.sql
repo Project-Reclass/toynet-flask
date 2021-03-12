@@ -9,6 +9,8 @@ DROP TABLE IF EXISTS toynet_surveys;
 DROP TABLE IF EXISTS toynet_survey_questions;
 DROP TABLE IF EXISTS toynet_survey_options;
 DROP TABLE IF EXISTS toynet_survey_types;
+DROP TABLE IF EXISTS toynet_topos;
+DROP TABLE IF EXISTS toynet_sessions;
 
 CREATE TABLE user (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -31,10 +33,6 @@ CREATE TABLE toynet_value_inspirations (
   FOREIGN KEY (value_id) REFERENCES toynet_value (id)
 );
 
-<<<<<<< HEAD
-
-=======
->>>>>>> progress save for ticket one django migration to flask
 -- quizzes submodule
 
 CREATE TABLE toynet_quizzes (
@@ -65,11 +63,7 @@ CREATE TABLE toynet_surveys (
 
 CREATE TABLE toynet_survey_questions (
   survey_id INTEGER NOT NULL,
-<<<<<<< HEAD
   question_id  INTEGER NOT NULL,
-=======
-  question_id  INTEGER NOT NLL,
->>>>>>> progress save for ticket one django migration to flask
   type_id INTEGER NOT NULL,
   question TEXT NOT NULL,
   unit TEXT,
@@ -92,8 +86,6 @@ CREATE TABLE toynet_survey_types (
   PRIMARY KEY (type_id)
   FOREIGN KEY (type_id) REFERENCES toynet_survey_questions (type_id)
 );
-<<<<<<< HEAD
-=======
 
 CREATE TABLE toynet_topos (
   topo_id INTEGER NOT NULL, --primary key
@@ -114,4 +106,3 @@ CREATE TABLE toynet_sessions (
   FOREIGN KEY (topo_id) REFERENCES toynet_topos(topo_id)
   FOREIGN KEY (user_id) REFERENCES user(id)
 };
->>>>>>> progress save for ticket one django migration to flask
