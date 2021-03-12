@@ -31,7 +31,10 @@ CREATE TABLE toynet_value_inspirations (
   FOREIGN KEY (value_id) REFERENCES toynet_value (id)
 );
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> progress save for ticket one django migration to flask
 -- quizzes submodule
 
 CREATE TABLE toynet_quizzes (
@@ -62,7 +65,11 @@ CREATE TABLE toynet_surveys (
 
 CREATE TABLE toynet_survey_questions (
   survey_id INTEGER NOT NULL,
+<<<<<<< HEAD
   question_id  INTEGER NOT NULL,
+=======
+  question_id  INTEGER NOT NLL,
+>>>>>>> progress save for ticket one django migration to flask
   type_id INTEGER NOT NULL,
   question TEXT NOT NULL,
   unit TEXT,
@@ -85,3 +92,26 @@ CREATE TABLE toynet_survey_types (
   PRIMARY KEY (type_id)
   FOREIGN KEY (type_id) REFERENCES toynet_survey_questions (type_id)
 );
+<<<<<<< HEAD
+=======
+
+CREATE TABLE toynet_topos (
+  topo_id INTEGER NOT NULL, --primary key
+  topology TEXT NOT NULL, --XML file (starting file for a lesson module)
+  author_id INTEGER NOT NULL,
+  PRIMARY KEY (topo_id)
+);
+
+CREATE TABLE toynet_sessions (
+  session_id INTEGER NOT NULL, --primary key
+  topo_id INTEGER NOT NULL, --links to the original topography for the lesson module (foreign key)
+  topology TEXT NOT NULL, --XML file (not the path)
+  
+  user_id INTEGER NOT NULL, --foreign key from user table
+  create_time DATETIME,
+  update_time DATETIME, 
+
+  FOREIGN KEY (topo_id) REFERENCES toynet_topos(topo_id)
+  FOREIGN KEY (user_id) REFERENCES user(id)
+};
+>>>>>>> progress save for ticket one django migration to flask
