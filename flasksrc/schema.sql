@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS usernames;
+DROP TABLE IF EXISTS users;
 
 DROP TABLE IF EXISTS toynet_values;
 DROP TABLE IF EXISTS toynet_value_inspirations;
@@ -27,8 +27,6 @@ CREATE TABLE users (
   first_name TEXT,
   created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
--- TODO: avatars =D
 
 -- values submodule
 

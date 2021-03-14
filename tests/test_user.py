@@ -86,13 +86,13 @@ def test_userByUsername_get(client):
     # bad data
 
     bad_get_data = {
-        'username': 'tay@projectreclass.org',
+        'username': 'fake.bob@projectreclass.org',
     }
 
     rv = client.get('/api/username', data=bad_get_data)
     assert rv.status_code == 404
     rv_json = json.loads(rv.data.decode('utf-8'))
-    assert rv_json['message'] == "no user exists with username: tay@projectreclass.org"
+    assert rv_json['message'] == "no user exists with username: fake.bob@projectreclass.org"
 
 def test_userLogin_post(client):
     """Check users login vets password correctly"""
