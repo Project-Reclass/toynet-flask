@@ -1,5 +1,5 @@
 /*
-NOTE: We should create an enums for the military branches
+NOTE: We should create an enum for the military branches
 
 INSERT INTO toynet_value(id, name) VALUES(####, "Value Name");
 INSERT INTO toynet_value_inspiration(value_id, organization, quote) VALUES(####, "Org Name 1", "Org Quote 1");
