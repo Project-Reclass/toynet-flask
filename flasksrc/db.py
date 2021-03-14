@@ -34,6 +34,9 @@ def init_db():
     with current_app.open_resource('schema.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
+    with current_app.open_resource('seed_data/users.sql') as f:
+        db.executescript(f.read().decode('utf8'))
+
     with current_app.open_resource('seed_data/toynet_values.sql') as f:
         db.executescript(f.read().decode('utf8'))
 
