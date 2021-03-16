@@ -91,27 +91,11 @@ Windows PowerShell:
 ```
 
 Go to: `http://127.0.0.1:5000/`
-<br/><img src="documentation/images/hello-reclass.png" width="300" /><br/>
+<p align="center"> <kbd> <img src="documentation/images/hello-reclass.png" width="300" /> </kbd> </p>
 
-Go to: `http://127.0.0.1:5000/api/value/5001`
-<br/><img src="documentation/images/values-goodID.png" width="600" /><br/>
-Open Network tab of Chrome DevTools (right click screen & click "Inspect")
-<br/><img src="documentation/images/values-goodID-200.png" width="500" /><br/>
+# Test the Service
 
-Go to: `http://127.0.0.1:5000/api/value/1`
-<br/><img src="documentation/images/values-badID.png" width="350" /><br/>
-Open Network tab of Chrome DevTools (right click screen & click "Inspect")
-<br/><img src="documentation/images/values-badID-404.png" width="500" /><br/>
-
-# Testing
-
-To send REST calls to local application, you can use something like [Postman](https://www.postman.com/downloads/) ([tutorial](https://learning.postman.com/docs/sending-requests/requests/)) or [Insomnia](https://insomnia.rest/) ([tutorial](https://support.insomnia.rest/article/11-getting-started)).
-
-Run our unit tests from the root directory:
-
-```
-$ pytest -v
-```
+Visit [testing documentation](documentation/testing.md).
 
 # Troubleshooting
 
