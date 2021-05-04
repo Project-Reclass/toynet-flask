@@ -50,4 +50,10 @@ def create_app(test_config=None):
     from .survey import ToyNetSurveyById
     api.add_resource(ToyNetSurveyById, '/api/survey/<string:survey_id>')
 
+    from .session import ToyNetSession
+    api.add_resource(ToyNetSession, '/api/toynet/session/')
+
+    from .session import ToyNetSessionById
+    api.add_resource(ToyNetSessionById, '/api/toynet/session/<string:toynet_session_id>')
+
     return app
