@@ -1,5 +1,9 @@
-DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS users;
+
 DROP TABLE IF EXISTS toynet_values;
+DROP TABLE IF EXISTS toynet_topos;
+
+DROP TABLE IF EXISTS toynet_sessions;
 DROP TABLE IF EXISTS toynet_value_inspirations;
 
 DROP TABLE IF EXISTS toynet_quizzes;
@@ -10,8 +14,8 @@ DROP TABLE IF EXISTS toynet_survey_questions;
 DROP TABLE IF EXISTS toynet_survey_options;
 DROP TABLE IF EXISTS toynet_survey_types;
 
-CREATE TABLE user (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+CREATE TABLE users (
+  id TEXT PRIMARY KEY NOT NULL,
   username TEXT UNIQUE NOT NULL,
   password TEXT NOT NULL
 );
@@ -30,7 +34,6 @@ CREATE TABLE toynet_value_inspirations (
   quote TEXT NOT NULL,
   FOREIGN KEY (value_id) REFERENCES toynet_value (id)
 );
-
 
 -- quizzes submodule
 
@@ -84,4 +87,25 @@ CREATE TABLE toynet_survey_types (
   type TEXT NOT NULL,
   PRIMARY KEY (type_id)
   FOREIGN KEY (type_id) REFERENCES toynet_survey_questions (type_id)
+);
+
+CREATE TABLE toynet_topos (
+  topo_id INTEGER NOT NULL, --primary key
+  topology TEXT NOT NULL, --XML representation of topology (starting topology for a lesson module)
+  author_id INTEGER NOT NULL,
+  PRIMARY KEY (topo_id)
+);
+
+CREATE TABLE toynet_sessions ( 
+  session_id INTEGER PRIMARY KEY AUTOINCREMENT, --primary key
+  topo_id INTEGER NOT NULL, --links to the original topography for the lesson module (foreign key)
+  topology TEXT NOT NULL, --XML representation of current (user modified) topology
+  
+  user_id TEXT NOT NULL, --foreign key from users table
+  create_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  update_time TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP, 
+
+  --PRIMARY KEY (session_id)
+  FOREIGN KEY (topo_id) REFERENCES toynet_topos(topo_id)
+  FOREIGN KEY (user_id) REFERENCES users(id)
 );
