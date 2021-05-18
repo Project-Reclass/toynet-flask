@@ -16,18 +16,18 @@ DROP TABLE IF EXISTS toynet_survey_types;
 
 -- user data
 
-CREATE TABLE usernames (
-  username TEXT PRIMARY KEY,
-  toynet_userid INTEGER NOT NULL,
-  UNIQUE (toynet_userid),
-  FOREIGN KEY (toynet_userid) REFERENCES users (id)
+CREATE TABLE user_groups (
+  id TEXT PRIMARY KEY
 );
 
 CREATE TABLE users (
-  id TEXT PRIMARY KEY,
+  username TEXT,
+  user_group_id TEXT NOT NULL DEFAULT 'DEFAULT',
   password_hash TEXT NOT NULL,
   first_name TEXT,
-  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (username, user_group_id),
+  FOREIGN KEY (user_group_id) REFERENCES user_groups (id)
 );
 
 -- values submodule
@@ -43,6 +43,17 @@ CREATE TABLE toynet_value_inspirations (
   organization TEXT NOT NULL,
   quote TEXT NOT NULL,
   FOREIGN KEY (value_id) REFERENCES toynet_value (id)
+);
+
+CREATE TABLE toynet_value_entries (
+  value_id INTEGER NOT NULL,
+  username TEXT NOT NULL,
+  user_group_id TEXT NOT NULL DEFAULT 'DEFAULT',
+  quote TEXT NOT NULL,
+  created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (value_id, username, user_group_id),
+  FOREIGN KEY (value_id) REFERENCES toynet_value (id)
+  FOREIGN KEY (username, user_group_id) REFERENCES users (username, user_group_id)
 );
 
 -- quizzes submodule
@@ -64,7 +75,6 @@ CREATE TABLE toynet_quiz_options (
   PRIMARY KEY (quiz_id, question_id, option_id)
   FOREIGN KEY (quiz_id, question_id) REFERENCES toynet_quizzes (quiz_id, question_id)
 );
-
 
 -- surveys submodule
 
