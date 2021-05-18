@@ -47,7 +47,6 @@ class ToyNetUser(Resource):
         except Exception as e:
             print(e.args[0])
             abort(500, message=f"Insert operation failed for user: {username}")
-
         return {'username': req['username']}, 200
 
 

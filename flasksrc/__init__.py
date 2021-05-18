@@ -3,7 +3,10 @@ import os
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_jwt_extended import JWTManager
+<<<<<<< HEAD
 
+=======
+>>>>>>> jwt & value submodule
 
 
 class HelloReclass(Resource):
@@ -15,6 +18,7 @@ class HelloReclass(Resource):
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
+<<<<<<< HEAD
     JWTManager(app)
 
     if test_config is None:
@@ -22,6 +26,15 @@ def create_app(test_config=None):
         app.config['DATABASE'] = os.path.join(app.instance_path, 'toynet.sqlite')
     else:
         app.config.from_pyfile('test_config.py', silent=True)
+=======
+    jwt = JWTManager(app)
+
+    if test_config is None:
+        app.config.from_pyfile('test_config.py', silent=True)
+    else:
+        app.config.from_pyfile('dev_config.py', silent=False)
+        app.config['DATABASE'] = os.path.join(app.instance_path, 'toynet.sqlite')
+>>>>>>> jwt & value submodule
 
     # ensure the instance folder exists
     try:
