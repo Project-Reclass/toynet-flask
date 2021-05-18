@@ -46,7 +46,11 @@ class ToyNetValueEntryById(Resource):
     @jwt_required()
     def get(self, value_id):
         username = get_jwt_identity()
+<<<<<<< HEAD
         group_id = current_app.config['USER_GROUP']
+=======
+        user_group_id = current_app.config['USER_GROUP']
+>>>>>>> jwt & value submodule
 
         db = get_db()
         try:
@@ -56,17 +60,29 @@ class ToyNetValueEntryById(Resource):
                 ' ON v.id = ve.value_id'
                 ' WHERE v.id = (?) AND ve.username = (?) AND ve.user_group_id = (?)'
                 ' ORDER BY ve.created DESC',
+<<<<<<< HEAD
                 (value_id, username, group_id,)
+=======
+                (value_id, username, user_group_id,)
+>>>>>>> jwt & value submodule
             ).fetchall()
         except Exception as e:
             print(e.args[0])
             abort(500, message="query for value failed: {}".format(value_id))
 
         if not len(rows):
+<<<<<<< HEAD
             msg = "no entries for value {} for {}, group {}".format(value_id, username, group_id)
             abort(404, message=msg)
 
         return {'entry': rows[0]['quote']}, 200
+=======
+            abort(404, message="value ID {} does not have entries for {} of group {}".format(value_id, username, user_group_id))
+
+        return {
+            'entry': rows[0]['quote'],
+        }, 200
+>>>>>>> jwt & value submodule
 
     @jwt_required()
     def put(self, value_id):
@@ -81,17 +97,27 @@ class ToyNetValueEntryById(Resource):
         db = get_db()
         try:
             db.execute(
+<<<<<<< HEAD
                 'INSERT or REPLACE INTO'
                 ' toynet_value_entries(value_id, username, user_group_id, quote, created)'
+=======
+                'INSERT or REPLACE INTO toynet_value_entries(value_id, username, user_group_id, quote, created)'
+>>>>>>> jwt & value submodule
                 ' VALUES((?), (?), (?), (?), datetime(\'now\'))',
                 (value_id, username, user_group_id, req['quote'],)
             )
             db.commit()
         except Exception as e:
             print(e.args[0])
+<<<<<<< HEAD
             abort(
                 500,
                 message=f"Insert operation failed for value_id: {value_id} & user: {username}"
             )
 
         return {}, 200
+=======
+            abort(500, message=f"Insert operation failed for value_id: {value_id}, user: {username}, and quote: {req['quote']}")
+        
+        return {}, 200
+>>>>>>> jwt & value submodule

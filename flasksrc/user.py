@@ -47,6 +47,10 @@ class ToyNetUser(Resource):
         except Exception as e:
             print(e.args[0])
             abort(500, message=f"Insert operation failed for user: {username}")
+<<<<<<< HEAD
+=======
+        
+>>>>>>> jwt & value submodule
         return {'username': req['username']}, 200
 
 
