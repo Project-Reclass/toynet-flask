@@ -107,3 +107,8 @@ A: Delete `instance/toynet.sqlite` and run `flask init-db` again.
 
 **Q: I added a test file but it isn't being picked up by pytest**<br/>
 A: Make sure the file is named `test_***.py`
+
+
+# FYIs
+
+**1. We have not rigorously tested different `USER_GROUP_ID`s.**

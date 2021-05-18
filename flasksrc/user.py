@@ -1,15 +1,17 @@
-import uuid
+import datetime
 import argon2
 from marshmallow import Schema, fields, ValidationError
 
-from flask import request
+from flask import request, current_app
 from flask_restful import Resource, abort
 from flasksrc.db import get_db
+from flask_jwt_extended import create_access_token
+
 
 hasher = argon2.PasswordHasher()
 
 
-class ToyNetUserCreateReq(Schema):
+class ToyNetUserReq(Schema):
     """ /api/user - POST
 
     Parameters:
@@ -25,72 +27,32 @@ class ToyNetUserCreateReq(Schema):
 class ToyNetUser(Resource):
     def post(self):
         try:
-            req = ToyNetUserCreateReq().load(request.form)
+            req = ToyNetUserReq().load(request.form)
         except ValidationError as e:
             abort(400, message=f'malformed create user request: {e.messages}')
 
-        user_id = str(uuid.uuid1())
+        username = req['username']
+        user_group_id = current_app.config['USER_GROUP']
         pw_hash = hasher.hash(req['password'])
         first_name = 'first_name' in req and req['first_name'] or 'NULL'
-        username = req['username']
 
         db = get_db()
         try:
-            script = 'BEGIN;' + \
-                'INSERT INTO users(id, password_hash, first_name)' + \
-                ' VALUES(\'' + user_id + '\', \'' + pw_hash + '\', \'' + first_name + '\');' + \
-                'INSERT INTO usernames(username, toynet_userid)' + \
-                ' VALUES(\'' + username + '\', \'' + user_id + '\');' + \
-                'END TRANSACTION;'
-            db.executescript(script)
+            db.execute(
+                'INSERT INTO users(username, user_group_id, password_hash, first_name)'
+                ' VALUES((?), (?), (?), (?))',
+                (username, user_group_id, pw_hash, first_name,)
+            )
+            db.commit()
         except Exception as e:
             print(e.args[0])
             abort(500, message=f"Insert operation failed for user: {username}")
 
-        return dict(user_id=user_id), 200
-
-
-class ToyNetUserGetByUsernameReq(Schema):
-    """ /api/username/<string:username> - GET
-
-    Parameters:
-     - username (str)
-    """
-    username = fields.Str(required=True)
-
-
-class ToyNetUserByUsername(Resource):
-    def get(self):
-        try:
-            req = ToyNetUserGetByUsernameReq().load(request.form)
-        except ValidationError as e:
-            abort(400, message=f"cannot parse username {request.form['username']} ({e.messages})")
-
-        db = get_db()
-        try:
-            rows = db.execute(
-                'SELECT usernames.username, usernames.toynet_userid, users.id, users.first_name'
-                ' FROM usernames LEFT JOIN users'
-                ' ON usernames.toynet_userid = users.id'
-                ' WHERE usernames.username=(?)',
-                (req['username'],)
-            ).fetchall()
-        except Exception as e:
-            print(e.args[0])
-            abort(500, message=f"query for username failed: {req['username']}")
-
-        if not len(rows):
-            abort(404, message=f"no user exists with username: {req['username']}")
-
-        return {
-            'username': rows[0]['username'],
-            'id': rows[0]['id'],
-            'first_name': rows[0]['first_name'],
-        }, 200
+        return {'username': req['username']}, 200
 
 
 class ToyNetUserLoginReq(Schema):
-    """ /api/user - POST
+    """ /api/login - POST
 
     Parameters:
      - username (str)
@@ -105,19 +67,19 @@ class ToyNetUserLogin(Resource):
         try:
             req = ToyNetUserLoginReq().load(request.form)
         except ValidationError:
-            # TODO: log details
-
             # avoid including username/password in abort message
-            abort(400, message='malformed login request')
+            abort(
+                400,
+                message='malformed login request'
+            )
 
         db = get_db()
         try:
             rows = db.execute(
                 'SELECT users.password_hash'
-                ' FROM usernames LEFT JOIN users'
-                ' ON usernames.toynet_userid = users.id'
-                ' WHERE usernames.username=(?)',
-                (req['username'],)
+                ' FROM users'
+                ' WHERE username=(?) AND user_group_id=(?)',
+                (req['username'], current_app.config['USER_GROUP'],)
             ).fetchall()
         except Exception as e:
             print(e.args[0])
@@ -130,6 +92,14 @@ class ToyNetUserLogin(Resource):
             hasher.verify(rows[0]['password_hash'], req['password'])
         except argon2.exceptions.VerifyMismatchError as e:
             print(e.args[0])
-            return {'verified': False}, 401
+            return {'verified': False}, 401, {'WWW-Authenticate': 'Basic realm="ToyNet"'}
 
-        return {'verified': True}, 200
+        # generate JWT token
+
+        expires = datetime.timedelta(hours=9)  # a "workday"
+        access_token = create_access_token(identity=req['username'], expires_delta=expires)
+
+        return {
+            'verified': True,
+            'token': access_token
+        }, 200
