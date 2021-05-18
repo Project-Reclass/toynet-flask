@@ -11,6 +11,9 @@ INSERT INTO toynet_value_inspirations(value_id, organization, quote) VALUES(5001
 INSERT INTO toynet_value_inspirations(value_id, organization, quote) VALUES(5001, "U.S. Army", "Do what is right, legally and morally. Integrity is a quality you develop by adhering to moral principles. It requires that you do and say nothing that deceives others. As your integrity grows, so does the trust others place in you [...] and, finally, the fundamental acceptance of yourself.");
 INSERT INTO toynet_value_inspirations(value_id, organization, quote) VALUES(5001, "U.S. Coast Guard", "Integrity is our standard. We demonstrate uncompromising ethical conduct and moral behavior in all of our personal actions. We are loyal and accountable to the public trust.");
 
+INSERT INTO toynet_value_entries(value_id, username, user_group_id, quote) VALUES(5001, "tay@projectreclass.org", "ALPHA", "In my opinion, integrity is completeness and consistency.");
+INSERT INTO toynet_value_entries(value_id, username, quote) VALUES(5001, "bot@projectreclass.org", "Bots do not need integrity.");
+
 INSERT INTO toynet_values(id, name) VALUES(5002, "Respect");
 INSERT INTO toynet_value_inspirations(value_id, organization, quote) VALUES(5002, "U.S. Army", "Treat people as they should be treated [...] Respect is what allows us to appreciate the best in other people. Respect is trusting that all people have done their jobs and fulfilled their duty.");
 

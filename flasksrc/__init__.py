@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 from flask_restful import Resource, Api
+from flask_jwt_extended import JWTManager
 
 
 class HelloReclass(Resource):
@@ -13,17 +14,13 @@ class HelloReclass(Resource):
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'toynet.sqlite'),
-    )
+    jwt = JWTManager(app)
 
     if test_config is None:
-        # load the instance config, if it exists, when not testing
-        app.config.from_pyfile('config.py', silent=True)
+        app.config.from_pyfile('test_config.py', silent=True)
     else:
-        # load the test config if passed in
-        app.config.from_mapping(test_config)
+        app.config.from_pyfile('config.py', silent=False)
+        app.config['DATABASE'] = os.path.join(app.instance_path, 'toynet.sqlite')
 
     # ensure the instance folder exists
     try:
@@ -39,13 +36,13 @@ def create_app(test_config=None):
     api = Api(app)
     api.add_resource(HelloReclass, '/')
 
-    from .user import ToyNetUser, ToyNetUserByUsername, ToyNetUserLogin
+    from .user import ToyNetUser, ToyNetUserLogin
     api.add_resource(ToyNetUser, '/api/user')
-    api.add_resource(ToyNetUserByUsername, '/api/username')
     api.add_resource(ToyNetUserLogin, '/api/login')
 
-    from .value import ToyNetValueById
-    api.add_resource(ToyNetValueById, '/api/value/<string:value_id>')
+    from .value import ToyNetValueById, ToyNetValueEntryById
+    api.add_resource(ToyNetValueById, '/api/value/<string:value_id>/inspirations')
+    api.add_resource(ToyNetValueEntryById, '/api/value/<string:value_id>/entry')
 
     from .quiz import ToyNetQuiz
     api.add_resource(ToyNetQuiz, '/api/quiz/<string:quiz_id>')
