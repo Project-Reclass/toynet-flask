@@ -63,7 +63,10 @@ class ToyNetValueEntryById(Resource):
             abort(500, message="query for value failed: {}".format(value_id))
 
         if not len(rows):
-            abort(404, message="value ID {} does not have entries for {} of group {}".format(value_id, username, user_group_id))
+            abort(
+                404,
+                message="value ID {} does not have entries for {} of group {}".format(value_id, username, user_group_id)
+            )
 
         return {
             'entry': rows[0]['quote'],
@@ -82,13 +85,17 @@ class ToyNetValueEntryById(Resource):
         db = get_db()
         try:
             db.execute(
-                'INSERT or REPLACE INTO toynet_value_entries(value_id, username, user_group_id, quote, created)'
+                'INSERT or REPLACE INTO'
+                ' toynet_value_entries(value_id, username, user_group_id, quote, created)'
                 ' VALUES((?), (?), (?), (?), datetime(\'now\'))',
                 (value_id, username, user_group_id, req['quote'],)
             )
             db.commit()
         except Exception as e:
             print(e.args[0])
-            abort(500, message=f"Insert operation failed for value_id: {value_id}, user: {username}, and quote: {req['quote']}")
-        
+            abort(
+                500,
+                message=f"Insert operation failed for value_id: {value_id} & user: {username}"
+            )
+
         return {}, 200

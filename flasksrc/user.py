@@ -1,4 +1,3 @@
-import uuid
 import datetime
 import argon2
 from marshmallow import Schema, fields, ValidationError
@@ -48,7 +47,7 @@ class ToyNetUser(Resource):
         except Exception as e:
             print(e.args[0])
             abort(500, message=f"Insert operation failed for user: {username}")
-        
+
         return {'username': req['username']}, 200
 
 
@@ -68,7 +67,11 @@ class ToyNetUserLogin(Resource):
         try:
             req = ToyNetUserLoginReq().load(request.form)
         except ValidationError:
-            abort(400, message='malformed login request') # avoid including username/password in abort message
+            # avoid including username/password in abort message
+            abort(
+                400,
+                message='malformed login request'
+            )
 
         db = get_db()
         try:
