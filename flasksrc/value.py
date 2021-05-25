@@ -46,7 +46,7 @@ class ToyNetValueEntryById(Resource):
     @jwt_required()
     def get(self, value_id):
         username = get_jwt_identity()
-        user_group_id = current_app.config['USER_GROUP']
+        group_id = current_app.config['USER_GROUP']
 
         db = get_db()
         try:
@@ -56,21 +56,17 @@ class ToyNetValueEntryById(Resource):
                 ' ON v.id = ve.value_id'
                 ' WHERE v.id = (?) AND ve.username = (?) AND ve.user_group_id = (?)'
                 ' ORDER BY ve.created DESC',
-                (value_id, username, user_group_id,)
+                (value_id, username, group_id,)
             ).fetchall()
         except Exception as e:
             print(e.args[0])
             abort(500, message="query for value failed: {}".format(value_id))
 
         if not len(rows):
-            abort(
-                404,
-                message="value ID {} does not have entries for {} of group {}".format(value_id, username, user_group_id)
-            )
+            msg = "no entries for value {} for {}, group {}".format(value_id, username, group_id)
+            abort(404, message=msg)
 
-        return {
-            'entry': rows[0]['quote'],
-        }, 200
+        return {'entry': rows[0]['quote']}, 200
 
     @jwt_required()
     def put(self, value_id):
