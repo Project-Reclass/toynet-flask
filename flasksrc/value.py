@@ -72,12 +72,19 @@ class ToyNetValueEntryById(Resource):
 
         if not len(rows):
 <<<<<<< HEAD
+<<<<<<< HEAD
             msg = "no entries for value {} for {}, group {}".format(value_id, username, group_id)
             abort(404, message=msg)
 
         return {'entry': rows[0]['quote']}, 200
 =======
             abort(404, message="value ID {} does not have entries for {} of group {}".format(value_id, username, user_group_id))
+=======
+            abort(
+                404,
+                message="value ID {} does not have entries for {} of group {}".format(value_id, username, user_group_id)
+            )
+>>>>>>> lint
 
         return {
             'entry': rows[0]['quote'],
@@ -98,11 +105,16 @@ class ToyNetValueEntryById(Resource):
         try:
             db.execute(
 <<<<<<< HEAD
+<<<<<<< HEAD
                 'INSERT or REPLACE INTO'
                 ' toynet_value_entries(value_id, username, user_group_id, quote, created)'
 =======
                 'INSERT or REPLACE INTO toynet_value_entries(value_id, username, user_group_id, quote, created)'
 >>>>>>> jwt & value submodule
+=======
+                'INSERT or REPLACE INTO'
+                ' toynet_value_entries(value_id, username, user_group_id, quote, created)'
+>>>>>>> lint
                 ' VALUES((?), (?), (?), (?), datetime(\'now\'))',
                 (value_id, username, user_group_id, req['quote'],)
             )
@@ -110,14 +122,20 @@ class ToyNetValueEntryById(Resource):
         except Exception as e:
             print(e.args[0])
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> lint
             abort(
                 500,
                 message=f"Insert operation failed for value_id: {value_id} & user: {username}"
             )
 
         return {}, 200
+<<<<<<< HEAD
 =======
             abort(500, message=f"Insert operation failed for value_id: {value_id}, user: {username}, and quote: {req['quote']}")
         
         return {}, 200
 >>>>>>> jwt & value submodule
+=======
+>>>>>>> lint
