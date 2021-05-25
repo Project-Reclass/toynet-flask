@@ -76,7 +76,7 @@ def test_valueEntryById_post(client):
     )
     assert rv.status_code == 404
     rv_json = json.loads(rv.data.decode('utf-8'))
-    assert rv_json['message'] == 'value ID 5004 does not have entries for veteran@projectreclass.org of group ALPHA'
+    assert rv_json['message'][:30] == 'no entries for value 5004 for '
 
     # insert personal entry
     rv = client.put(
