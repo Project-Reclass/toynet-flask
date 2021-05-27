@@ -96,7 +96,7 @@ class ToyNetUserLogin(Resource):
 
         # generate JWT token
 
-        expires = datetime.timedelta(hours=9) # a "workday"
+        expires = datetime.timedelta(hours=9)  # a "workday"
         access_token = create_access_token(identity=req['username'], expires_delta=expires)
 
         return {

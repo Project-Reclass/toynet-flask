@@ -42,7 +42,7 @@ def test_valueById_get(client):
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['message'] == 'value ID 1 does not exist'
 
-def test_valueEntryById_post(client):
+def test_valueEntryById_put(client):
     """Check that values can be retrieved by ID"""
 
     # create user
@@ -86,15 +86,40 @@ def test_valueEntryById_post(client):
     )
     assert rv.status_code == 200
 
+def test_valueEntryById_putTwice(client):
+    """Check that values can be retrieved by ID"""
 
-    # retrieve personal entry
-    rv = client.get(
-        '/api/value/5004/entry',
-        headers = {'Authorization': 'Bearer {}'.format(access_token)},
+    # create user
+    rv = client.post(
+        '/api/user',
+        data={
+            'username': 'veteran@projectreclass.org',
+            'password': 'bossvet123',
+            'first_name': 'Boss',
+        },
+    )
+    assert rv.status_code == 200
+
+    # login using user
+    rv = client.post(
+        '/api/login',
+        data={
+            'username': 'veteran@projectreclass.org',
+            'password': 'bossvet123',
+        },
     )
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
-    assert rv_json['entry'] == "Integrity is honesty."
+    assert rv_json['verified'] == True
+    access_token = rv_json['token']
+
+    # insert personal entry
+    rv = client.put(
+        '/api/value/5004/entry',
+        data={'quote': "Integrity is honesty."},
+        headers = {'Authorization': 'Bearer {}'.format(access_token)},
+    )
+    assert rv.status_code == 200
 
     # insert new personal entry
     rv = client.put(

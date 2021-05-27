@@ -107,3 +107,152 @@ def test_userLogin_post(client):
     rv_json = json.loads(rv.data.decode('utf-8'))
 
     assert rv_json['verified'] == False
+
+def test_jwtRequired_wrongUser(client):
+    """Check that values can be retrieved by ID"""
+
+    # create veteran user
+    rv = client.post(
+        '/api/user',
+        data={
+            'username': 'veteran@projectreclass.org',
+            'password': 'bossvet123',
+            'first_name': 'Boss',
+        },
+    )
+    assert rv.status_code == 200
+
+    # login as veteran user
+    rv = client.post(
+        '/api/login',
+        data={
+            'username': 'veteran@projectreclass.org',
+            'password': 'bossvet123',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    vet_access_token = rv_json['token']
+
+    # insert personal entry as veteran user
+    rv = client.put(
+        '/api/value/5004/entry',
+        data={'quote': "Integrity is honesty."},
+        headers = {'Authorization': 'Bearer {}'.format(vet_access_token)},
+    )
+    assert rv.status_code == 200
+
+    # create civilian user
+    rv = client.post(
+        '/api/user',
+        data={
+            'username': 'civilian@projectreclass.org',
+            'password': 'civilboss123',
+            'first_name': 'Boss',
+        },
+    )
+    assert rv.status_code == 200
+
+    # login as civilian user
+    rv = client.post(
+        '/api/login',
+        data={
+            'username': 'civilian@projectreclass.org',
+            'password': 'civilboss123',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    civ_access_token = rv_json['token']
+
+    # get all entries regarding value 5004 as civilian
+    rv = client.get(
+        '/api/value/5004/entry',
+        headers = {'Authorization': 'Bearer {}'.format(civ_access_token)},
+    )
+    assert rv.status_code == 404
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['message'][:30] == 'no entries for value 5004 for '
+
+def test_jwtRequired_siloedUsers(client):
+    """Check that values can be retrieved by ID"""
+
+    # create veteran user
+    rv = client.post(
+        '/api/user',
+        data={
+            'username': 'veteran@projectreclass.org',
+            'password': 'bossvet123',
+            'first_name': 'Boss',
+        },
+    )
+    assert rv.status_code == 200
+
+    # login as veteran user
+    rv = client.post(
+        '/api/login',
+        data={
+            'username': 'veteran@projectreclass.org',
+            'password': 'bossvet123',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    vet_access_token = rv_json['token']
+
+    # insert personal entry as veteran user
+    rv = client.put(
+        '/api/value/5004/entry',
+        data={'quote': "I am a veteran. I have integrity."},
+        headers = {'Authorization': 'Bearer {}'.format(vet_access_token)},
+    )
+    assert rv.status_code == 200
+
+    # create civilian user
+    rv = client.post(
+        '/api/user',
+        data={
+            'username': 'civilian@projectreclass.org',
+            'password': 'civilboss123',
+            'first_name': 'Boss',
+        },
+    )
+    assert rv.status_code == 200
+
+    # login as civilian user
+    rv = client.post(
+        '/api/login',
+        data={
+            'username': 'civilian@projectreclass.org',
+            'password': 'civilboss123',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    civ_access_token = rv_json['token']
+
+    # insert personal entry as civilian user
+    rv = client.put(
+        '/api/value/5004/entry',
+        data={'quote': "I am a civilian. I have integrity."},
+        headers = {'Authorization': 'Bearer {}'.format(civ_access_token)},
+    )
+    assert rv.status_code == 200
+
+    # get all entries regarding value 5004 as vet
+    rv = client.get(
+        '/api/value/5004/entry',
+        headers = {'Authorization': 'Bearer {}'.format(vet_access_token)},
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['entry'] == "I am a veteran. I have integrity."
+
+    # get all entries regarding value 5004 as civilian
+    rv = client.get(
+        '/api/value/5004/entry',
+        headers = {'Authorization': 'Bearer {}'.format(civ_access_token)},
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['entry'] == "I am a civilian. I have integrity."
