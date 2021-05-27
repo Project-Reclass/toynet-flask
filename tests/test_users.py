@@ -24,7 +24,6 @@ def test_user_post(client):
     """Check users can be added"""
 
     # with first_name
-
     rv = client.post(
         '/api/user',
         data={
@@ -33,13 +32,9 @@ def test_user_post(client):
             'first_name': 'Bob',
         },
     )
-
     assert rv.status_code == 200
 
-    rv_json = json.loads(rv.data.decode('utf-8'))
-
     # without first_name
-
     rv = client.post(
         '/api/user',
         data={
@@ -47,25 +42,21 @@ def test_user_post(client):
             'password': 'aliceisdabomb',
         },
     )
-
     assert rv.status_code == 200
 
     # missing password
-
     rv = client.post(
         '/api/user',
         data={'username': 'alice@projectreclass.org'},
     )
-
     assert rv.status_code == 400
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['message'][:30] == 'malformed create user request:'
 
 def test_userLogin_post(client):
-    """Check users login vets password correctly"""
+    """Check that only users with good username/password can login """
 
     # insert
-
     rv = client.post(
         '/api/user',
         data={
@@ -78,7 +69,6 @@ def test_userLogin_post(client):
     assert rv.status_code == 200
 
     # good login attempt
-  
     rv = client.post(
         '/api/login',
         data={
@@ -89,12 +79,10 @@ def test_userLogin_post(client):
 
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
-
     assert 'token' in rv_json and len(rv_json['token']) > 100
     assert rv_json['verified'] == True
 
     # bad login attempt
-
     rv = client.post(
         '/api/login',
         data={
@@ -105,11 +93,10 @@ def test_userLogin_post(client):
 
     assert rv.status_code == 401
     rv_json = json.loads(rv.data.decode('utf-8'))
-
     assert rv_json['verified'] == False
 
 def test_jwtRequired_wrongUser(client):
-    """Check that values can be retrieved by ID"""
+    """Check that users cannot see other user data"""
 
     # create veteran user
     rv = client.post(
@@ -165,7 +152,7 @@ def test_jwtRequired_wrongUser(client):
     rv_json = json.loads(rv.data.decode('utf-8'))
     civ_access_token = rv_json['token']
 
-    # get all entries regarding value 5004 as civilian
+    # get entry regarding value 5004 as civilian
     rv = client.get(
         '/api/value/5004/entry',
         headers = {'Authorization': 'Bearer {}'.format(civ_access_token)},
@@ -174,8 +161,8 @@ def test_jwtRequired_wrongUser(client):
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['message'][:30] == 'no entries for value 5004 for '
 
-def test_jwtRequired_siloedUsers(client):
-    """Check that values can be retrieved by ID"""
+def test_jwtRequired_twoActiveUsers(client):
+    """Check that two different users can interact with their data in parallel"""
 
     # create veteran user
     rv = client.post(
@@ -239,7 +226,7 @@ def test_jwtRequired_siloedUsers(client):
     )
     assert rv.status_code == 200
 
-    # get all entries regarding value 5004 as vet
+    # get entry regarding value 5004 as vet
     rv = client.get(
         '/api/value/5004/entry',
         headers = {'Authorization': 'Bearer {}'.format(vet_access_token)},
@@ -248,7 +235,7 @@ def test_jwtRequired_siloedUsers(client):
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['entry'] == "I am a veteran. I have integrity."
 
-    # get all entries regarding value 5004 as civilian
+    # get entry regarding value 5004 as civilian
     rv = client.get(
         '/api/value/5004/entry',
         headers = {'Authorization': 'Bearer {}'.format(civ_access_token)},

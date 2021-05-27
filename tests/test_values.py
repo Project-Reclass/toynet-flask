@@ -56,7 +56,7 @@ def test_valueEntryById_put(client):
     )
     assert rv.status_code == 200
 
-    # login using user
+    # login as user
     rv = client.post(
         '/api/login',
         data={
@@ -69,7 +69,7 @@ def test_valueEntryById_put(client):
     assert rv_json['verified'] == True
     access_token = rv_json['token']
 
-    # get all entries regarding value 5004, Integrity
+    # check that value_entries table is empty for user
     rv = client.get(
         '/api/value/5004/entry',
         headers = {'Authorization': 'Bearer {}'.format(access_token)},
@@ -86,8 +86,16 @@ def test_valueEntryById_put(client):
     )
     assert rv.status_code == 200
 
+    # retrieve personal entry and verify text
+    rv = client.get(
+        '/api/value/5004/entry',
+        headers = {'Authorization': 'Bearer {}'.format(access_token)},
+    )
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['entry'] == "Integrity is honesty."
+
 def test_valueEntryById_putTwice(client):
-    """Check that values can be retrieved by ID"""
+    """Check that a new entry for the same user updates the database."""
 
     # create user
     rv = client.post(
@@ -100,7 +108,7 @@ def test_valueEntryById_putTwice(client):
     )
     assert rv.status_code == 200
 
-    # login using user
+    # login as user
     rv = client.post(
         '/api/login',
         data={
