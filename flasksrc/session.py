@@ -1,10 +1,38 @@
 from flask_restful import Resource, abort, reqparse
+from flask_apispec import use_kwargs, marshal_with
+from flask_apispec.views import MethodResource
 from flask import request
+from marshmallow import Schema, fields
 
 from flasksrc.db import get_db
 
 
-class ToyNetSession(Resource):
+# Schema definitions
+class ToyNetSessionPostRequestSchema(Schema):
+    toynet_topo_id = fields.Int()
+    toynet_user_id = fields.Str()
+
+class ToyNetSessionPostResponseSchema(Schema):
+    status = fields.Bool()
+    toynet_session_id = fields.Int()
+
+class ToyNetSessionByIdGetRequestSchema(Schema):
+    toynet_session_id = fields.Int()
+
+class ToyNetSessionByIdGetResponseSchema(Schema):
+    topo_id = fields.Int()
+    topology = fields.Str()
+    user_id = fields.Str()
+
+class ToyNetSessionByIdPutRequestSchema(Schema):
+    toynet_session_id = fields.Int()
+
+class ToyNetSessionByIdPutResponseSchema(Schema):
+    pass
+
+class ToyNetSession(MethodResource, Resource):
+    @use_kwargs(ToyNetSessionPostRequestSchema, location=('json'))
+    @marshal_with(ToyNetSessionPostResponseSchema)
     def post(self):
         parser = reqparse.RequestParser()
         parser.add_argument('toynet_topo_id', type=int)
@@ -63,7 +91,9 @@ class ToyNetSession(Resource):
             }, 201
 
 
-class ToyNetSessionById(Resource):
+class ToyNetSessionById(MethodResource, Resource):
+    @use_kwargs(ToyNetSessionByIdGetRequestSchema, location=('json'))
+    @marshal_with(ToyNetSessionByIdGetResponseSchema)
     def get(self, toynet_session_id):
         db = get_db()
 
@@ -87,6 +117,8 @@ class ToyNetSessionById(Resource):
             'user_id': rows[0]['user_id'],
         }, 200
 
+    @use_kwargs(ToyNetSessionByIdPutRequestSchema, location=('json'))
+    @marshal_with(ToyNetSessionByIdPutResponseSchema)
     def put(self, toynet_session_id):
         db = get_db()
 

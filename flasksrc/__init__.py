@@ -3,6 +3,7 @@ import os
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_jwt_extended import JWTManager
+from flask_apispec import FlaskApiSpec
 
 
 class HelloReclass(Resource):
@@ -55,5 +56,9 @@ def create_app(test_config=None):
 
     from .session import ToyNetSessionById
     api.add_resource(ToyNetSessionById, '/api/toynet/session/<string:toynet_session_id>')
+
+    docs = FlaskApiSpec(app)
+    docs.register(ToyNetSession)
+    docs.register(ToyNetSessionById)
 
     return app
