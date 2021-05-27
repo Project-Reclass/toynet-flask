@@ -2,46 +2,45 @@ from flask_restful import Resource, abort, reqparse
 from flask_apispec import use_kwargs, marshal_with
 from flask_apispec.views import MethodResource
 from flask import request
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, ValidationError
 
 from flasksrc.db import get_db
 
 
 # Schema definitions
-class ToyNetSessionPostRequestSchema(Schema):
-    toynet_topo_id = fields.Int()
-    toynet_user_id = fields.Str()
+class ToyNetSessionPostReq(Schema):
+    toynet_topo_id = fields.Number(required=True)
+    toynet_user_id = fields.Str(required=True)
 
-class ToyNetSessionPostResponseSchema(Schema):
-    status = fields.Bool()
-    toynet_session_id = fields.Int()
+class ToyNetSessionPostResp(Schema):
+    status = fields.Bool(required=True)
+    toynet_session_id = fields.Int(required=True)
 
-class ToyNetSessionByIdGetRequestSchema(Schema):
-    toynet_session_id = fields.Int()
+#class ToyNetSessionByIdGetReq(Schema):
+#    toynet_session_id = fields.Number(required=True)
 
-class ToyNetSessionByIdGetResponseSchema(Schema):
-    topo_id = fields.Int()
-    topology = fields.Str()
-    user_id = fields.Str()
+class ToyNetSessionByIdGetResp(Schema):
+    topo_id = fields.Int(required=True)
+    topology = fields.Str(required=True)
+    user_id = fields.Str(required=True)
 
-class ToyNetSessionByIdPutRequestSchema(Schema):
-    toynet_session_id = fields.Int()
+#class ToyNetSessionByIdPutReq(Schema):
+#    toynet_session_id = fields.Number(required=True)
 
-class ToyNetSessionByIdPutResponseSchema(Schema):
-    pass
+#class ToyNetSessionByIdPutResp(Schema):
+#    pass
 
 class ToyNetSession(MethodResource, Resource):
-    @use_kwargs(ToyNetSessionPostRequestSchema, location=('json'))
-    @marshal_with(ToyNetSessionPostResponseSchema)
+    #@use_kwargs(ToyNetSessionPostReq, location=('json'))
+    @marshal_with(ToyNetSessionPostResp)
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('toynet_topo_id', type=int)
-        parser.add_argument('toynet_user_id', type=str)
-        request.get_json(force=True)
+        try:
+            req = ToyNetSessionPostReq().load(request.form)
+        except ValidationError as e:
+            abort(400, message=f'malformed request: {e.messages}')
 
-        args = parser.parse_args()
-        toynet_topo_id = int(args['toynet_topo_id'])
-        toynet_user_id = str(args['toynet_user_id'])
+        toynet_topo_id = req['toynet_topo_id']
+        toynet_user_id = req['toynet_user_id']
 
         db = get_db()
 
@@ -61,9 +60,9 @@ class ToyNetSession(MethodResource, Resource):
 
         try:
             user_rows = db.execute(
-                'SELECT id' +
+                'SELECT username' +
                 ' FROM users' +
-                ' WHERE id = (?)',
+                ' WHERE username = (?)',
                 (str(toynet_user_id),)
             ).fetchall()
         except Exception as e:
@@ -92,8 +91,8 @@ class ToyNetSession(MethodResource, Resource):
 
 
 class ToyNetSessionById(MethodResource, Resource):
-    @use_kwargs(ToyNetSessionByIdGetRequestSchema, location=('json'))
-    @marshal_with(ToyNetSessionByIdGetResponseSchema)
+    #@use_kwargs(ToyNetSessionByIdGetReq, location=('json'))
+    @marshal_with(ToyNetSessionByIdGetResp)
     def get(self, toynet_session_id):
         db = get_db()
 
@@ -117,17 +116,17 @@ class ToyNetSessionById(MethodResource, Resource):
             'user_id': rows[0]['user_id'],
         }, 200
 
-    @use_kwargs(ToyNetSessionByIdPutRequestSchema, location=('json'))
-    @marshal_with(ToyNetSessionByIdPutResponseSchema)
+    #@use_kwargs(ToyNetSessionByIdPutReq, location=('json'))
+    #@marshal_with(ToyNetSessionByIdPutResp)
     def put(self, toynet_session_id):
+        try:
+            req = ToyNetSessionByIdPutReq().load(request.form)
+        except ValidationError as e:
+            abort(400, message=f'malformed request: {e.messages}')
+
         db = get_db()
 
-        parser = reqparse.RequestParser()
-        parser.add_argument('new_topology', type=str)
-        request.get_json(force=True)
-
-        args = parser.parse_args()
-        new_topo = str(args['new_topology'])
+        new_topo = req['new_topology']
 
         try:
             db.execute(
