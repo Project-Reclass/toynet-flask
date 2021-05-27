@@ -1,10 +1,9 @@
+DROP TABLE IF EXISTS user_groups;
 DROP TABLE IF EXISTS users;
 
 DROP TABLE IF EXISTS toynet_values;
-DROP TABLE IF EXISTS toynet_topos;
-
-DROP TABLE IF EXISTS toynet_sessions;
 DROP TABLE IF EXISTS toynet_value_inspirations;
+DROP TABLE IF EXISTS toynet_value_entries;
 
 DROP TABLE IF EXISTS toynet_quizzes;
 DROP TABLE IF EXISTS toynet_quiz_options;
@@ -13,6 +12,9 @@ DROP TABLE IF EXISTS toynet_surveys;
 DROP TABLE IF EXISTS toynet_survey_questions;
 DROP TABLE IF EXISTS toynet_survey_options;
 DROP TABLE IF EXISTS toynet_survey_types;
+
+DROP TABLE IF EXISTS toynet_topos;
+DROP TABLE IF EXISTS toynet_sessions;
 
 -- user data
 
@@ -108,6 +110,8 @@ CREATE TABLE toynet_survey_types (
   PRIMARY KEY (type_id)
   FOREIGN KEY (type_id) REFERENCES toynet_survey_questions (type_id)
 );
+
+-- emulator submodule
 
 CREATE TABLE toynet_topos (
   topo_id INTEGER NOT NULL, --primary key
