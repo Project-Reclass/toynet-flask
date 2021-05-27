@@ -90,6 +90,7 @@ def test_userLogin_post(client):
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
 
+    assert 'token' in rv_json and len(rv_json['token']) > 100
     assert rv_json['verified'] == True
 
     # bad login attempt

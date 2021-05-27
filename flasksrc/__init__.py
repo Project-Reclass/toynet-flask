@@ -17,10 +17,10 @@ def create_app(test_config=None):
     JWTManager(app)
 
     if test_config is None:
-        app.config.from_pyfile('test_config.py', silent=True)
-    else:
         app.config.from_pyfile('dev_config.py', silent=False)
         app.config['DATABASE'] = os.path.join(app.instance_path, 'toynet.sqlite')
+    else:
+        app.config.from_pyfile('test_config.py', silent=True)
 
     # ensure the instance folder exists
     try:
@@ -44,10 +44,10 @@ def create_app(test_config=None):
     api.add_resource(ToyNetValueById, '/api/value/<string:value_id>/inspirations')
     api.add_resource(ToyNetValueEntryById, '/api/value/<string:value_id>/entry')
 
-    from .quiz import ToyNetQuiz
-    api.add_resource(ToyNetQuiz, '/api/quiz/<string:quiz_id>')
+    from .quiz import ToyNetQuizById
+    api.add_resource(ToyNetQuizById, '/api/quiz/<string:quiz_id>')
 
-    from .survey import ToyNetSurvey
-    api.add_resource(ToyNetSurvey, '/api/survey/<string:survey_id>')
+    from .survey import ToyNetSurveyById
+    api.add_resource(ToyNetSurveyById, '/api/survey/<string:survey_id>')
 
     return app

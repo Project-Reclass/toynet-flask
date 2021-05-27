@@ -52,7 +52,7 @@ class ToyNetUser(Resource):
 
 
 class ToyNetUserLoginReq(Schema):
-    """ /api/user - POST
+    """ /api/login - POST
 
     Parameters:
      - username (str)

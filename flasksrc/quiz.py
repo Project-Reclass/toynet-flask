@@ -3,7 +3,7 @@ from flask_restful import Resource, abort
 from flasksrc.db import get_db
 
 
-class ToyNetQuiz(Resource):
+class ToyNetQuizById(Resource):
     def get(self, quiz_id):
         db = get_db()
 
