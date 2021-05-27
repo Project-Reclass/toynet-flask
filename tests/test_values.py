@@ -89,6 +89,7 @@ def test_valueEntryById_put(client):
     # retrieve personal entry and verify text
     rv = client.get(
         '/api/value/5004/entry',
+        data={'quote': "Integrity is honesty."},
         headers = {'Authorization': 'Bearer {}'.format(access_token)},
     )
     rv_json = json.loads(rv.data.decode('utf-8'))
