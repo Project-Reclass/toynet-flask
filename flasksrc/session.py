@@ -9,29 +9,19 @@ from flasksrc.db import get_db
 
 # Schema definitions
 class ToyNetSessionPostReq(Schema):
-    toynet_topo_id = fields.Number(required=True)
+    toynet_topo_id = fields.Int(required=True)
     toynet_user_id = fields.Str(required=True)
 
 class ToyNetSessionPostResp(Schema):
     status = fields.Bool(required=True)
     toynet_session_id = fields.Int(required=True)
 
-#class ToyNetSessionByIdGetReq(Schema):
-#    toynet_session_id = fields.Number(required=True)
-
 class ToyNetSessionByIdGetResp(Schema):
     topo_id = fields.Int(required=True)
     topology = fields.Str(required=True)
     user_id = fields.Str(required=True)
 
-#class ToyNetSessionByIdPutReq(Schema):
-#    toynet_session_id = fields.Number(required=True)
-
-#class ToyNetSessionByIdPutResp(Schema):
-#    pass
-
 class ToyNetSession(MethodResource, Resource):
-    #@use_kwargs(ToyNetSessionPostReq, location=('json'))
     @marshal_with(ToyNetSessionPostResp)
     def post(self):
         try:
@@ -91,14 +81,13 @@ class ToyNetSession(MethodResource, Resource):
 
 
 class ToyNetSessionById(MethodResource, Resource):
-    #@use_kwargs(ToyNetSessionByIdGetReq, location=('json'))
     @marshal_with(ToyNetSessionByIdGetResp)
     def get(self, toynet_session_id):
         db = get_db()
 
         try:
             rows = db.execute(
-                'SELECT topo_id, topology, user_id, create_time, update_time' +
+                'SELECT topo_id, topology, user_id' +#, create_time, update_time' +
                 ' FROM toynet_sessions' +
                 ' WHERE session_id = (?)',
                 (str(toynet_session_id),)
@@ -116,8 +105,6 @@ class ToyNetSessionById(MethodResource, Resource):
             'user_id': rows[0]['user_id'],
         }, 200
 
-    #@use_kwargs(ToyNetSessionByIdPutReq, location=('json'))
-    #@marshal_with(ToyNetSessionByIdPutResp)
     def put(self, toynet_session_id):
         try:
             req = ToyNetSessionByIdPutReq().load(request.form)
