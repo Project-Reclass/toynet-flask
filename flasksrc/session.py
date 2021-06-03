@@ -1,9 +1,8 @@
+from marshmallow import Schema, fields, ValidationError
 from flask_restful import Resource, abort, reqparse
-from flask_apispec import use_kwargs, marshal_with
+from flask_apispec import marshal_with
 from flask_apispec.views import MethodResource
 from flask import request
-from marshmallow import Schema, fields, ValidationError
-
 from flasksrc.db import get_db
 
 
@@ -12,14 +11,17 @@ class ToyNetSessionPostReq(Schema):
     toynet_topo_id = fields.Int(required=True)
     toynet_user_id = fields.Str(required=True)
 
+
 class ToyNetSessionPostResp(Schema):
     status = fields.Bool(required=True)
     toynet_session_id = fields.Int(required=True)
+
 
 class ToyNetSessionByIdGetResp(Schema):
     topo_id = fields.Int(required=True)
     topology = fields.Str(required=True)
     user_id = fields.Str(required=True)
+
 
 class ToyNetSession(MethodResource, Resource):
     @marshal_with(ToyNetSessionPostResp)

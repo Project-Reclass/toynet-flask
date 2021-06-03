@@ -1,5 +1,4 @@
 from flask_restful import Resource, abort
-
 from flasksrc.db import get_db
 
 

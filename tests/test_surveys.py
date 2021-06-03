@@ -1,9 +1,7 @@
 import os
 import tempfile
-
 import pytest
 import json
-
 from flasksrc import create_app, db
 from flask_jwt_extended import create_access_token
 

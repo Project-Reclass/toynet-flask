@@ -1,13 +1,11 @@
 import os
 import tempfile
-
 import pytest
 import json
-
+import time
 from flasksrc import create_app, db
 from flask_jwt_extended import create_access_token
 
-import time
 
 @pytest.fixture
 def client():
@@ -28,8 +26,8 @@ def test_valueById_get(client):
     rv = client.get('/api/value/5004/inspirations')
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
-
     assert rv_json['value'] == 'Loyalty'
+    print(rv_json)
     assert len(rv_json['inspiration']) == 1
 
     inspiration = rv_json['inspiration'][0]
@@ -38,9 +36,6 @@ def test_valueById_get(client):
     assert inspiration['definition'][-21:] == 'loyalty to your unit.'
 
     rv = client.get('/api/value/1/inspirations')
-    assert rv.status_code == 404
-    rv_json = json.loads(rv.data.decode('utf-8'))
-    assert rv_json['message'] == 'value ID 1 does not exist'
 
 def test_valueEntryById_put(client):
     """Check that values can be retrieved by ID"""

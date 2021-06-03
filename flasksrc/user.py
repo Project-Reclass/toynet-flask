@@ -1,33 +1,42 @@
 import datetime
 import argon2
 from marshmallow import Schema, fields, ValidationError
-
 from flask import request, current_app
 from flask_restful import Resource, abort
 from flasksrc.db import get_db
 from flask_jwt_extended import create_access_token
+from flask_apispec import marshal_with
 
 
 hasher = argon2.PasswordHasher()
 
 
-class ToyNetUserReq(Schema):
-    """ /api/user - POST
-
-    Parameters:
-     - password (str)
-     - username (str)
-     - first_name (str, optional)
-    """
+# Schema definitions
+class ToyNetUserPostReq(Schema):
     password = fields.Str(required=True)
     username = fields.Str(required=True)
     first_name = fields.Str(required=False)
 
 
+class ToyNetUserPostResp(Schema):
+    username = fields.Str(required=True)
+
+
+class ToyNetUserLoginPostReq(Schema):
+    username = fields.Str(required=True)
+    password = fields.Str(required=True)
+
+
+class ToyNetUserLoginPostResp(Schema):
+    verified = fields.Bool(required=True)
+    token = fields.Str(required=True)
+
+
 class ToyNetUser(Resource):
+    @marshal_with(ToyNetUserPostResp)
     def post(self):
         try:
-            req = ToyNetUserReq().load(request.form)
+            req = ToyNetUserPostReq().load(request.form)
         except ValidationError as e:
             abort(400, message=f'malformed create user request: {e.messages}')
 
@@ -51,21 +60,11 @@ class ToyNetUser(Resource):
         return {'username': req['username']}, 200
 
 
-class ToyNetUserLoginReq(Schema):
-    """ /api/login - POST
-
-    Parameters:
-     - username (str)
-     - password (str)
-    """
-    username = fields.Str(required=True)
-    password = fields.Str(required=True)
-
-
 class ToyNetUserLogin(Resource):
+    @marshal_with(ToyNetUserLoginPostResp)
     def post(self):
         try:
-            req = ToyNetUserLoginReq().load(request.form)
+            req = ToyNetUserLoginPostReq().load(request.form)
         except ValidationError:
             # avoid including username/password in abort message
             abort(
