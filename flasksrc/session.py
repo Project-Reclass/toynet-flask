@@ -1,7 +1,6 @@
 from marshmallow import Schema, fields, ValidationError
 from flask_restful import Resource, abort, reqparse
-from flask_apispec import marshal_with
-from flask_apispec.views import MethodResource
+from flask_apispec import marshal_with, MethodResource
 from flask import request
 from flasksrc.db import get_db
 

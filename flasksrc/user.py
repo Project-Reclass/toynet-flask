@@ -8,7 +8,6 @@ from flask_jwt_extended import create_access_token
 from flask_apispec import marshal_with, MethodResource
 
 
-
 hasher = argon2.PasswordHasher()
 
 
@@ -20,7 +19,7 @@ class ToyNetUserPostReq(Schema):
 
 
 class ToyNetUserPostResp(Schema):
-    username = fields.Str(required=True)
+    username = fields.Str()
 
 
 class ToyNetUserLoginPostReq(Schema):
@@ -29,8 +28,8 @@ class ToyNetUserLoginPostReq(Schema):
 
 
 class ToyNetUserLoginPostResp(Schema):
-    verified = fields.Bool(required=True)
-    token = fields.Str(required=True)
+    verified = fields.Bool()
+    token = fields.Str()
 
 
 class ToyNetUser(MethodResource):

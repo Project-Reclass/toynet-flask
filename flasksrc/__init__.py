@@ -41,8 +41,8 @@ def create_app(test_config=None):
     from .user import ToyNetUser, ToyNetUserLogin
     api.add_resource(ToyNetUser, '/api/user')
     api.add_resource(ToyNetUserLogin, '/api/login')
-#    docs.register(ToyNetUser)
-#    docs.register(ToyNetUserLogin)
+    docs.register(ToyNetUser)
+    docs.register(ToyNetUserLogin)
 
     from .value import ToyNetValueById, ToyNetValueEntryById
     api.add_resource(ToyNetValueById, '/api/value/<string:value_id>/inspirations')
@@ -52,11 +52,11 @@ def create_app(test_config=None):
 
     from .quiz import ToyNetQuizById
     api.add_resource(ToyNetQuizById, '/api/quiz/<string:quiz_id>')
-#    docs.register(ToyNetQuizById)
+    docs.register(ToyNetQuizById)
 
     from .survey import ToyNetSurveyById
     api.add_resource(ToyNetSurveyById, '/api/survey/<string:survey_id>')
-#    docs.register(ToyNetSurveyById)
+#    docs.register(ToyNetSurveyById) # TODO: TAYTAY
 
     from .session import ToyNetSession
     api.add_resource(ToyNetSession, '/api/toynet/session')

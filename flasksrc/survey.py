@@ -1,8 +1,15 @@
+from marshmallow import Schema, fields
 from flask_restful import Resource, abort
 from flasksrc.db import get_db
+from flask_apispec import marshal_with, MethodResource
 
 
-class ToyNetSurveyById(Resource):
+# Schema definitions
+
+# TODO: TAYTAY
+
+
+class ToyNetSurveyById(MethodResource):
     def get(self, survey_id):
         db = get_db()
 

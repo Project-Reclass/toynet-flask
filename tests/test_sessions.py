@@ -3,7 +3,6 @@ import tempfile
 import pytest
 import json
 from flasksrc import create_app, db
-from flask_apispec.views import MethodResource
 from flask_jwt_extended import create_access_token
 
 @pytest.fixture
