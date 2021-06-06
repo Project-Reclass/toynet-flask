@@ -3,24 +3,29 @@ from flask import request, current_app
 from flask_restful import Resource, abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flasksrc.db import get_db
-from flask_apispec import marshal_with
+from flask_apispec import marshal_with, MethodResource
 
 
 # Schema definitions
+class ToyNetValueInspiration(Schema):
+    organization = fields.Str()
+    definition = fields.Str()
+
+
 class ToyNetValueByIdPostResp(Schema):
-    value = fields.Str(required=True)
-    inspirations = fields.List(fields.Str(required=True))
+    value = fields.Str()
+    inspiration = fields.List(fields.Nested(ToyNetValueInspiration))
 
 
 class ToyNetEntryByIdGetResp(Schema):
-    entry = fields.Str(required=True)
+    entry = fields.Str()
 
 
 class ToyNetValueEntryPutReq(Schema):
     quote = fields.Str(required=True)
 
 
-class ToyNetValueById(Resource):
+class ToyNetValueById(MethodResource):
     @marshal_with(ToyNetValueByIdPostResp)
     def get(self, value_id):
         db = get_db()
@@ -42,15 +47,13 @@ class ToyNetValueById(Resource):
 
         inspirations = [{'organization': r['organization'], 'definition': r['quote']} for r in rows]
 
-        print(inspirations)
-
         return {
             'value': rows[0]['name'],
             'inspiration': inspirations
         }, 200
 
 
-class ToyNetValueEntryById(Resource):
+class ToyNetValueEntryById(MethodResource):
     @marshal_with(ToyNetEntryByIdGetResp)
     @jwt_required()
     def get(self, value_id):

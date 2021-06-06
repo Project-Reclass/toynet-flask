@@ -13,17 +13,17 @@ class ToyNetSessionPostReq(Schema):
 
 
 class ToyNetSessionPostResp(Schema):
-    status = fields.Bool(required=True)
-    toynet_session_id = fields.Int(required=True)
+    status = fields.Bool()
+    toynet_session_id = fields.Int()
 
 
 class ToyNetSessionByIdGetResp(Schema):
-    topo_id = fields.Int(required=True)
-    topology = fields.Str(required=True)
-    user_id = fields.Str(required=True)
+    topo_id = fields.Int()
+    topology = fields.Str()
+    user_id = fields.Str()
 
 
-class ToyNetSession(MethodResource, Resource):
+class ToyNetSession(MethodResource):
     @marshal_with(ToyNetSessionPostResp)
     def post(self):
         try:
@@ -82,7 +82,7 @@ class ToyNetSession(MethodResource, Resource):
             }, 201
 
 
-class ToyNetSessionById(MethodResource, Resource):
+class ToyNetSessionById(MethodResource):
     @marshal_with(ToyNetSessionByIdGetResp)
     def get(self, toynet_session_id):
         db = get_db()
