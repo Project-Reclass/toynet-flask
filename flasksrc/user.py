@@ -2,7 +2,7 @@ import datetime
 import argon2
 from marshmallow import Schema, fields, ValidationError
 from flask import request, current_app
-from flask_restful import Resource, abort
+from flask_restful import abort
 from flasksrc.db import get_db
 from flask_jwt_extended import create_access_token
 from flask_apispec import marshal_with, MethodResource

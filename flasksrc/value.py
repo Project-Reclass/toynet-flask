@@ -1,6 +1,6 @@
 from marshmallow import Schema, fields, ValidationError
 from flask import request, current_app
-from flask_restful import Resource, abort
+from flask_restful import abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flasksrc.db import get_db
 from flask_apispec import marshal_with, MethodResource

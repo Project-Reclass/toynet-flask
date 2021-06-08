@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields
-from flask_restful import Resource, abort
+from flask_restful import abort
 from flasksrc.db import get_db
 from flask_apispec import marshal_with, MethodResource
 
