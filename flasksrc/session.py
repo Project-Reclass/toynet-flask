@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields, ValidationError
-from flask_restful import Resource, abort, reqparse
+from flask_restful import abort
 from flask_apispec import marshal_with, MethodResource
 from flask import request
 from flasksrc.db import get_db
@@ -12,14 +12,17 @@ class ToyNetSessionPostReq(Schema):
 
 
 class ToyNetSessionPostResp(Schema):
-    status = fields.Bool()
     toynet_session_id = fields.Int()
 
 
 class ToyNetSessionByIdGetResp(Schema):
     topo_id = fields.Int()
-    topology = fields.Str()
     user_id = fields.Str()
+    topology = fields.Str()
+
+
+class ToyNetSessionByIdPutReq(Schema):
+    new_topology = fields.Str(required=True)
 
 
 class ToyNetSession(MethodResource):
@@ -37,8 +40,8 @@ class ToyNetSession(MethodResource):
 
         try:
             topo_rows = db.execute(
-                'SELECT topology' +
-                ' FROM toynet_topos' +
+                'SELECT topology'
+                ' FROM toynet_topos'
                 ' WHERE topo_id = (?)',
                 (str(toynet_topo_id),)
             ).fetchall()
@@ -51,8 +54,8 @@ class ToyNetSession(MethodResource):
 
         try:
             user_rows = db.execute(
-                'SELECT username' +
-                ' FROM users' +
+                'SELECT username'
+                ' FROM users'
                 ' WHERE username = (?)',
                 (str(toynet_user_id),)
             ).fetchall()
@@ -66,17 +69,16 @@ class ToyNetSession(MethodResource):
         try:
             cur = db.cursor()
             cur.execute(
-                    'INSERT INTO toynet_sessions(topo_id, topology, user_id)' +
-                    ' VALUES(?,?,?)',
-                    (str(toynet_topo_id), topo_rows[0]['topology'], toynet_user_id,)
-                    )
+                'INSERT INTO toynet_sessions(topo_id, topology, user_id)'
+                ' VALUES(?,?,?)',
+                (str(toynet_topo_id), topo_rows[0]['topology'], toynet_user_id,)
+            )
             db.commit()
         except Exception as e:
             print(e.args[0])
-            abort(500, message='Failed to create new session')
+            abort(500, message='Failehttps://input.djr.com/d to create new session')
 
         return {
-            'status': True,
             'toynet_session_id': cur.lastrowid
             }, 201
 
@@ -88,8 +90,8 @@ class ToyNetSessionById(MethodResource):
 
         try:
             rows = db.execute(
-                'SELECT topo_id, topology, user_id' +#, create_time, update_time' +
-                ' FROM toynet_sessions' +
+                'SELECT topo_id, topology, user_id'
+                ' FROM toynet_sessions'
                 ' WHERE session_id = (?)',
                 (str(toynet_session_id),)
             ).fetchall()
@@ -106,6 +108,7 @@ class ToyNetSessionById(MethodResource):
             'user_id': rows[0]['user_id'],
         }, 200
 
+    @marshal_with(ToyNetSessionByIdPutReq)
     def put(self, toynet_session_id):
         try:
             req = ToyNetSessionByIdPutReq().load(request.form)
@@ -118,11 +121,11 @@ class ToyNetSessionById(MethodResource):
 
         try:
             db.execute(
-                    'UPDATE toynet_sessions' +
-                    ' SET topology = (?)' +
-                    ' WHERE session_id = (?)',
-                    (new_topo, str(toynet_session_id),)
-                    )
+                'UPDATE toynet_sessions'
+                ' SET topology = (?)'
+                ' WHERE session_id = (?)',
+                (new_topo, str(toynet_session_id),)
+            )
             db.commit()
         except Exception as e:
             print(e.args[0])
