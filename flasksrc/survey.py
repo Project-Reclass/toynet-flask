@@ -1,12 +1,26 @@
 from marshmallow import Schema, fields
-from flask_restful import Resource, abort
+from flask_restful import abort
 from flasksrc.db import get_db
 from flask_apispec import marshal_with, MethodResource
+from enum import Enum
+
+class ItemType(Enum):
+    TEXT = "TEXT"
+    CHOICE = "CHOICE"
+    LONGTEXT = "LONGTEXT"
+    SCALE = "SCALE"
 
 
 # Schema definitions
 
-# TODO: TAYTAY
+class ToyNetSurveyItem(Schema):
+    item_type = fields.Str()
+    question = fields.Str()
+    options = fields.List(fields.Str())
+
+
+class ToyNetSurveyGetResp(Schema):
+    items = fields.List(fields.Nested(ToyNetSurveyItem))
 
 
 class ToyNetSurveyById(MethodResource):
@@ -40,23 +54,27 @@ class ToyNetSurveyById(MethodResource):
             if current_question_id != row['question_id']:
                 current_question_id = row['question_id']
                 if row['option']:
-                    result.append({
+                    entry = {
                         'type': row['type'],
                         'question': row['question'],
                         'options': [row['option']]
-                    })
+                    }
                 elif row['unit']:
-                    result.append({
+                    entry = {
                         'type': row['type'],
                         'question': row['question'],
                         'unit': row['unit']
-                    })
+                    }
                 else:
-                    result.append({
+                    entry = {
                         'type': row['type'],
                         'question': row['question'],
-                    })
+                    }
+                result.append(entry)
             else:
+                # append to the options list of the last result
                 result[-1]['options'].append(row['option'])
 
-        return result, 200
+        return {
+            'items': result,
+        }, 200

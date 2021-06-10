@@ -25,13 +25,13 @@ def test_surveyById_get(client):
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
 
-    assert rv_json[0]["question"] == 'What is your first name?'
-    assert len(rv_json) == 7
-    assert len(rv_json[1]['options']) == 4
+    assert rv_json['items'][0]['question'] == 'What is your first name?'
+    assert len(rv_json['items']) == 7
+    assert len(rv_json['items'][1]['options']) == 4
 
-    assert rv_json[1]["options"][0] == "As of now, I don't plan on it."
-    assert rv_json[3]["options"][4] == "Professional Experience"
-    assert rv_json[6]["unit"] == "months"
+    assert rv_json['items'][1]['options'][0] == 'As of now, I don\'t plan on it.'
+    assert rv_json['items'][3]['options'][4] == 'Professional Experience'
+    assert rv_json['items'][6]['unit'] == 'months'
 
     rv = client.get('/api/survey/4')
     assert rv.status_code == 404

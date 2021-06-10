@@ -56,7 +56,7 @@ def create_app(test_config=None):
 
     from .survey import ToyNetSurveyById
     api.add_resource(ToyNetSurveyById, '/api/survey/<string:survey_id>')
-#    docs.register(ToyNetSurveyById) # TODO: TAYTAY
+    docs.register(ToyNetSurveyById)
 
     from .session import ToyNetSession
     api.add_resource(ToyNetSession, '/api/toynet/session')
