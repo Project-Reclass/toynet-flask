@@ -1,12 +1,32 @@
+from marshmallow import Schema, fields, ValidationError
 from flask import request, current_app
-from flask_restful import Resource, abort
+from flask_restful import abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flasksrc.db import get_db
+from flask_apispec import marshal_with, MethodResource
 
-from marshmallow import Schema, fields, ValidationError
+
+# Schema definitions
+class ToyNetValueInspiration(Schema):
+    organization = fields.Str()
+    definition = fields.Str()
 
 
-class ToyNetValueById(Resource):
+class ToyNetValueByIdPostResp(Schema):
+    value = fields.Str()
+    inspiration = fields.List(fields.Nested(ToyNetValueInspiration))
+
+
+class ToyNetEntryByIdGetResp(Schema):
+    entry = fields.Str()
+
+
+class ToyNetValueEntryPutReq(Schema):
+    quote = fields.Str(required=True)
+
+
+class ToyNetValueById(MethodResource):
+    @marshal_with(ToyNetValueByIdPostResp)
     def get(self, value_id):
         db = get_db()
 
@@ -33,16 +53,8 @@ class ToyNetValueById(Resource):
         }, 200
 
 
-class ToyNetValueEntryReq(Schema):
-    """ /api/user - PUT
-
-    Parameters:
-     - quote (str)
-    """
-    quote = fields.Str(required=True)
-
-
-class ToyNetValueEntryById(Resource):
+class ToyNetValueEntryById(MethodResource):
+    @marshal_with(ToyNetEntryByIdGetResp)
     @jwt_required()
     def get(self, value_id):
         username = get_jwt_identity()
@@ -71,7 +83,7 @@ class ToyNetValueEntryById(Resource):
     @jwt_required()
     def put(self, value_id):
         try:
-            req = ToyNetValueEntryReq().load(request.form)
+            req = ToyNetValueEntryPutReq().load(request.form)
         except ValidationError as e:
             abort(400, message=f'malformed create user request: {e.messages}')
 

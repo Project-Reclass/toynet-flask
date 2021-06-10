@@ -1,13 +1,12 @@
 import os
-
 from flask import Flask
 from flask_restful import Resource, Api
 from flask_jwt_extended import JWTManager
+from flask_apispec import FlaskApiSpec
 
 
 class HelloReclass(Resource):
     def get(self):
-        # return {'hello': 'reclass'}
         return 'Hello, Reclass!'
 
 
@@ -35,19 +34,34 @@ def create_app(test_config=None):
     # make RESTful
     api = Api(app)
     api.add_resource(HelloReclass, '/')
+    docs = FlaskApiSpec(app)
 
     from .user import ToyNetUser, ToyNetUserLogin
     api.add_resource(ToyNetUser, '/api/user')
     api.add_resource(ToyNetUserLogin, '/api/login')
+    docs.register(ToyNetUser)
+    docs.register(ToyNetUserLogin)
 
     from .value import ToyNetValueById, ToyNetValueEntryById
-    api.add_resource(ToyNetValueById, '/api/value/<string:value_id>/inspirations')
-    api.add_resource(ToyNetValueEntryById, '/api/value/<string:value_id>/entry')
+    api.add_resource(ToyNetValueById, '/api/value/<int:value_id>/inspirations')
+    api.add_resource(ToyNetValueEntryById, '/api/value/<int:value_id>/entry')
+    docs.register(ToyNetValueById)
+    docs.register(ToyNetValueEntryById)
 
     from .quiz import ToyNetQuizById
-    api.add_resource(ToyNetQuizById, '/api/quiz/<string:quiz_id>')
+    api.add_resource(ToyNetQuizById, '/api/quiz/<int:quiz_id>')
+    docs.register(ToyNetQuizById)
 
     from .survey import ToyNetSurveyById
     api.add_resource(ToyNetSurveyById, '/api/survey/<string:survey_id>')
+    docs.register(ToyNetSurveyById)
+
+    from .session import ToyNetSession
+    api.add_resource(ToyNetSession, '/api/toynet/session')
+    docs.register(ToyNetSession)
+
+    from .session import ToyNetSessionById
+    api.add_resource(ToyNetSessionById, '/api/toynet/session/<int:toynet_session_id>')
+    docs.register(ToyNetSessionById)
 
     return app

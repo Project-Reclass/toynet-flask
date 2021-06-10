@@ -1,9 +1,22 @@
-from flask_restful import Resource, abort
-
+from marshmallow import Schema, fields
+from flask_restful import abort
 from flasksrc.db import get_db
+from flask_apispec import marshal_with, MethodResource
 
 
-class ToyNetQuizById(Resource):
+# Schema definitions
+class ToyNetQuizItem(Schema):
+    question = fields.Str()
+    options = fields.List(fields.Str())
+    answer = fields.Int()
+
+
+class ToyNetQuizGetResp(Schema):
+    items = fields.List(fields.Nested(ToyNetQuizItem))
+
+
+class ToyNetQuizById(MethodResource):
+    @marshal_with(ToyNetQuizGetResp)
     def get(self, quiz_id):
         db = get_db()
 
@@ -44,4 +57,4 @@ class ToyNetQuizById(Resource):
                     " length of its options."
                 )
 
-        return result, 200
+        return {'items': result}, 200

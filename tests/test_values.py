@@ -1,13 +1,10 @@
 import os
 import tempfile
-
 import pytest
 import json
-
 from flasksrc import create_app, db
 from flask_jwt_extended import create_access_token
 
-import time
 
 @pytest.fixture
 def client():
@@ -28,7 +25,6 @@ def test_valueById_get(client):
     rv = client.get('/api/value/5004/inspirations')
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
-
     assert rv_json['value'] == 'Loyalty'
     assert len(rv_json['inspiration']) == 1
 
@@ -39,8 +35,23 @@ def test_valueById_get(client):
 
     rv = client.get('/api/value/1/inspirations')
     assert rv.status_code == 404
+
+def test_valueById_getMultInpsirations(client):
+    """Check that values can be retrieved by ID"""
+
+    rv = client.get('/api/value/5001/inspirations')
+    assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
-    assert rv_json['message'] == 'value ID 1 does not exist'
+    assert rv_json['value'] == 'Integrity'
+    assert len(rv_json['inspiration']) == 3
+
+    assert rv_json['inspiration'][0]['organization'] == 'U.S. Air Force'
+    assert rv_json['inspiration'][0]['definition'][:20] == 'Integrity is the adh'
+    assert rv_json['inspiration'][1]['organization'] == 'U.S. Army'
+    assert rv_json['inspiration'][1]['definition'][:20] == 'Do what is right, le'
+    assert rv_json['inspiration'][2]['organization'] == 'U.S. Coast Guard'
+    assert rv_json['inspiration'][2]['definition'][:20] == 'Integrity is our sta'
+
 
 def test_valueEntryById_put(client):
     """Check that values can be retrieved by ID"""
