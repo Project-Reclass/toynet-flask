@@ -16,6 +16,7 @@ class ToyNetQuizGetResp(Schema):
 
 
 class ToyNetQuizById(MethodResource):
+    @marshal_with(ToyNetQuizGetResp)
     def get(self, quiz_id):
         db = get_db()
 

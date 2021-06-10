@@ -4,6 +4,7 @@ from flasksrc.db import get_db
 from flask_apispec import marshal_with, MethodResource
 from enum import Enum
 
+
 class ItemType(Enum):
     TEXT = "TEXT"
     CHOICE = "CHOICE"
@@ -12,11 +13,11 @@ class ItemType(Enum):
 
 
 # Schema definitions
-
 class ToyNetSurveyItem(Schema):
     item_type = fields.Str()
     question = fields.Str()
     options = fields.List(fields.Str())
+    unit = fields.Str()
 
 
 class ToyNetSurveyGetResp(Schema):
@@ -24,6 +25,7 @@ class ToyNetSurveyGetResp(Schema):
 
 
 class ToyNetSurveyById(MethodResource):
+    @marshal_with(ToyNetSurveyGetResp)
     def get(self, survey_id):
         db = get_db()
 
