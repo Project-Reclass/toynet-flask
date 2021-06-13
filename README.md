@@ -61,11 +61,11 @@ Go to: `http://127.0.0.1:5000/`
 
 # Swagger API Documentation
 
-Visit [swagger documentation](documentation/swagger.md).
+Visit [swagger documentation](documentation/swagger.md) to generate living documentation about available API endpoints alongside your flask instance.
 
 # Test the Service
 
-Visit [testing documentation](documentation/testing.md).
+Visit [testing documentation](documentation/testing.md) to learn how to unit test, run manual tests in development, and query SQLite files.
 
 # Dependencies
 
