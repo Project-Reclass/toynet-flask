@@ -2,7 +2,7 @@
 Backend service of ToyNet emulator and learning platform
 
 # Requirements
-(Windows Documentation)[https://github.com/Project-Reclass/toynet-flask/blob/main/documentation/swagger.md]
+The following tutorial applies to Linux / MacOS devleopment enviornments. Visit Windows documentation (here)[https://github.com/Project-Reclass/toynet-flask/blob/main/documentation/swagger.md].
 
 ## Python
 
@@ -10,8 +10,6 @@ Install Python3.7
 
 ## venv
 Create a project folder and a venv folder within:
-
-Linux / MacOS:
 ```
 $ git clone https://github.com/Project-Reclass/toynet-flask
 $ cd toynet-flask
@@ -19,8 +17,6 @@ $ python3 -m venv venv
 ```
 
 Before you work on your project, activate the corresponding environment:
-
-Linux / MacOS:
 ```
 $ . venv/bin/activate
 ```
@@ -38,9 +34,8 @@ $ deactivate
 More information [here](https://docs.python.org/3/library/venv.html)
 
 # Run the service
-(Windows Documentation)[https://github.com/Project-Reclass/toynet-flask/blob/main/documentation/swagger.md]
+The following tutorial applies to Linux / MacOS devleopment enviornments. Visit Windows documentation (here)[https://github.com/Project-Reclass/toynet-flask/blob/main/documentation/swagger.md].
 
-MacOS / Linux:
 ```
 $ export FLASK_APP=flasksrc
 
