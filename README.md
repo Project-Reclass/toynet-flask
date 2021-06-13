@@ -2,7 +2,7 @@
 Backend service of ToyNet emulator and learning platform
 
 # Requirements
-The following tutorial applies to Linux / MacOS devleopment enviornments. Visit Windows documentation [here](https://github.com/Project-Reclass/toynet-flask/blob/main/documentation/windows.md).
+The following tutorial applies to Linux / MacOS devleopment enviornments. Visit Windows documentation [here](documentation/windows.md).
 
 ## Python
 
@@ -34,7 +34,7 @@ $ deactivate
 More information [here](https://docs.python.org/3/library/venv.html)
 
 # Run the service
-The following tutorial applies to Linux / MacOS devleopment enviornments. Visit Windows documentation [here](https://github.com/Project-Reclass/toynet-flask/blob/main/documentation/windows.md).
+The following tutorial applies to Linux / MacOS devleopment enviornments. Visit Windows documentation [here](documentation/windows.md).
 
 ```
 $ export FLASK_APP=flasksrc
