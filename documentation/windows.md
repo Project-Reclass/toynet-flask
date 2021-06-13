@@ -46,4 +46,4 @@ Windows PowerShell:
 ```
 
 Go to: `http://127.0.0.1:5000/`
-<p align="center"> <kbd> <img src="documentation/images/hello-reclass.png" width="300" /> </kbd> </p>
+<p align="center"> <kbd> <img src="images/hello-reclass.png" width="300" /> </kbd> </p>
