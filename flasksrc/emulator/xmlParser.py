@@ -6,13 +6,15 @@ from flasksrc.emulator.util.error import XMLParseError
 from flasksrc.emulator.util import typecheck as tc
 
 
-class Name(str): pass
+class Name(str):
+    pass
 
 
-class IP(str): pass
+class IP(str):
+    pass
 
 
-class InterfaceConfig():
+class InterfaceCfg():
     """A representation device interfaces in network configurations parsed from XML file.
         Currently, we only track interfaces on routers.
     Raises:
@@ -22,15 +24,16 @@ class InterfaceConfig():
         interfaceNum:   int -- identifying index on device used to generate interface name
         ip:             IP -- optional IP-address associated with interface for routing
     """
-    def __init__(self, deviceName: Name, interfaceNum: int=0, ip: IP=None):
+    def __init__(self, deviceName: Name, interfaceNum: int = 0, ip: IP = None):
         tc.inputTypeCheck(deviceName, 'deviceName', str)
         tc.inputTypeCheck(interfaceNum, 'interfaceNum', int)
-        if ip is not None: tc.inputTypeCheck(ip, 'ip', str)
+        if ip is not None:
+            tc.inputTypeCheck(ip, 'ip', str)
 
         self.deviceName:Name = deviceName
         self.name: str = deviceName + '-eth' + str(interfaceNum)
         self.ip: IP = ip
-    
+
     def __str__(self) -> str:
         ipStr: str = ' | ip: ' + self.ip if self.ip is not None else ''
         return 'Interface { name: ' + self.name + ipStr + '}'
@@ -39,11 +42,13 @@ class InterfaceConfig():
         ipStr: str = ' -> ' + self.ip if self.ip is not None else ''
         return '[' + self.name + ipStr + ']'
 
+
 class DeviceConfig():
     """Abstraction for all Devices int network configurations parsed from XML file."""
     pass
 
-class RouterConfig(DeviceConfig):
+
+class RouterCfg(DeviceConfig):
     """A representation routers in network configurations parsed from XML file.
         Interfaces are tracked on routers to enable default gateway configuratinos on hosts
     Raises:
@@ -60,22 +65,23 @@ class RouterConfig(DeviceConfig):
 
         self.name: Name = name
         self.ip: IP = ip
-        self.intfs: List[InterfaceConfig] = list()
+        self.intfs: List[InterfaceCfg] = list()
 
-        for (i,intf) in enumerate(interfaces):
-            self.intfs.append(InterfaceConfig(self.name, i, intf))
+        for (i, intf) in enumerate(interfaces):
+            self.intfs.append(InterfaceCfg(self.name, i, intf))
 
-    def getIntfByIdx(self, idx: int) -> InterfaceConfig:
+    def getIntfByIdx(self, idx: int) -> InterfaceCfg:
         return self.intfs[idx]
 
     def __str__(self) -> str:
         intfs: str = functools.reduce(
-            lambda output,intfstr: (output+', '+intfstr),
-            map( lambda intf: intf.toShortString(),self.intfs)
+            lambda output, intfstr: (output + ', ' + intfstr),
+            map(lambda intf: intf.toShortString(), self.intfs)
         )
         return 'Router { name: ' + self.name + ' | ip: ' + self.ip + ' | intfs: ' + intfs + ' }'
 
-class SwitchConfig(DeviceConfig):
+
+class SwitchCfg(DeviceConfig):
     """A representation switches in network configurations parsed from XML file.
         Interfaces are not currently tracked on switches.
     Raises:
@@ -90,7 +96,8 @@ class SwitchConfig(DeviceConfig):
     def __str__(self) -> str:
         return 'Switch { name: ' + self.name + ' }'
 
-class HostConfig(DeviceConfig):
+
+class HostCfg(DeviceConfig):
     """A representation hosts in network configurations parsed from XML file.
         Interfaces are not currently tracked on hosts and we assume there is one
         interface per host.
@@ -110,9 +117,11 @@ class HostConfig(DeviceConfig):
         self.defaultRoute: str = 'via ' + defaultRtrIp.split('/')[0]
 
     def __str__(self) -> str:
-        return 'Host { name: ' + self.name + ' | ip ' + self.ip + ' | route: ' + self.defaultRoute + ' }'
+        return 'Host { name: ' + self.name + ' | ip ' + self.ip + \
+            ' | route: ' + self.defaultRoute + ' }'
 
-class ToyTopoConfig():
+
+class ToyTopoCfg():
     """A representation of all devices in network configurations parsed from XML file.
         Outputed by parseXML function. Ingested by Mininet to run their simulations.
     Attributes:
@@ -121,21 +130,21 @@ class ToyTopoConfig():
     """
     def __init__(
             self,
-            routers: List[RouterConfig],
-            switches: List[SwitchConfig],
-            hosts: List[HostConfig],
-            links: List[Tuple[InterfaceConfig, InterfaceConfig]],
-            root: str=None
-        ):
+            routers: List[RouterCfg],
+            switches: List[SwitchCfg],
+            hosts: List[HostCfg],
+            links: List[Tuple[InterfaceCfg, InterfaceCfg]],
+            root: str = None
+            ):
         self.root: str = root
-        self.routers: List[RouterConfig] = routers
-        self.switches: List[SwitchConfig] = switches
-        self.hosts: List[HostConfig] = hosts
-        self.links: List[Tuple[InterfaceConfig, InterfaceConfig]] = links
+        self.routers: List[RouterCfg] = routers
+        self.switches: List[SwitchCfg] = switches
+        self.hosts: List[HostCfg] = hosts
+        self.links: List[Tuple[InterfaceCfg, InterfaceCfg]] = links
 
 
-def parseXML(data: str) -> ToyTopoConfig:
-    """Converts XML structure in provided fiel into a ToyTopoConfig which can
+def parseXML(data: str) -> ToyTopoCfg:
+    """Converts XML structure in provided fiel into a ToyTopoCfg which can
         be processed by Mininet
     Raises:
         XMLParseError, TypeCheckError
@@ -164,36 +173,36 @@ def parseXML(data: str) -> ToyTopoConfig:
     if XMLlinkList is None:
         raise XMLParseError('No linkList specified', data)
 
-    routers: Tuple[Dict[str:RouterConfig]] = dict()
+    routers: Tuple[Dict[str:RouterCfg]] = dict()
     for r in XMLrouterList.iter('router'):
         interfaces: List[IP] = [XMLintf.text for XMLintf in r.findall('intf')]
-        routers[r.attrib['name']] = RouterConfig(r.attrib['name'], r.attrib['ip'], interfaces)
+        routers[r.attrib['name']] = RouterCfg(r.attrib['name'], r.attrib['ip'], interfaces)
 
-    switches: Tuple[Dict[str:SwitchConfig]] = dict()
+    switches: Tuple[Dict[str:SwitchCfg]] = dict()
     for s in XMLswitchList.iter('switch'):
         switchName: str = s.attrib['name']
-        switches[switchName] = SwitchConfig(switchName)
+        switches[switchName] = SwitchCfg(switchName)
 
-    hosts: Tuple[Dict[str:HostConfig]] = dict() 
+    hosts: Tuple[Dict[str:HostCfg]] = dict()
     for h in XMLhostList.iter('host'):
         XMLdefaultRtr: ElementTree.ElementTree = h.find('defaultRouter')
         defName: Name = XMLdefaultRtr.find('name').text
         defIpIdx: int = int(XMLdefaultRtr.find('intf').text)
 
-        interface: InterfaceConfig = routers[defName].getIntfByIdx(defIpIdx)
-        hosts[h.attrib['name']] = HostConfig(h.attrib['name'], h.attrib['ip'], interface.ip)
+        interface: InterfaceCfg = routers[defName].getIntfByIdx(defIpIdx)
+        hosts[h.attrib['name']] = HostCfg(h.attrib['name'], h.attrib['ip'], interface.ip)
 
-    links: List[Tuple[InterfaceConfig, InterfaceConfig]] = list()
+    links: List[Tuple[InterfaceCfg, InterfaceCfg]] = list()
     for link in XMLlinkList.iter('link'):
-        dvcs:List[InterfaceConfig] = list()
+        dvcs: List[InterfaceCfg] = list()
         for dvc in link.iter('dvc'):
             dvcNm: Name = dvc.attrib['name']
             if dvcNm.startswith('r'):
                 dvcs.append(routers[dvcNm].getIntfByIdx(int(dvc.find('intf').text)))
             elif dvcNm.startswith('s'):
-                dvcs.append(InterfaceConfig(dvcNm, int(dvc.find('intf').text)))
+                dvcs.append(InterfaceCfg(dvcNm, int(dvc.find('intf').text)))
             else:
-                dvcs.append(InterfaceConfig(dvcNm))
+                dvcs.append(InterfaceCfg(dvcNm))
         links.append((dvcs[0], dvcs[1]))
 
-    return ToyTopoConfig(routers, switches, hosts, links, root)
+    return ToyTopoCfg(routers, switches, hosts, links, root)
