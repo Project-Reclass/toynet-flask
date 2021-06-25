@@ -22,7 +22,7 @@ def test_topo_id_post(client):
     '''Check the POST topo_id returns a session id if valid or error if not'''
     client.post(
           '/api/user',
-          data = {
+          json={
               'username': 'arthur@projectreclass.org',
               'password': 'BaLtH@$0R',
               'first_name': 'Arthur',
@@ -31,7 +31,7 @@ def test_topo_id_post(client):
 
     rv = client.post(
         '/api/toynet/session',
-        data = {
+        json={
             'toynet_topo_id': 1,
             'toynet_user_id': 'arthur@projectreclass.org',
         },
@@ -45,7 +45,7 @@ def test_topo_id_post(client):
     #Invalid toynet_topo_id number
     rv = client.post(
         '/api/toynet/session',
-        data = {
+        json={
             'toynet_topo_id': -5,
             'toynet_user_id': 'arthur@projectreclass.org',
         },
@@ -57,7 +57,7 @@ def test_topo_id_post(client):
     #invalid user id
     rv = client.post(
         '/api/toynet/session',
-        data = {
+        json={
             'toynet_topo_id': 1,
             'toynet_user_id': 'loser@projectreclass.org', #this should produce an error because we have no losers. #facts
         },
@@ -87,7 +87,7 @@ def test_session_by_id_get(client):
 def test_session_by_id_put(client):
     rv = client.put(
         '/api/toynet/session/1',
-        data = {'new_topology': 'aq49i',},
+        json={'new_topology': 'aq49i',},
     )
 
     get_rv = client.get('/api/toynet/session/1')

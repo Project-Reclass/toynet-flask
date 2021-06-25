@@ -24,7 +24,7 @@ def test_user_post(client):
     # with first_name
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'bob@projectreclass.org',
             'password': 'bobisdabomb',
             'first_name': 'Bob',
@@ -35,7 +35,7 @@ def test_user_post(client):
     # without first_name
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'alice@projectreclass.org',
             'password': 'aliceisdabomb',
         },
@@ -45,7 +45,7 @@ def test_user_post(client):
     # missing password
     rv = client.post(
         '/api/user',
-        data={'username': 'alice@projectreclass.org'},
+        json={'username': 'alice@projectreclass.org'},
     )
     assert rv.status_code == 400
     rv_json = json.loads(rv.data.decode('utf-8'))
@@ -57,7 +57,7 @@ def test_userLogin_post(client):
     # insert
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'bob@projectreclass.org',
             'password': 'bobisdabomb',
             'first_name': 'Bob',
@@ -69,7 +69,7 @@ def test_userLogin_post(client):
     # good login attempt
     rv = client.post(
         '/api/login',
-        data={
+        json={
             'username': 'bob@projectreclass.org',
             'password': 'bobisdabomb',
         },
@@ -83,7 +83,7 @@ def test_userLogin_post(client):
     # bad login attempt
     rv = client.post(
         '/api/login',
-        data={
+        json={
             'username': 'bob@projectreclass.org',
             'password': 'bobisdabroom',
         },
@@ -99,7 +99,7 @@ def test_jwtRequired_wrongUser(client):
     # create veteran user
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'veteran@projectreclass.org',
             'password': 'bossvet123',
             'first_name': 'Boss',
@@ -110,7 +110,7 @@ def test_jwtRequired_wrongUser(client):
     # login as veteran user
     rv = client.post(
         '/api/login',
-        data={
+        json={
             'username': 'veteran@projectreclass.org',
             'password': 'bossvet123',
         },
@@ -122,7 +122,7 @@ def test_jwtRequired_wrongUser(client):
     # insert personal entry as veteran user
     rv = client.put(
         '/api/value/5004/entry',
-        data={'quote': "Integrity is honesty."},
+        json={'quote': "Integrity is honesty."},
         headers = {'Authorization': 'Bearer {}'.format(vet_access_token)},
     )
     assert rv.status_code == 200
@@ -130,7 +130,7 @@ def test_jwtRequired_wrongUser(client):
     # create civilian user
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'civilian@projectreclass.org',
             'password': 'civilboss123',
             'first_name': 'Boss',
@@ -141,7 +141,7 @@ def test_jwtRequired_wrongUser(client):
     # login as civilian user
     rv = client.post(
         '/api/login',
-        data={
+        json={
             'username': 'civilian@projectreclass.org',
             'password': 'civilboss123',
         },
@@ -165,7 +165,7 @@ def test_jwtRequired_twoActiveUsers(client):
     # create veteran user
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'veteran@projectreclass.org',
             'password': 'bossvet123',
             'first_name': 'Boss',
@@ -176,7 +176,7 @@ def test_jwtRequired_twoActiveUsers(client):
     # login as veteran user
     rv = client.post(
         '/api/login',
-        data={
+        json={
             'username': 'veteran@projectreclass.org',
             'password': 'bossvet123',
         },
@@ -188,7 +188,7 @@ def test_jwtRequired_twoActiveUsers(client):
     # insert personal entry as veteran user
     rv = client.put(
         '/api/value/5004/entry',
-        data={'quote': "I am a veteran. I have integrity."},
+        json={'quote': "I am a veteran. I have integrity."},
         headers = {'Authorization': 'Bearer {}'.format(vet_access_token)},
     )
     assert rv.status_code == 200
@@ -196,7 +196,7 @@ def test_jwtRequired_twoActiveUsers(client):
     # create civilian user
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'civilian@projectreclass.org',
             'password': 'civilboss123',
             'first_name': 'Boss',
@@ -207,7 +207,7 @@ def test_jwtRequired_twoActiveUsers(client):
     # login as civilian user
     rv = client.post(
         '/api/login',
-        data={
+        json={
             'username': 'civilian@projectreclass.org',
             'password': 'civilboss123',
         },
@@ -219,7 +219,7 @@ def test_jwtRequired_twoActiveUsers(client):
     # insert personal entry as civilian user
     rv = client.put(
         '/api/value/5004/entry',
-        data={'quote': "I am a civilian. I have integrity."},
+        json={'quote': "I am a civilian. I have integrity."},
         headers = {'Authorization': 'Bearer {}'.format(civ_access_token)},
     )
     assert rv.status_code == 200
