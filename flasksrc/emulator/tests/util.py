@@ -2,8 +2,13 @@ from typing import List, Tuple
 from flasksrc.emulator.xmlParser import ToyTopoConfig, RouterCfg, SwitchCfg, HostCfg, InterfaceCfg
 
 
-def makeToyTopoCfg(routers: List[str], switches: List[str], hosts: List[str], links: List[Tuple[str,str]],
-    root: str=None)-> ToyTopoCfg:
+def makeToyTopoCfg(
+        routers: List[str],
+        switches: List[str],
+        hosts: List[str],
+        links: List[Tuple[str,str]],
+        root: str = None
+        ) -> ToyTopoCfg:
 
     MOCK_IP: str = "X.X.X.X/Y"
     MOCK_INTF: List[str] = []

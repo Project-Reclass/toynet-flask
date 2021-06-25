@@ -9,6 +9,7 @@ def getDeviceList(deviceType: str, xmlTopology: ET):
     if deviceList is None: raise XMLParseError('No ' + tag + ' specified', xmlTopology)
     return deviceList
 
+
 def addToDeviceListByName(names: List[str], deviceType: str, xmlTopology: ET):
     deviceList = getDeviceList(deviceType, xmlTopology)
 
@@ -65,9 +66,10 @@ def addToDeviceListByName(names: List[str], deviceType: str, xmlTopology: ET):
 
     else:
         pass
-        #raise error
+        # raise error
 
     return xmlTopology
+
 
 def removeFromDeviceListByName(names: List[str], deviceType: str, xmlTopology: ET):
     deviceList = getDeviceList(deviceType, xmlTopology)
@@ -85,6 +87,7 @@ def removeFromDeviceListByName(names: List[str], deviceType: str, xmlTopology: E
             if device.attrib['name'] == names[0]:
                 deviceList.remove(device)
                 return xmlTopology
+
 
 def parseModificationCommand(command: str, xmlTopology: ET.ElementTree):
     tokens = command.split(' ')
