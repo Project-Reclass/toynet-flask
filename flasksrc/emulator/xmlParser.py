@@ -1,5 +1,5 @@
 from xml.etree import ElementTree
-from typing import List, Tuple
+from typing import List, Tuple, Dict
 import functools
 
 from flasksrc.emulator.util.error import XMLParseError
