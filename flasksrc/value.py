@@ -1,9 +1,9 @@
 from marshmallow import Schema, fields, ValidationError
-from flask import request, current_app
+from flask import current_app
 from flask_restful import abort
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flasksrc.db import get_db
-from flask_apispec import marshal_with, MethodResource
+from flask_apispec import marshal_with, MethodResource, use_kwargs
 
 
 # Schema definitions
@@ -21,7 +21,7 @@ class ToyNetEntryByIdGetResp(Schema):
     entry = fields.Str()
 
 
-class ToyNetValueEntryPutReq(Schema):
+class ToyNetValueEntryByIdPutReq(Schema):
     quote = fields.Str(required=True)
 
 
@@ -81,9 +81,10 @@ class ToyNetValueEntryById(MethodResource):
         return {'entry': rows[0]['quote']}, 200
 
     @jwt_required()
-    def put(self, value_id):
+    @use_kwargs(ToyNetValueEntryByIdPutReq)
+    def put(self, value_id, **kwargs):
         try:
-            req = ToyNetValueEntryPutReq().load(request.json)
+            req = ToyNetValueEntryByIdPutReq().load(kwargs)
         except ValidationError as e:
             abort(400, message=f'malformed create user request: {e.messages}')
 

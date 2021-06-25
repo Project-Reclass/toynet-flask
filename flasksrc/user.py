@@ -1,11 +1,11 @@
 import datetime
 import argon2
 from marshmallow import Schema, fields, ValidationError
-from flask import request, current_app
+from flask import current_app
 from flask_restful import abort
 from flasksrc.db import get_db
 from flask_jwt_extended import create_access_token
-from flask_apispec import marshal_with, MethodResource
+from flask_apispec import marshal_with, MethodResource, use_kwargs
 
 
 hasher = argon2.PasswordHasher()
@@ -33,10 +33,11 @@ class ToyNetUserLoginPostResp(Schema):
 
 
 class ToyNetUser(MethodResource):
+    @use_kwargs(ToyNetUserPostReq)
     @marshal_with(ToyNetUserPostResp)
-    def post(self):
+    def post(self, **kwargs):
         try:
-            req = ToyNetUserPostReq().load(request.json)
+            req = ToyNetUserPostReq().load(kwargs)
         except ValidationError as e:
             abort(400, message=f'malformed create user request: {e.messages}')
 
@@ -61,10 +62,11 @@ class ToyNetUser(MethodResource):
 
 
 class ToyNetUserLogin(MethodResource):
+    @use_kwargs(ToyNetUserLoginPostReq)
     @marshal_with(ToyNetUserLoginPostResp)
-    def post(self):
+    def post(self, **kwargs):
         try:
-            req = ToyNetUserLoginPostReq().load(request.json)
+            req = ToyNetUserLoginPostReq().load(kwargs)
         except ValidationError:
             # avoid including username/password in abort message
             abort(
