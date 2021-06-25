@@ -36,7 +36,7 @@ class ToyNetUser(MethodResource):
     @marshal_with(ToyNetUserPostResp)
     def post(self):
         try:
-            req = ToyNetUserPostReq().load(request.form)
+            req = ToyNetUserPostReq().load(request.json)
         except ValidationError as e:
             abort(400, message=f'malformed create user request: {e.messages}')
 
@@ -64,7 +64,7 @@ class ToyNetUserLogin(MethodResource):
     @marshal_with(ToyNetUserLoginPostResp)
     def post(self):
         try:
-            req = ToyNetUserLoginPostReq().load(request.form)
+            req = ToyNetUserLoginPostReq().load(request.json)
         except ValidationError:
             # avoid including username/password in abort message
             abort(

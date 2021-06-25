@@ -59,7 +59,7 @@ def test_valueEntryById_put(client):
     # create user
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'veteran@projectreclass.org',
             'password': 'bossvet123',
             'first_name': 'Boss',
@@ -70,7 +70,7 @@ def test_valueEntryById_put(client):
     # login as user
     rv = client.post(
         '/api/login',
-        data={
+        json={
             'username': 'veteran@projectreclass.org',
             'password': 'bossvet123',
         },
@@ -92,7 +92,7 @@ def test_valueEntryById_put(client):
     # insert personal entry
     rv = client.put(
         '/api/value/5004/entry',
-        data={'quote': "Integrity is honesty."},
+        json={'quote': "Integrity is honesty."},
         headers = {'Authorization': 'Bearer {}'.format(access_token)},
     )
     assert rv.status_code == 200
@@ -111,7 +111,7 @@ def test_valueEntryById_putTwice(client):
     # create user
     rv = client.post(
         '/api/user',
-        data={
+        json={
             'username': 'veteran@projectreclass.org',
             'password': 'bossvet123',
             'first_name': 'Boss',
@@ -122,7 +122,7 @@ def test_valueEntryById_putTwice(client):
     # login as user
     rv = client.post(
         '/api/login',
-        data={
+        json={
             'username': 'veteran@projectreclass.org',
             'password': 'bossvet123',
         },
@@ -135,7 +135,7 @@ def test_valueEntryById_putTwice(client):
     # insert personal entry
     rv = client.put(
         '/api/value/5004/entry',
-        data={'quote': "Integrity is honesty."},
+        json={'quote': "Integrity is honesty."},
         headers = {'Authorization': 'Bearer {}'.format(access_token)},
     )
     assert rv.status_code == 200
@@ -143,7 +143,7 @@ def test_valueEntryById_putTwice(client):
     # insert new personal entry
     rv = client.put(
         '/api/value/5004/entry',
-        data={'quote': "Integrity is MORE THAN honesty."},
+        json={'quote': "Integrity is MORE THAN honesty."},
         headers = {'Authorization': 'Bearer {}'.format(access_token)},
     )
     assert rv.status_code == 200
