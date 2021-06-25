@@ -6,7 +6,7 @@ def makeToyTopoCfg(
         routers: List[str],
         switches: List[str],
         hosts: List[str],
-        links: List[Tuple[str,str]],
+        links: List[Tuple[str, str]],
         root: str = None
         ) -> ToyTopoCfg:
 

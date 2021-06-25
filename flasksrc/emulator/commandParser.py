@@ -6,7 +6,8 @@ from flasksrc.emulator.util.error import XMLParseError
 def getDeviceList(deviceType: str, xmlTopology: ET):
     tag = deviceType + 'List'
     deviceList: ET.ElementTree = xmlTopology.find(tag)
-    if deviceList is None: raise XMLParseError('No ' + tag + ' specified', xmlTopology)
+    if deviceList is None:
+        raise XMLParseError('No ' + tag + ' specified', xmlTopology)
     return deviceList
 
 

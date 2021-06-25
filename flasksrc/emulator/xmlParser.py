@@ -30,7 +30,7 @@ class InterfaceCfg():
         if ip is not None:
             tc.inputTypeCheck(ip, 'ip', str)
 
-        self.deviceName:Name = deviceName
+        self.deviceName: Name = deviceName
         self.name: str = deviceName + '-eth' + str(interfaceNum)
         self.ip: IP = ip
 
