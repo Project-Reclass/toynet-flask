@@ -92,4 +92,4 @@ def test_session_by_id_put(client):
 
     get_rv = client.get('/api/toynet/session/1')
     get_rv_json = json.loads(get_rv.data.decode('utf-8'))
-    assert get_rv_json['topology'][159:192] == '<router name="r2" ip="0.0.0.0/0">'
+    assert get_rv_json['topology'][159:192] == '<router name="r2" ip="0.0.0.0/0">' or get_rv_json['topology'][159:192] == '<router ip="0.0.0.0/0" name="r2">'
