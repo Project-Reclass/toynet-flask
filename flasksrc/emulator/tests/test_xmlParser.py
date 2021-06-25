@@ -2,7 +2,7 @@ import unittest
 
 from flasksrc.emulator.xmlParser import HostConfig
 import flasksrc.emulator.xmlParser as parser
-import flasksrc.emulator.tests.util as testutil
+
 
 class TestXMLParserMethods(unittest.TestCase):
     sample_linuxrouter = './flasksrc/emulator/tests/sample_inputs/linuxrouter.xml'
@@ -21,9 +21,12 @@ class TestXMLParserMethods(unittest.TestCase):
         self.assertEqual(len(setOfSwitchNames), len(config.switches))
         self.assertEqual(len(setOfHostNames), len(config.hosts))
 
-        for rNames in config.routers.keys(): self.assertTrue(rNames in setOfRouterNames)
-        for sNames in config.switches.keys(): self.assertTrue(sNames in setOfSwitchNames)
-        for hNames in config.hosts.keys(): self.assertTrue(hNames in setOfHostNames)
+        for rNames in config.routers.keys():
+            self.assertTrue(rNames in setOfRouterNames)
+        for sNames in config.switches.keys():
+            self.assertTrue(sNames in setOfSwitchNames)
+        for hNames in config.hosts.keys():
+            self.assertTrue(hNames in setOfHostNames)
 
         router0 = config.routers['r0']
         self.assertEqual(router0.name, 'r0')
@@ -53,7 +56,8 @@ class TestXMLParserMethods(unittest.TestCase):
         self.assertEqual(len(config.links), 6)
 
         mapOfLinks = dict()
-        for (i1, i2) in config.links: mapOfLinks[(i1.deviceName, i2.deviceName)] = (i1, i2)
+        for (i1, i2) in config.links:
+            mapOfLinks[(i1.deviceName, i2.deviceName)] = (i1, i2)
 
         self.assertTrue(('r0', 's1') in mapOfLinks)
         link = mapOfLinks[('r0', 's1')]

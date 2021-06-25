@@ -7,6 +7,7 @@ from flasksrc.db import get_db
 from xml.etree import ElementTree as ET
 from flasksrc.emulator.commandParser import parseModificationCommand
 
+
 # Schema definitions
 class ToyNetSessionPostReq(Schema):
     toynet_topo_id = fields.Int(required=True)
@@ -27,7 +28,7 @@ class ToyNetSessionByIdPutReq(Schema):
     command = fields.Str(required=True)
 
 
-class ToyNetSession(MethodResource):    
+class ToyNetSession(MethodResource):
     @marshal_with(ToyNetSessionPostResp)
     def post(self):
         try:
@@ -125,10 +126,10 @@ class ToyNetSessionById(MethodResource):
         db = get_db()
 
         sessionInfo = self.getTopologyFromDb(db, toynet_session_id)
-        xmlTopology:ET = ET.fromstring(sessionInfo['topology'])
-    
-        newXmlTopology = parseModificationCommand(req['command'], xmlTopology)
-        new_topo = topology=ET.tostring(xmlTopology, encoding='utf-8').decode('utf-8')
+        xmlTopology = ET.fromstring(sessionInfo['topology'])
+        parseModificationCommand(req['command'], xmlTopology)
+
+        new_topo = ET.tostring(xmlTopology, encoding='utf-8').decode('utf-8')
 
         try:
             db.execute(

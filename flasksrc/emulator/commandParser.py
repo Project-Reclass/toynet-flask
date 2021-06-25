@@ -1,15 +1,15 @@
-from typing import List, Tuple
-
+from typing import List
 from xml.etree import ElementTree as ET
 from flasksrc.emulator.util.error import XMLParseError
 
-def getDeviceList(deviceType:str, xmlTopology:ET):
+
+def getDeviceList(deviceType: str, xmlTopology: ET):
     tag = deviceType + 'List'
-    deviceList:ET.ElementTree = xmlTopology.find(tag)
+    deviceList: ET.ElementTree = xmlTopology.find(tag)
     if deviceList is None: raise XMLParseError('No ' + tag + ' specified', xmlTopology)
     return deviceList
 
-def addToDeviceListByName(names:List[str], deviceType:str, xmlTopology:ET):
+def addToDeviceListByName(names: List[str], deviceType: str, xmlTopology: ET):
     deviceList = getDeviceList(deviceType, xmlTopology)
 
     if deviceType == 'link':
@@ -18,12 +18,12 @@ def addToDeviceListByName(names:List[str], deviceType:str, xmlTopology:ET):
         dvc1 = ET.Element('dvc')
         dvc1.attrib['name'] = names[0]
         dvc1Intf = ET.Element('intf')
-        dvc1Intf.text = '0' # TODO: must be real for mininet
+        dvc1Intf.text = '0'  # TODO: must be real for mininet
 
         dvc2 = ET.Element('dvc')
         dvc2.attrib['name'] = names[1]
         dvc2Intf = ET.Element('intf')
-        dvc2Intf.text = '0' # TODO: must be real for mininet
+        dvc2Intf.text = '0'  # TODO: must be real for mininet
 
         dvc1.append(dvc1Intf)
         dvc2.append(dvc2Intf)
@@ -34,11 +34,11 @@ def addToDeviceListByName(names:List[str], deviceType:str, xmlTopology:ET):
     elif deviceType == 'router':
         router = ET.Element('router')
         router.attrib['name'] = names[0]
-        router.attrib['ip'] = '0.0.0.0/0' # TODO: must be real for mininet
+        router.attrib['ip'] = '0.0.0.0/0'  # TODO: must be real for mininet
         routerIntf = ET.Element('intf')
-        routerIntf.text = '0' # TODO: must be real for mininet
+        routerIntf.text = '0'  # TODO: must be real for mininet
 
-        router.append(routerIntf) # TODO: may be a list
+        router.append(routerIntf)  # TODO: may be a list
         deviceList.append(router)
 
     elif deviceType == 'switch':
@@ -50,13 +50,13 @@ def addToDeviceListByName(names:List[str], deviceType:str, xmlTopology:ET):
     elif deviceType == 'host':
         host = ET.Element('host')
         host.attrib['name'] = names[0]
-        host.attrib['ip'] = '0.0.0.0/0' # TODO: must be real for mininet
+        host.attrib['ip'] = '0.0.0.0/0'  # TODO: must be real for mininet
 
         defaultRouter = ET.Element('defaultRouter')
         defaultRouterName = ET.Element('name')
         defaultRouterIntf = ET.Element('intf')
-        defaultRouterName.text = 'r0' # TODO: must be real for mininet
-        defaultRouterIntf.text = '0' # TODO: must be real for mininet
+        defaultRouterName.text = 'r0'  # TODO: must be real for mininet
+        defaultRouterIntf.text = '0'  # TODO: must be real for mininet
 
         defaultRouter.append(defaultRouterName)
         defaultRouter.append(defaultRouterIntf)
@@ -69,14 +69,15 @@ def addToDeviceListByName(names:List[str], deviceType:str, xmlTopology:ET):
 
     return xmlTopology
 
-def removeFromDeviceListByName(names:List[str], deviceType:str, xmlTopology:ET):
+def removeFromDeviceListByName(names: List[str], deviceType: str, xmlTopology: ET):
     deviceList = getDeviceList(deviceType, xmlTopology)
 
     if deviceType == 'link':
         for link in deviceList.findall('link'):
             dvcs = [dvc.attrib['name'] for dvc in link.findall('dvc')]
-            print(dvcs)
-            if (names[0] == dvcs[0] and names[1] == dvcs[1]) or (names[0] == dvcs[1] and names[1] == dvcs[0]):
+            [n0, n1, d0, d1] = [names[0], names[1], dvcs[0], dvcs[1]]
+
+            if (n0 == d0 and n1 == d1) or (n0 == d1 and n1 == d0):
                 deviceList.remove(link)
                 return xmlTopology
     else:
@@ -85,12 +86,14 @@ def removeFromDeviceListByName(names:List[str], deviceType:str, xmlTopology:ET):
                 deviceList.remove(device)
                 return xmlTopology
 
-def parseModificationCommand(command:str, xmlTopology:ET.ElementTree) -> ET.ElementTree:
+def parseModificationCommand(command: str, xmlTopology: ET.ElementTree):
     tokens = command.split(' ')
 
     action = tokens[0]
     deviceType = tokens[1]
     names = tokens[2:]
 
-    if action == 'add': return addToDeviceListByName(names, deviceType, xmlTopology)
-    if action == 'remove': return removeFromDeviceListByName(names, deviceType, xmlTopology)
+    if action == 'add':
+        return addToDeviceListByName(names, deviceType, xmlTopology)
+    if action == 'remove':
+        return removeFromDeviceListByName(names, deviceType, xmlTopology)
