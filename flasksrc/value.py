@@ -83,7 +83,7 @@ class ToyNetValueEntryById(MethodResource):
     @jwt_required()
     def put(self, value_id):
         try:
-            req = ToyNetValueEntryPutReq().load(request.form)
+            req = ToyNetValueEntryPutReq().load(request.json)
         except ValidationError as e:
             abort(400, message=f'malformed create user request: {e.messages}')
 

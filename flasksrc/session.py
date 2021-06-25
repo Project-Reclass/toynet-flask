@@ -31,7 +31,7 @@ class ToyNetSession(MethodResource):
     @marshal_with(ToyNetSessionPostResp)
     def post(self):
         try:
-            req = ToyNetSessionPostReq().load(request.form)
+            req = ToyNetSessionPostReq().load(request.json)
         except ValidationError as e:
             abort(400, message=f'malformed request: {e.messages}')
 
@@ -118,7 +118,7 @@ class ToyNetSessionById(MethodResource):
     @marshal_with(ToyNetSessionByIdPutReq)
     def put(self, toynet_session_id):
         try:
-            req = ToyNetSessionByIdPutReq().load(request.form)
+            req = ToyNetSessionByIdPutReq().load(request.json)
         except ValidationError as e:
             abort(400, message=f'malformed request: {e.messages}')
 
