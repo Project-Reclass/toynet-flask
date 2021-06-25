@@ -1,6 +1,6 @@
 import unittest
 
-from flasksrc.emulator.xmlParser import HostConfig
+from flasksrc.emulator.xmlParser import HostCfg
 import flasksrc.emulator.xmlParser as parser
 
 
@@ -101,8 +101,8 @@ class TestXMLParserMethods(unittest.TestCase):
         self.assertEqual(link[0].name, 's3-eth1')
         self.assertEqual(link[1].deviceName, 'h3')
 
-    def test_XMLParser__HostConfig(self):
-        hostCfg = HostConfig('hostName', '192.168.1.100/24', '192.168.1.1/24')
+    def test_XMLParser__HostCfg(self):
+        hostCfg = HostCfg('hostName', '192.168.1.100/24', '192.168.1.1/24')
 
         self.assertEqual(hostCfg.name, 'hostName')
         self.assertEqual(hostCfg.ip, '192.168.1.100/24')
