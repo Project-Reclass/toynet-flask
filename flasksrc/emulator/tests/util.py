@@ -1,5 +1,5 @@
 from typing import List, Tuple
-from flasksrc.emulator.xmlParser import ToyTopoConfig, RouterCfg, SwitchCfg, HostCfg, InterfaceCfg
+from flasksrc.emulator.xmlParser import ToyTopoCfg, RouterCfg, SwitchCfg, HostCfg, InterfaceCfg
 
 
 def makeToyTopoCfg(
