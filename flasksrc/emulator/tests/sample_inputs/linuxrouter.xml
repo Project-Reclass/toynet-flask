@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<topology>
+    <root>r0</root>
+    <routerList>
+        <router name="r0" ip="192.168.1.1/24">
+            <intf>192.168.1.1/24</intf>
+            <intf>172.16.0.1/12</intf>
+            <intf>10.0.0.1/8</intf>
+        </router>
+    </routerList>
+    <switchList>
+        <switch name="s1" />
+        <switch name="s2" />
+        <switch name="s3" />
+    </switchList>
+    <hostList>
+        <host name="h1" ip="192.168.1.100/24">
+            <defaultRouter><name>r0</name><intf>0</intf></defaultRouter>
+        </host>
+        <host name="h2" ip="172.16.0.100/12">
+            <defaultRouter><name>r0</name><intf>1</intf></defaultRouter>
+        </host>
+        <host name="h3" ip="10.0.0.100/8">
+            <defaultRouter><name>r0</name><intf>2</intf></defaultRouter>
+        </host>
+    </hostList>
+    <linkList>
+        <link><dvc name="r0"><intf>0</intf></dvc><dvc name="s1"><intf>0</intf></dvc></link>
+        <link><dvc name="r0"><intf>1</intf></dvc><dvc name="s2"><intf>0</intf></dvc></link>
+        <link><dvc name="r0"><intf>2</intf></dvc><dvc name="s3"><intf>0</intf></dvc></link>
+        <link><dvc name="s1"><intf>1</intf></dvc><dvc name="h1" /></link>
+        <link><dvc name="s2"><intf>1</intf></dvc><dvc name="h2" /></link>
+        <link><dvc name="s3"><intf>1</intf></dvc><dvc name="h3" /></link>
+    </linkList>
+</topology>

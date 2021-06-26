@@ -4,6 +4,9 @@ from flask_apispec import marshal_with, MethodResource
 from flask import request
 from flasksrc.db import get_db
 
+from xml.etree import ElementTree as ET
+from flasksrc.emulator.commandParser import parseModificationCommand
+
 
 # Schema definitions
 class ToyNetSessionPostReq(Schema):
@@ -22,7 +25,7 @@ class ToyNetSessionByIdGetResp(Schema):
 
 
 class ToyNetSessionByIdPutReq(Schema):
-    new_topology = fields.Str(required=True)
+    command = fields.Str(required=True)
 
 
 class ToyNetSession(MethodResource):
@@ -84,10 +87,7 @@ class ToyNetSession(MethodResource):
 
 
 class ToyNetSessionById(MethodResource):
-    @marshal_with(ToyNetSessionByIdGetResp)
-    def get(self, toynet_session_id):
-        db = get_db()
-
+    def getTopologyFromDb(self, db, toynet_session_id):
         try:
             rows = db.execute(
                 'SELECT topo_id, topology, user_id'
@@ -102,10 +102,18 @@ class ToyNetSessionById(MethodResource):
         if not len(rows):
             abort(400, message='session_id {} does not exist'.format(toynet_session_id))
 
+        return rows[0]
+
+    @marshal_with(ToyNetSessionByIdGetResp)
+    def get(self, toynet_session_id):
+        db = get_db()
+
+        sessionInfo = self.getTopologyFromDb(db, toynet_session_id)
+
         return {
-            'topo_id': rows[0]['topo_id'],
-            'topology': rows[0]['topology'],
-            'user_id': rows[0]['user_id'],
+            'topo_id': sessionInfo['topo_id'],
+            'topology': sessionInfo['topology'],
+            'user_id': sessionInfo['user_id'],
         }, 200
 
     @marshal_with(ToyNetSessionByIdPutReq)
@@ -117,7 +125,11 @@ class ToyNetSessionById(MethodResource):
 
         db = get_db()
 
-        new_topo = req['new_topology']
+        sessionInfo = self.getTopologyFromDb(db, toynet_session_id)
+        xmlTopology = ET.fromstring(sessionInfo['topology'])
+        parseModificationCommand(req['command'], xmlTopology)
+
+        new_topo = ET.tostring(xmlTopology, encoding='utf-8').decode('utf-8')
 
         try:
             db.execute(

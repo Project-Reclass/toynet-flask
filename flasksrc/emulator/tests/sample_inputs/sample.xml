@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<topology>
+    <root>r0</root>
+    <routerList>
+        <router name="r0" ip="172.16.0.254/16">
+            <intf>10.0.0.1/30</intf>
+            <intf>10.0.0.5/30</intf>
+        </router>
+       <router name="r1" ip="172.16.128.254/18">
+            <intf>10.0.0.2/30</intf>
+            <intf>172.16.160.1/20</intf>
+            <intf>172.16.176.1/20</intf>
+            <intf>10.0.0.10/30</intf>
+        </router>
+        <router name="r2" ip="172.16.192.254/18">
+            <intf>10.0.0.6/30</intf>
+            <intf>172.16.224.1/20</intf>
+            <intf>172.16.240.1/20</intf>
+            <intf>10.0.0.9/30</intf>
+        </router>
+    </routerList>
+    <switchList>
+        <switch name="s1" />
+        <switch name="s2" />
+        <switch name="s3" />
+        <switch name="s4" />
+        <switch name="s5" />
+        <switch name="s6" />
+    </switchList>
+    <hostList>
+        <host name="h1" ip="172.16.160.101/20">
+            <defaultRouter><name>r1</name><intf>1</intf></defaultRouter>
+        </host>
+        <host name="h2" ip="172.16.176.101/20">
+            <defaultRouter><name>r1</name><intf>2</intf></defaultRouter>
+        </host>
+        <host name="h3" ip="172.16.224.101/20">
+            <defaultRouter><name>r2</name><intf>1</intf></defaultRouter>
+        </host>
+        <host name="h4" ip="172.16.224.102/20">
+            <defaultRouter><name>r2</name><intf>1</intf></defaultRouter>
+        </host>
+        <host name="h5" ip="172.16.240.101/20">
+            <defaultRouter><name>r2</name><intf>2</intf></defaultRouter>
+        </host>
+        <host name="h6" ip="172.16.240.102/20">
+            <defaultRouter><name>r2</name><intf>2</intf></defaultRouter>
+        </host>
+        <host name="h7" ip="172.16.240.103/20">
+            <defaultRouter><name>r2</name><intf>2</intf></defaultRouter>
+        </host>
+        <host name="h8" ip="172.16.240.104/20">
+            <defaultRouter><name>r2</name><intf>2</intf></defaultRouter>
+        </host>
+    </hostList>
+    <linkList>
+        <link><dvc name="r0"><intf>0</intf></dvc><dvc name="r1"><intf>0</intf></dvc></link>
+        <link><dvc name="r0"><intf>1</intf></dvc><dvc name="r2"><intf>0</intf></dvc></link>
+        <link><dvc name="r1"><intf>3</intf></dvc><dvc name="r2"><intf>3</intf></dvc></link>
+        <link><dvc name="r1"><intf>1</intf></dvc><dvc name="s1"><intf>0</intf></dvc></link>
+        <link><dvc name="r1"><intf>2</intf></dvc><dvc name="s2"><intf>0</intf></dvc></link>
+        <link><dvc name="r2"><intf>1</intf></dvc><dvc name="s3"><intf>0</intf></dvc></link>
+        <link><dvc name="r2"><intf>2</intf></dvc><dvc name="s4"><intf>0</intf></dvc></link>
+        <link><dvc name="s1"><intf>1</intf></dvc><dvc name="h1" /></link>
+        <link><dvc name="s2"><intf>1</intf></dvc><dvc name="h2" /></link>
+        <link><dvc name="s3"><intf>1</intf></dvc><dvc name="h3" /></link>
+        <link><dvc name="s3"><intf>2</intf></dvc><dvc name="h4" /></link>
+        <link><dvc name="s4"><intf>1</intf></dvc><dvc name="s5"><intf>0</intf></dvc></link>
+        <link><dvc name="s4"><intf>2</intf></dvc><dvc name="s6"><intf>0</intf></dvc></link>
+        <link><dvc name="s5"><intf>1</intf></dvc><dvc name="h5" /></link>
+        <link><dvc name="s5"><intf>2</intf></dvc><dvc name="h6" /></link>
+        <link><dvc name="s6"><intf>1</intf></dvc><dvc name="h7" /></link>
+        <link><dvc name="s6"><intf>2</intf></dvc><dvc name="h8" /></link>
+    </linkList>
+</topology>

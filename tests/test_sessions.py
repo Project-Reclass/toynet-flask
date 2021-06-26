@@ -81,15 +81,15 @@ def test_session_by_id_get(client):
     }
     '''
     assert rv_json['topo_id'] == 1
-    assert rv_json['topology'][:67] == r'<?xml version=\"1.0\" encoding=\"UTF-8\"?><topology><root>r0</root>'
+    assert rv_json['topology'][:63] == r'<?xml version="1.0" encoding="UTF-8"?><topology><root>r1</root>'
     assert rv_json['user_id'] == '0'
 
 def test_session_by_id_put(client):
     rv = client.put(
         '/api/toynet/session/1',
-        json={'new_topology': 'aq49i',},
+        json={'command': 'add router r2',},
     )
 
     get_rv = client.get('/api/toynet/session/1')
     get_rv_json = json.loads(get_rv.data.decode('utf-8'))
-    assert get_rv_json['topology'] == 'aq49i'
+    assert get_rv_json['topology'][159:192] == '<router name="r2" ip="0.0.0.0/0">' or get_rv_json['topology'][159:192] == '<router ip="0.0.0.0/0" name="r2">'
