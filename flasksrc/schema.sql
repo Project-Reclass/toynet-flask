@@ -1,3 +1,5 @@
+BEGIN TRANSACTION;
+
 DROP TABLE IF EXISTS user_groups;
 DROP TABLE IF EXISTS users;
 
@@ -133,3 +135,5 @@ CREATE TABLE toynet_sessions (
   FOREIGN KEY (topo_id) REFERENCES toynet_topos(topo_id)
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
+
+END TRANSACTION;
