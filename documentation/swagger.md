@@ -28,14 +28,14 @@ A good example file is `flasksrc/sessions.py`.
 
 ## Viewing API Specification
 After running your Flask deployment, you will be able to vie the raw JSON
-specification at `localhost:5000/swagger/`
+specification at `localhost:5000/swagger`
 If you want to have a more graphical depiction of the specification, you can
-browse to `localhost:5000/swagger-ui/`
+browse to `localhost:5000/swagger-ui`
 
 One approach is to curl the endpoint and pipe the JSON output into `jq` for
 syntax-highlighted output:
 ```bash
-curl http://localhost:5000/swagger/ | jq
+curl http://localhost:5000/swagger | jq
 ```
 <p align="center"> <kbd> <img src="images/curl_swagger.png" width="300" /> </kbd> </p>
 

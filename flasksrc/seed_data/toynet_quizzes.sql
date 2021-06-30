@@ -1,3 +1,5 @@
+BEGIN TRANSACTION;
+
 INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(0, 4001, "Which type of fiber is best suited for long distance transmission?", 1);
 INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(1, 4001, "What level of the 7 Layer OSI model are Routers in?", 2);
 INSERT INTO toynet_quizzes(question_id, quiz_id, question, answer) VALUES(2, 4001, "What part of IP packet determines destination?", 2);
@@ -154,3 +156,5 @@ INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(1, 4003, 6, "Star");
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(2, 4003, 6, "Ring");
 INSERT INTO toynet_quiz_options(option_id, quiz_id, question_id, option) VALUES(3, 4003, 6, "Mesh");
+
+END TRANSACTION;

@@ -47,9 +47,8 @@ def test_user_post(client):
         '/api/user',
         json={'username': 'alice@projectreclass.org'},
     )
-    assert rv.status_code == 400
-    rv_json = json.loads(rv.data.decode('utf-8'))
-    assert rv_json['message'][:30] == 'malformed create user request:'
+    assert rv.status_code == 422
+    assert rv.data.decode('utf-8')[:30] == r'<!DOCTYPE HTML PUBLIC "-//W3C/'
 
 def test_userLogin_post(client):
     """Check that only users with good username/password can login """

@@ -21,6 +21,12 @@ def create_app(test_config=None):
     else:
         app.config.from_pyfile('test_config.py', silent=True)
 
+    # Change default API specification paths
+    app.config.update({
+        'APISPEC_SWAGGER_URL': '/swagger',
+        'APISPEC_SWAGGER_UI_URL': '/swagger-ui',
+    })
+
     # ensure the instance folder exists
     try:
         os.makedirs(app.instance_path)

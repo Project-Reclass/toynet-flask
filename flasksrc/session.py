@@ -1,7 +1,6 @@
 from marshmallow import Schema, fields, ValidationError
 from flask_restful import abort
-from flask_apispec import marshal_with, MethodResource
-from flask import request
+from flask_apispec import marshal_with, MethodResource, use_kwargs
 from flasksrc.db import get_db
 
 from xml.etree import ElementTree as ET
@@ -10,8 +9,8 @@ from flasksrc.emulator.commandParser import parseModificationCommand
 
 # Schema definitions
 class ToyNetSessionPostReq(Schema):
-    toynet_topo_id = fields.Int(required=True)
-    toynet_user_id = fields.Str(required=True)
+    toynet_topo_id = fields.Int()
+    toynet_user_id = fields.Str()
 
 
 class ToyNetSessionPostResp(Schema):
@@ -29,10 +28,11 @@ class ToyNetSessionByIdPutReq(Schema):
 
 
 class ToyNetSession(MethodResource):
+    @use_kwargs(ToyNetSessionPostReq)
     @marshal_with(ToyNetSessionPostResp)
-    def post(self):
+    def post(self, **kwargs):
         try:
-            req = ToyNetSessionPostReq().load(request.json)
+            req = ToyNetSessionPostReq().load(kwargs)
         except ValidationError as e:
             abort(400, message=f'malformed request: {e.messages}')
 
@@ -79,10 +79,10 @@ class ToyNetSession(MethodResource):
             db.commit()
         except Exception as e:
             print(e.args[0])
-            abort(500, message='Failehttps://input.djr.com/d to create new session')
+            abort(500, message='Failed to create new session')
 
         return {
-            'toynet_session_id': cur.lastrowid
+            'toynet_session_id': cur.lastrowid,
             }, 201
 
 
@@ -116,10 +116,10 @@ class ToyNetSessionById(MethodResource):
             'user_id': sessionInfo['user_id'],
         }, 200
 
-    @marshal_with(ToyNetSessionByIdPutReq)
-    def put(self, toynet_session_id):
+    @use_kwargs(ToyNetSessionByIdPutReq)
+    def put(self, toynet_session_id, **kwargs):
         try:
-            req = ToyNetSessionByIdPutReq().load(request.json)
+            req = ToyNetSessionByIdPutReq().load(kwargs)
         except ValidationError as e:
             abort(400, message=f'malformed request: {e.messages}')
 

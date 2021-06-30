@@ -1,3 +1,5 @@
+BEGIN TRANSACTION;
+
 INSERT INTO toynet_survey_types(type_id, type) VALUES(0, "TEXT");
 INSERT INTO toynet_survey_types(type_id, type) VALUES(1, "CHOICE");
 INSERT INTO toynet_survey_types(type_id, type) VALUES(2, "LONGTEXT");
@@ -77,3 +79,5 @@ INSERT INTO toynet_survey_options(survey_id, question_id, option_id, option) VAL
 INSERT INTO toynet_survey_questions(survey_id, question_id, type_id, question, unit) VALUES(6002, 8, 0, "How difficult as the material to master?", NULL);
 
 INSERT INTO toynet_survey_questions(survey_id, question_id, type_id, question, unit) VALUES(6002, 9, 2, "Please list any questions you still have about the content.", NULL);
+
+END TRANSACTION;
