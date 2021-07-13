@@ -1,3 +1,3 @@
 [submodule "toynet-mininet"]
-	path = toynet-mininet
+	path = toynet_mininet
 	url = https://github.com/Project-Reclass/toynet-mininet

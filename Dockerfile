@@ -10,6 +10,7 @@ COPY . .
 
 ENV FLASK_ENV=production
 ENV FLASK_APP=flasksrc
+ENV TOYNET_IMAGE_TAG=toynet
 
 EXPOSE 5000
 

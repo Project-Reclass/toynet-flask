@@ -62,12 +62,12 @@ def create_app(test_config=None):
     api.add_resource(ToyNetSurveyById, '/api/survey/<string:survey_id>')
     docs.register(ToyNetSurveyById)
 
-    from .session import ToyNetSession
+    from .session import ToyNetSession, ToyNetSessionById, ToyNetSessionByIdTerminate
     api.add_resource(ToyNetSession, '/api/toynet/session')
-    docs.register(ToyNetSession)
-
-    from .session import ToyNetSessionById
     api.add_resource(ToyNetSessionById, '/api/toynet/session/<int:toynet_session_id>')
+    api.add_resource(ToyNetSessionByIdTerminate, '/api/toynet/session/<int:toynet_session_id>/terminate')
+    docs.register(ToyNetSession)
     docs.register(ToyNetSessionById)
+    docs.register(ToyNetSessionByIdTerminate)
 
     return app
