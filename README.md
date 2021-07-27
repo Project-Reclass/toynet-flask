@@ -92,3 +92,10 @@ A: Make sure the file is named `test_***.py`
 # FYIs
 
 **1. We have not rigorously tested different `USER_GROUP_ID`s.**
+
+
+# Contributors
+
+* Tay Nishimura
+* John Chung
+* Arthur Lacey
