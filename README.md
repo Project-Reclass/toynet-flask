@@ -99,3 +99,6 @@ A: Make sure the file is named `test_***.py`
 * Tay Nishimura
 * John Chung
 * Arthur Lacey
+* Blaze Bissar
+* Shaili Smith
+* Yujing Gao
