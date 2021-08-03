@@ -14,6 +14,7 @@ DROP TABLE IF EXISTS toynet_surveys;
 DROP TABLE IF EXISTS toynet_survey_questions;
 DROP TABLE IF EXISTS toynet_survey_options;
 DROP TABLE IF EXISTS toynet_survey_types;
+DROP TABLE IF EXISTS toynet_survey_results;
 
 DROP TABLE IF EXISTS toynet_topos;
 DROP TABLE IF EXISTS toynet_sessions;
@@ -112,6 +113,28 @@ CREATE TABLE toynet_survey_types (
   PRIMARY KEY (type_id)
   FOREIGN KEY (type_id) REFERENCES toynet_survey_questions (type_id)
 );
+
+CREATE TABLE toynet_survey_results (
+  survey_id INTEGER NOT NULL,
+  question_id INTEGER NOT NULL,
+  option_id INTEGER NOT NULL, 
+  user_id INTEGER NOT NULL,
+  submission_id SERIAL,
+  submission TEXT NOT NULL,
+  PRIMARY KEY (user_id, submission_id)
+  FOREIGN KEY (survey_id,question_id,option_id) REFERENCES toynet_survey_options (survey_id,question_id,option_id)
+);   
+
+ALTER SEQUENCE toynet_survey_results_submission_id_seq RESTART WITH 0;
+  
+CREATE TABLE toynet_survey_users (
+  user_id INTEGER NOT NULL,
+  user_name TEXT NOT NULL,
+  survey_id INTEGER NOT NULL, 
+  PRIMARY KEY (user_id)
+  FOREIGN KEY (user_id) REFERENCES toynet_survey_results (user_id)
+);
+
 
 -- emulator submodule
 
