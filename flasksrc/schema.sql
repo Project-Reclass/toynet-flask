@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS toynet_value_entries;
 
 DROP TABLE IF EXISTS toynet_quizzes;
 DROP TABLE IF EXISTS toynet_quiz_options;
+DROP TABLE IF EXISTS toynet_quiz_scores;
 
 DROP TABLE IF EXISTS toynet_surveys;
 DROP TABLE IF EXISTS toynet_survey_questions;
@@ -78,6 +79,17 @@ CREATE TABLE toynet_quiz_options (
   option TEXT NOT NULL,
   PRIMARY KEY (quiz_id, question_id, option_id)
   FOREIGN KEY (quiz_id, question_id) REFERENCES toynet_quizzes (quiz_id, question_id)
+);
+
+CREATE TABLE toynet_quiz_scores (
+  submission_id INTEGER PRIMARY KEY AUTOINCREMENT=0,
+  quiz_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL,
+  count_correct INTEGER NOT NULL,
+  count_wrong INTEGER NOT NULL,
+  submitted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (quiz_id) REFERENCES toynet_quizzes (quiz_id),
+  FOREIGN KEY (user_id) REFERENCES users (username)
 );
 
 -- surveys submodule
