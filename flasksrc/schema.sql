@@ -82,7 +82,7 @@ CREATE TABLE toynet_quiz_options (
 );
 
 CREATE TABLE toynet_quiz_scores (
-  submission_id INTEGER PRIMARY KEY AUTOINCREMENT=0,
+  submission_id INTEGER PRIMARY KEY AUTOINCREMENT,
   quiz_id INTEGER NOT NULL,
   user_id TEXT NOT NULL,
   count_correct INTEGER NOT NULL,

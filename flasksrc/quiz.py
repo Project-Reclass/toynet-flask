@@ -1,8 +1,9 @@
-from marshmallow import Schema, fields
+from marshmallow import Schema, fields, ValidationError
 from flask_restful import abort
 from flasksrc.db import get_db
-from flask_apispec import marshal_with, MethodResource
-
+from flask_apispec import marshal_with, MethodResource, use_kwargs
+from flask_jwt_extended import jwt_required
+from flask import request
 
 # Schema definitions
 class ToyNetQuizItem(Schema):
@@ -13,6 +14,15 @@ class ToyNetQuizItem(Schema):
 
 class ToyNetQuizGetResp(Schema):
     items = fields.List(fields.Nested(ToyNetQuizItem))
+
+class ToyNetQuizScorePostReq(Schema):
+    quiz_id = fields.Int(required=True)
+    user_id = fields.String(required=True)
+    count_correct = fields.Int(required=True)
+    count_wrong = fields.Int(required=True)
+
+class ToyNetQuizScorePostResp(Schema):
+    submission_id = fields.Int()
 
 
 class ToyNetQuizById(MethodResource):
@@ -58,3 +68,39 @@ class ToyNetQuizById(MethodResource):
                 )
 
         return {'items': result}, 200
+
+class ToyNetQuizScore(MethodResource):
+    @jwt_required()
+    @use_kwargs(ToyNetQuizScorePostReq)
+    @marshal_with(ToyNetQuizScorePostResp)
+    def post(self, **kwargs):
+        try:
+            req = ToyNetQuizScorePostReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message=f'malformed create submission request: {e.messages}')
+        
+        quiz_id = req['quiz_id']
+        user_id = req['user_id']
+        count_correct = req['count_correct']
+        count_wrong = req['count_wrong']
+
+        db = get_db()
+        try:
+            db.execute(
+                'INSERT INTO toynet_quiz_scores(quiz_id,user_id,count_correct,count_wrong)'
+                ' VALUES((?), (?), (?), (?))',
+                (quiz_id,user_id,count_correct,count_wrong)
+            )
+            db.commit()
+            rows = db.execute(
+                'SELECT scores.id'
+                ' FROM toynet_quiz_scores AS scores'
+                ' WHERE scores.quiz_id = (?) AND scores.user_id = (?)'
+                ' ORDER BY scores.submitted DESC',
+                (quiz_id, user_id)
+            ).fetchall()
+        except Exception as e:
+            print(e.args[0])
+            abort(400, message="Insertion failed")
+
+        return {'submission_id': rows[0]}, 201
