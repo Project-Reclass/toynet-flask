@@ -24,6 +24,17 @@ class ToyNetQuizScorePostReq(Schema):
 class ToyNetQuizScorePostResp(Schema):
     submission_id = fields.Int()
 
+class ToyNetQuizScoreItem(Schema):
+    count_correct = fields.Int()
+    datetime = fields.DateTime()
+
+class ToyNetQuizScoresItem(Schema):
+    quiz_id = fields.Int()
+    count_total = fields.Int()
+    scores = fields.List(fields.Nested(ToyNetQuizScoreItem))
+
+class ToyNetQuizScoresGetResp(Schema):
+    scores = fields.List(fields.Nested(ToyNetQuizScoresItem))
 
 class ToyNetQuizById(MethodResource):
     @marshal_with(ToyNetQuizGetResp)
@@ -93,7 +104,7 @@ class ToyNetQuizScore(MethodResource):
             )
             db.commit()
             rows = db.execute(
-                'SELECT scores.id'
+                'SELECT scores.submission_id, scores.submitted'
                 ' FROM toynet_quiz_scores AS scores'
                 ' WHERE scores.quiz_id = (?) AND scores.user_id = (?)'
                 ' ORDER BY scores.submitted DESC',
@@ -103,4 +114,42 @@ class ToyNetQuizScore(MethodResource):
             print(e.args[0])
             abort(400, message="Insertion failed")
 
-        return {'submission_id': rows[0]}, 201
+        return {'submission_id': rows[0]['submission_id']}, 201
+
+class ToyNetQuizScoresByUser(MethodResource):
+    @jwt_required()
+    @marshal_with(ToyNetQuizScoresGetResp)
+    def get(self, user_id):
+        db = get_db()
+        try:
+            rows = db.execute(
+                'SELECT * FROM toynet_quiz_scores as scores'
+                ' WHERE scores.user_id = (?)'
+                ' GROUP BY scores.quiz_id'
+                ' ORDER BY scores.submitted',
+                user_id
+            ).fetchall()
+        except Exception as e:
+            print(e.args[0])
+            abort(500, message="query for quiz scores failed: {}".format(user_id))
+
+        if not len(rows):
+            abort(404, "no quiz scores for user {}".format(user_id))
+
+        scores = list()
+        count = 0
+        current_quiz_id = rows[0]['quiz_id']
+        for row in rows:
+            if current_quiz_id == row['quiz_id']:
+                scores[count]['scores'].append({'count_correct': row['count_correct'],
+                'datetime': row['submitted']})
+            else:
+                current_quiz_id = row['quiz_id'] 
+                count += 1
+                scores[count]['quiz_id'] = current_quiz_id
+                scores[count]['count_total'] = row['count_correct'] + row['count_wrong']
+                scores[count]['scores'] = {'count_correct': row['count_correct'],
+                    'datetime': row['submitted']}
+        
+        return {'scores': scores}, 200
+    

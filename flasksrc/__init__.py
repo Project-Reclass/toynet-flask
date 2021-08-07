@@ -54,11 +54,13 @@ def create_app(test_config=None):
     docs.register(ToyNetValueById)
     docs.register(ToyNetValueEntryById)
 
-    from .quiz import ToyNetQuizById, ToyNetQuizScore
+    from .quiz import ToyNetQuizById, ToyNetQuizScore, ToyNetQuizScoresByUser
     api.add_resource(ToyNetQuizById, '/api/quiz/<int:quiz_id>')
     api.add_resource(ToyNetQuizScore, '/api/quizscore')
+    api.add_resource(ToyNetQuizScoresByUser, '/api/quizscores/<string:user_id>')
     docs.register(ToyNetQuizById)
     docs.register(ToyNetQuizScore)
+    docs.register(ToyNetQuizScoresByUser)
 
     from .survey import ToyNetSurveyById
     api.add_resource(ToyNetSurveyById, '/api/survey/<string:survey_id>')
