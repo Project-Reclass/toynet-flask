@@ -115,7 +115,7 @@ CREATE TABLE toynet_survey_types (
 );
 
 CREATE TABLE toynet_survey_results (
-  submission_id INTEGER PRIMARY KEY AUTOINCREMENT,
+  submission_id INTEGER AUTOINCREMENT,
   survey_id INTEGER NOT NULL,
   question_id INTEGER NOT NULL,
   option_id INTEGER NOT NULL, 
