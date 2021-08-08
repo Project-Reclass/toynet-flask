@@ -115,6 +115,7 @@ CREATE TABLE toynet_survey_types (
 );
 
 CREATE TABLE toynet_survey_results (
+  submission_id INTEGER PRIMARY KEY AUTOINCREMENT,
   survey_id INTEGER NOT NULL,
   question_id INTEGER NOT NULL,
   option_id INTEGER NOT NULL, 
@@ -125,17 +126,7 @@ CREATE TABLE toynet_survey_results (
   FOREIGN KEY (survey_id,question_id,option_id) REFERENCES toynet_survey_options (survey_id,question_id,option_id)
 );   
 
-ALTER SEQUENCE toynet_survey_results_submission_id_seq RESTART WITH 0;
-  
-CREATE TABLE toynet_survey_users (
-  user_id INTEGER NOT NULL,
-  user_name TEXT NOT NULL,
-  survey_id INTEGER NOT NULL, 
-  PRIMARY KEY (user_id)
-  FOREIGN KEY (user_id) REFERENCES toynet_survey_results (user_id)
-);
-
-
+ 
 -- emulator submodule
 
 CREATE TABLE toynet_topos (
