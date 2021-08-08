@@ -119,9 +119,10 @@ CREATE TABLE toynet_survey_results (
   survey_id INTEGER NOT NULL,
   question_id INTEGER NOT NULL,
   option_id INTEGER NOT NULL, 
-  user_id INTEGER NOT NULL,
+  user_id TEXT NOT NULL,
   submission TEXT NOT NULL,
   FOREIGN KEY (survey_id,question_id,option_id) REFERENCES toynet_survey_options (survey_id,question_id,option_id)
+  FOREIGN KEY (user_id) REFERENCES users (username)
 );   
 
  
