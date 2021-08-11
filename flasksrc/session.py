@@ -155,15 +155,20 @@ class ToyNetSession(MethodResource):
                 running = False
             else:
                 ip = container.attrs['NetworkSettings']['IPAddress']
-                args = {'topology': topo_rows[0]}
+                args = {'topology': topo_rows[0]['topology']}
                 res_code = 404
                 while res_code != 200:
                     try:
                         res_code = requests.get('http://'+ip+':'+MINI_FLASK_PORT+'/').status_code 
                     except:
                         time.sleep(10)
-                res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', data = args)
-                #assuming that the topology posted is valid (because it's pulled from the DB, which should only store valid topos)
+                res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', json = args)
+                if res.status_code != 200:
+                    running=False
+                    print(res.status_code)
+                    for item in res.__dict__.keys():
+                        print(item, res.__dict__[item])
+                    
         else:
             running = False
 
@@ -223,7 +228,7 @@ class ToyNetSessionById(MethodResource):
                             res_code = requests.get('http://'+ip+':'+MINI_FLASK_PORT+'/').status_code 
                         except:
                             time.sleep(10)
-                    res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', data = args)
+                    res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', json = args)
                     #assuming that the topology posted is valid (because it's pulled from the DB, which should only store valid topos)
             else:
                 running = False
@@ -272,7 +277,7 @@ class ToyNetSessionById(MethodResource):
                     res_code = requests.get('http://'+ip+':'+MINI_FLASK_PORT+'/').status_code 
                 except:
                     time.sleep(10)
-            res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', data = args)
+            res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', json = args)
         else:
             abort(500, message='Container for session does not exist, cannot update topology')
 
@@ -293,7 +298,7 @@ class ToyNetSessionById(MethodResource):
             abort(400, message='toynet_command not specified')
         ip = container.attrs['NetworkSettings']['IPAddress']
         args = {'command': req['toynet_command']}
-        res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/command', data = args)
+        res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/command', json = args)
         if res.status_code != 200:
             print(res.status_code)
             print(res)
@@ -311,7 +316,7 @@ class ToyNetSessionByIdTerminate(MethodResource):
         
         ip = container.attrs['NetworkSettings']['IPAddress']
         args = {'terminate': True}
-        res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/terminate', data = args)
+        res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/terminate', json = args)
         
         #In the future we may want to handle failed MiniFlask terminate requests differently.
         #For now we are not preserving state, so we terminate the container within State's ToynetManager
