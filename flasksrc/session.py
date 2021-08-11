@@ -11,7 +11,8 @@ import time
 import os
 import sys
 
-MINI_FLASK_PORT=os.environ['MINI_FLASK_PORT']
+MINI_FLASK_PORT = os.environ['MINI_FLASK_PORT']
+
 
 # Schema definitions
 class ToyNetSessionPostReq(Schema):
@@ -52,10 +53,10 @@ class State():
     manager = ToynetManager()
     dev_status = os.environ['FLASK_ENV'] == 'development'
     if not manager.import_image(dev_status, os.environ['TOYNET_IMAGE_TAG']):
-        print('Failed to import image: {}'.format(os.environ['TOYNET_IMAGE_TAG']), file=sys.stderr)
+        print(f'Failed to import image: {os.environ["TOYNET_IMAGE_TAG"]}', file=sys.stderr)
         sys.exit(1)
     containers = dict()
-            
+
     @staticmethod
     def getDevStatus():
         return State.dev_status
@@ -82,6 +83,47 @@ class State():
             del State.containers[session]
 
 
+# Post data to a miniflask resource for the provided container
+def miniflaskPost(container, resource, args=None):
+    ip = container.attrs['NetworkSettings']['IPAddress']
+    res = requests.post(f'http://{ip}:{MINI_FLASK_PORT}{resource}', json=args)
+    return res
+
+
+# Get data from a miniflask resource for the provided container
+def miniflaskGet(container, resource, args=None):
+    ip = container.attrs['NetworkSettings']['IPAddress']
+    res = requests.get(f'http://{ip}:{MINI_FLASK_PORT}{resource}', json=args)
+    return res
+
+
+# Wait for a miniflask container to finish initializing and serve up endpoints
+def waitForMiniflask(container, toynet_session_id):
+    counter = 500
+    container.reload()
+
+    # Wait for the container to start
+    while not container.attrs['State']['Running'] and counter > 0:
+        time.sleep(10)
+        counter -= 1  # "Counter" intuitive?
+        container.reload()
+
+    # Container did not spin up
+    if counter == 0:
+        State.delContainer(toynet_session_id)
+        return False
+    else:
+        # Wait for miniflask to serve endpoints, will not timeout
+        res_code = 404
+        while res_code != 200:
+            try:
+                res_code = miniflaskGet(container, '/').status_code
+            except requests.exceptions.ConnectionError:
+                time.sleep(10)
+
+    return True
+
+
 class ToyNetSession(MethodResource):
     @use_kwargs(ToyNetSessionPostReq)
     @marshal_with(ToyNetSessionPostResp)
@@ -103,8 +145,7 @@ class ToyNetSession(MethodResource):
                 ' WHERE topo_id = (?)',
                 (str(toynet_topo_id),)
             ).fetchall()
-        except Exception as e:
-            print(e.args[0])
+        except Exception:
             abort(500, message='topo_id query failed: {}'.format(toynet_topo_id))
 
         if not len(topo_rows):
@@ -117,8 +158,7 @@ class ToyNetSession(MethodResource):
                 ' WHERE username = (?)',
                 (str(toynet_user_id),)
             ).fetchall()
-        except Exception as e:
-            print(e.args[0])
+        except Exception:
             abort(500, message='user_id query failed: {}'.format(toynet_user_id))
 
         if not len(user_rows):
@@ -133,42 +173,33 @@ class ToyNetSession(MethodResource):
             )
             db.commit()
             session_id = cur.lastrowid
-        except Exception as e:
+        except Exception:
             abort(500, message='Failed to create new session')
-        
+
         manager = State.getManager()
         running = True
 
+        # Create corresponding miniflask container
         if manager.check_cpu_availability and manager.check_memory_availability:
             name = manager.run_mininet_container(dev=State.getDevStatus())
             State.setContainer(session_id, name)
+
             container = State.getContainer(session_id)
-            counter = 500
-            #wait for container to 'come up' so that we can post the topology to it
-            container.reload()
-            while not container.attrs['State']['Running'] and counter > 0:
-                time.sleep(10)
-                counter-=1 #counter intuitive?
-                container.reload()
-            if counter == 0:
-                State.delContainer(toynet_session_id)
-                running = False
-            else:
-                ip = container.attrs['NetworkSettings']['IPAddress']
+            running = waitForMiniflask(container, session_id)
+
+            if running:
                 args = {'topology': topo_rows[0]['topology']}
-                res_code = 404
-                while res_code != 200:
-                    try:
-                        res_code = requests.get('http://'+ip+':'+MINI_FLASK_PORT+'/').status_code 
-                    except:
-                        time.sleep(10)
-                res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', json = args)
+                res = miniflaskPost(container, '/api/topo', args=args)
+
                 if res.status_code != 200:
-                    running=False
                     print(res.status_code)
-                    for item in res.__dict__.keys():
-                        print(item, res.__dict__[item])
-                    
+                    print(args)
+                    for k, v in res.__dict__.items():
+                        print(f'{k}: {v}')
+
+                    running = False
+
+        # Insufficient resources
         else:
             running = False
 
@@ -204,34 +235,23 @@ class ToyNetSessionById(MethodResource):
         container = State.getContainer(toynet_session_id)
         manager = State.getManager()
         running = True
+
+        # Spin up a miniflask container if one does not exist
         if container is None:
+            running = False
             if manager.check_cpu_availability and manager.check_memory_availability:
                 name = manager.run_mininet_container(dev=State.getDevStatus())
                 State.setContainer(toynet_session_id, name)
                 container = State.getContainer(toynet_session_id)
-                counter = 500
-                #wait for container to 'come up' so that we can post the topology to it
-                container.reload()
-                while not container.attrs['State']['Running'] and counter > 0:
-                    time.sleep(10)
-                    counter-=1 #counter intuitive?
-                    container.reload()
-                if counter == 0:
-                    State.delContainer(toynet_session_id)
-                    running = False
-                else:
-                    ip = container.attrs['NetworkSettings']['IPAddress']
+
+                running = waitForMiniflask(container, toynet_session_id)
+
+                if running:
                     args = {'topology': sessionInfo['topology']}
-                    res_code = 404
-                    while res_code != 200:
-                        try:
-                            res_code = requests.get('http://'+ip+':'+MINI_FLASK_PORT+'/').status_code 
-                        except:
-                            time.sleep(10)
-                    res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', json = args)
-                    #assuming that the topology posted is valid (because it's pulled from the DB, which should only store valid topos)
-            else:
-                running = False
+                    res = miniflaskPost(container, '/api/topo', args=args)
+
+                    if res.status_code == 200:
+                        running = True
 
         return {
             'topo_id': sessionInfo['topo_id'],
@@ -254,7 +274,7 @@ class ToyNetSessionById(MethodResource):
         parseModificationCommand(req['command'], xmlTopology)
 
         new_topo = ET.tostring(xmlTopology, encoding='utf-8').decode('utf-8')
-        
+
         try:
             db.execute(
                 'UPDATE toynet_sessions'
@@ -269,15 +289,15 @@ class ToyNetSessionById(MethodResource):
 
         container = State.getContainer(toynet_session_id)
         if container is not None:
-            ip = container.attrs['NetworkSettings']['IPAddress']
-            args = {'topology': sessionInfo['topology']}
-            res_code = 404
-            while res_code != 200:
-                try:
-                    res_code = requests.get('http://'+ip+':'+MINI_FLASK_PORT+'/').status_code 
-                except:
-                    time.sleep(10)
-            res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/topo', json = args)
+            running = waitForMiniflask(container, toynet_session_id)
+
+            if running:
+                args = {'topology': sessionInfo['topology']}
+                res = miniflaskPost(container, '/api/topo', args=args)
+
+                # Propagate the error if there is one
+                if res.status_code != 200:
+                    abort(res.status_code, message=res.json()['message'])
         else:
             abort(500, message='Container for session does not exist, cannot update topology')
 
@@ -291,18 +311,21 @@ class ToyNetSessionById(MethodResource):
             req = ToyNetSessionByIdPostReq().load(kwargs)
         except ValidationError as e:
             abort(400, message='Invalid request: {}'.format(e))
+
         container = State.getContainer(toynet_session_id)
         if container is None:
             abort(500, message='Invalid Session ID. No corresponding toynet container.')
+
+        # Separate validation from Marshmallow
         if 'toynet_command' not in req:
             abort(400, message='toynet_command not specified')
-        ip = container.attrs['NetworkSettings']['IPAddress']
+
         args = {'command': req['toynet_command']}
-        res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/command', json = args)
+        res = miniflaskPost(container, '/api/command', args=args)
+
         if res.status_code != 200:
-            print(res.status_code)
-            print(res)
             abort(res.status_code, message=res.json()['message'])
+
         return {
             'output': res.json()['output']
         }, 200
@@ -310,18 +333,19 @@ class ToyNetSessionById(MethodResource):
 
 class ToyNetSessionByIdTerminate(MethodResource):
     def post(self, toynet_session_id):
-        container = State.getContainer(toynet_session_id) #get container by session
+        container = State.getContainer(toynet_session_id)
         if container is None:
             abort(500, message='Failed to terminate')
-        
-        ip = container.attrs['NetworkSettings']['IPAddress']
+
+        # In the future we may want to handle failed MiniFlask terminate
+        # requests differently. For now we are not preserving state, so we
+        # terminate the container within State's ToynetManager
         args = {'terminate': True}
-        res = requests.post('http://' + ip + ':' + MINI_FLASK_PORT + '/api/terminate', json = args)
-        
-        #In the future we may want to handle failed MiniFlask terminate requests differently.
-        #For now we are not preserving state, so we terminate the container within State's ToynetManager
-        #if res.status_code != 200 or not res.json()['terminated']:
-            #abort(500, message='Failed to terminate')
+#        res = miniflaskPost(container, '/api/terminate', args=args)
+        miniflaskPost(container, '/api/terminate', args=args)
+
+#        if res.status_code != 200 or not res.json()['terminated']:
+#            abort(500, message='Failed to terminate')
 
         State.delContainer(container)
 

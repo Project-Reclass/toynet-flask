@@ -33,6 +33,14 @@ $ deactivate
 
 More information [here](https://docs.python.org/3/library/venv.html)
 
+You will also need to initialize the `toynet_mininet` submodule and its `mininet` submodule:
+```
+$ git submodule update --init --recursive
+```
+
+From there, make sure to build the toynet docker image from `toynet_mininet` and tag it with the same tag you use in the below environment variable for `TOYNET_IMAGE_TAG`.
+See the `toynet_mininet` submodule for instructions on building the image.
+
 # Run the service
 The following tutorial applies to Linux / MacOS devleopment enviornments. Visit Windows documentation [here](documentation/windows.md).
 
@@ -45,6 +53,9 @@ $ export FLASK_ENV=development
 # creates instance/toynet.sqlite
 $ flask init-db 
 Initialized the database.
+
+# Specifies the toynet image tag to use (must be built, see toynet-mininet)
+$ export TOYNET_IMAGE_TAG=miniflask-dev
 
 $ flask run
  * Serving Flask app "flasksrc" (lazy loading)

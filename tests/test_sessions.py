@@ -93,7 +93,7 @@ def test_session_by_id_get(client):
     assert rv_json['user_id'] == '0'
 
     rv = client.post(
-        '/api/toynet/session/1/terminate',
+        f'/api/toynet/session/{session_id}/terminate',
     )
     assert rv.status_code == 200
 
@@ -144,7 +144,6 @@ def test_session_by_id_post(client):
         json={'toynet_command': 'h1 arp',},
     )
     rv_json = json.loads(rv.data.decode('utf-8'))
-    print(rv_json)
     assert rv.status_code == 200
 
     #invalid request
@@ -157,7 +156,6 @@ def test_session_by_id_post(client):
         url+'/10',
         json={'toynet_command': 'h1 ping h2',},
     )
-    print(rv)
     assert rv.status_code == 500
 
     #terminate session
