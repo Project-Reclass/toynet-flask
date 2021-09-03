@@ -31,7 +31,7 @@ class ToyNetSurveyById(MethodResource):
 
         try:
             rows = db.execute(
-                'SELECT sq.question_id, sq.question, sq.unit, so.option, st.type_id'
+                'SELECT sq.question_id, sq.question, sq.unit, so.option, st.type'
                 ' FROM (toynet_surveys AS s'
                 '     LEFT JOIN toynet_survey_questions as sq'
                 '     on s.survey_id = sq.survey_id)'
@@ -57,19 +57,19 @@ class ToyNetSurveyById(MethodResource):
                 current_question_id = row['question_id']
                 if row['option']:
                     entry = {
-                        'type': row['type_id'],
+                        'item_type': row['type'],
                         'question': row['question'],
                         'options': [row['option']]
                     }
                 elif row['unit']:
                     entry = {
-                        'type': row['type_id'],
+                        'item_type': row['type'],
                         'question': row['question'],
                         'unit': row['unit']
                     }
                 else:
                     entry = {
-                        'type': row['type_id'],
+                        'item_type': row['type'],
                         'question': row['question'],
                     }
                 result.append(entry)
