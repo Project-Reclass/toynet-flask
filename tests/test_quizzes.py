@@ -92,6 +92,8 @@ def test_quizScore_post(client):
         headers={'Authorization': 'Bearer {}'.format(access_token)}
     )
     assert rv.status_code == 201
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['submission_id'] == 2
 
 def test_quizScoreByUser_get(client):
     # create user
@@ -145,6 +147,8 @@ def test_quizScoreByUser_get(client):
         headers={'Authorization': 'Bearer {}'.format(access_token)}
     )
     assert rv.status_code == 201
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['submission_id'] == 2
 
     # show user's quiz scores
     rv = client.get('api/quizscores/vet@projectreclass.org')
