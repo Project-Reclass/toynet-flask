@@ -38,3 +38,114 @@ def test_quizById_get(client):
     assert rv.status_code == 404
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['message'] == 'quiz ID 2 doesn\'t exist'
+
+
+def test_quizScore_post(client):
+    # create user
+    rv = client.post(
+        '/api/user',
+        json={
+            'username': 'vet@projectreclass.org',
+            'password': 'yayvets123$',
+            'first_name': 'Jeff'
+        })
+    
+    assert rv.status_code == 200
+
+    # login as user
+    rv = client.post(
+        '/api/login',
+        json={
+            'username': 'vet@projectreclass.org',
+            'password': 'yayvets123$'
+        }
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['verified'] == True
+    access_token = rv_json['token']
+
+    # insert new submission
+    rv = client.post(
+        '/api/quizscore',
+        json={
+            'quiz_id': 4001,
+            'user_id': 'vet@projectreclass.org',
+            'count_correct': 5,
+            'count_wrong': 3
+        },
+        headers={'Authorization': 'Bearer {}'.format(access_token)}
+    )
+    assert rv.status_code == 201
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['submission_id'] == 1
+
+    # insert new submission to verify that submission_id is incrementing
+    rv = client.post(
+        '/api/quizscore',
+        json={
+            'quiz_id': 4001,
+            'user_id': 'vet@projectreclass.org',
+            'count_correct': 1,
+            'count_wrong': 7
+        },
+        headers={'Authorization': 'Bearer {}'.format(access_token)}
+    )
+    assert rv.status_code == 201
+
+def test_quizScoreByUser_get(client):
+    # create user
+    rv = client.post(
+        '/api/user',
+        json={
+            'username': 'vet@projectreclass.org',
+            'password': 'yayvets123$',
+            'first_name': 'Jeff'
+        })
+    
+    assert rv.status_code == 200
+
+    # login as user
+    rv = client.post(
+        '/api/login',
+        json={
+            'username': 'vet@projectreclass.org',
+            'password': 'yayvets123$'
+        }
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['verified'] == True
+    access_token = rv_json['token']
+
+    # insert new submission
+    rv = client.post(
+        '/api/quizscore',
+        json={
+            'quiz_id': 4001,
+            'user_id': 'vet@projectreclass.org',
+            'count_correct': 5,
+            'count_wrong': 3
+        },
+        headers={'Authorization': 'Bearer {}'.format(access_token)}
+    )
+    assert rv.status_code == 201
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['submission_id'] == 1
+
+    # insert new submission to verify that submission_id is incrementing
+    rv = client.post(
+        '/api/quizscore',
+        json={
+            'quiz_id': 4001,
+            'user_id': 'vet@projectreclass.org',
+            'count_correct': 1,
+            'count_wrong': 7
+        },
+        headers={'Authorization': 'Bearer {}'.format(access_token)}
+    )
+    assert rv.status_code == 201
+
+    # show user's quiz scores
+    rv = client.get('api/quizscores/vet@projectreclass.org')
+    assert rv.status_code == 200
