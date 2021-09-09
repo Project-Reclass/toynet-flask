@@ -78,9 +78,12 @@ class State():
 
     @staticmethod
     def delContainer(session):
+        res = False
         if session in State.containers:
-            State.manager.kill_container(State.containers[session])
-            del State.containers[session]
+            res = State.manager.kill_container(State.containers[session])
+            if res:
+                del State.containers[session]
+        return res
 
 
 # Post data to a miniflask resource for the provided container
@@ -347,7 +350,12 @@ class ToyNetSessionByIdTerminate(MethodResource):
 #        if res.status_code != 200 or not res.json()['terminated']:
 #            abort(500, message='Failed to terminate')
 
-        State.delContainer(container)
+        res = State.delContainer(toynet_session_id)
 
-        return {
-        }, 200
+        if res is None:
+            abort(500, message='Container does not exist')
+        elif not res:
+            abort(500, message='Failed to terminate')
+        else:
+            return {
+                }, 200

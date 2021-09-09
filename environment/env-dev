@@ -1,0 +1,4 @@
+export FLASK_APP=flasksrc
+export FLASK_ENV=development
+export TOYNET_IMAGE_TAG=miniflask-dev
+export MINI_FLASK_PORT=5000
