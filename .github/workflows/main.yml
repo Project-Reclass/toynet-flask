@@ -21,13 +21,19 @@ jobs:
           python-version: 3.6
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-          pip install flake8
-          pip install pylint
+          pip3 install --upgrade pip
+          pip3 install -r requirements.txt
+          pip3 install flake8
+          pip3 install pylint
+      - name: Build miniflask
+        run: |
+          git submodule update --init --recursive
+          docker build -f toynet_mininet/dev.Dockerfile -t miniflask-dev .
       - name: Run tests with pytest
         run: |
-          pytest -v
+            source environment/env-dev
+            flask init-db
+            pytest -v --ignore tests/test_sessions.py tests/
       - name: Lint with flake8
         run: |
           flake8 flasksrc --count --select=E9,F63,F7,F82 --show-source --statistics
