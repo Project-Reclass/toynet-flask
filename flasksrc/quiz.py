@@ -16,10 +16,10 @@ class ToyNetQuizGetResp(Schema):
 
 
 class ToyNetQuizScorePostReq(Schema):
-    quiz_id = fields.Int(required=True)
-    user_id = fields.String(required=True)
-    count_correct = fields.Int(required=True)
-    count_wrong = fields.Int(required=True)
+    quiz_id = fields.Int()
+    user_id = fields.String()
+    count_correct = fields.Int()
+    count_wrong = fields.Int()
 
 
 class ToyNetQuizScorePostResp(Schema):
@@ -120,7 +120,7 @@ class ToyNetQuizScore(MethodResource):
             print(e.args[0])
             abort(400, message="Insertion failed")
 
-        return {'submission_id': rows[0]['submission_id']}, 201
+        return {'submission_id': rows[-1]['submission_id']}, 201
 
 
 class ToyNetQuizScoresByUser(MethodResource):
@@ -133,27 +133,49 @@ class ToyNetQuizScoresByUser(MethodResource):
                 'SELECT * FROM toynet_quiz_scores as scores'
                 ' WHERE scores.user_id = (?)'
                 ' GROUP BY scores.quiz_id'
-                ' ORDER BY scores.submitted',
-                user_id
+                ' ORDER BY scores.submission_id DESC',
+                (user_id,)
             ).fetchall()
         except Exception as e:
             print(e.args[0])
             abort(500, message="query for quiz scores failed: {}".format(user_id))
 
         if not len(rows):
-            abort(404, "no quiz scores for user {}".format(user_id))
-
-        scores = list()
+            return {'scores': []}
+        else:
+            scores = [
+                {
+                    'quiz_id': rows[0]['quiz_id'],
+                    'count_total': rows[0]['count_correct']+rows[0]['count_wrong'],
+                    'scores': [
+                        {
+                            'count_correct': rows[0]['count_correct'],
+                            'datetime': rows[0]['submitted']
+                        }
+                    ]
+                }
+            ]
+        
+        curr_quiz = rows[0]['quiz_id']
         count = 0
-        current_quiz_id = rows[0]['quiz_id']
+
         for row in rows:
-            if current_quiz_id == row['quiz_id']:
+            if row['quiz_id'] == curr_quiz:
                 scores[count]['scores'].append({'count_correct': row['count_correct'], 'datetime': row['submitted']})
             else:
-                current_quiz_id = row['quiz_id'] 
-                count += 1
-                scores[count]['quiz_id'] = current_quiz_id
-                scores[count]['count_total'] = row['count_correct'] + row['count_wrong']
-                scores[count]['scores'] = {'count_correct': row['count_correct'], 'datetime': row['submitted']}
+                curr_quiz = row['quiz_id']
+                count += 1 
+                scores.append(
+                    {
+                        'quiz_id': row['quiz_id'],
+                        'count_total': row['count_correct']+row['count_wrong'],
+                        'scores': [
+                            {
+                                'count_correct': row['count_correct'],
+                                'datetime': row['submitted']
+                            }
+                        ]
+                    }
+                )
 
         return {'scores': scores}, 200
