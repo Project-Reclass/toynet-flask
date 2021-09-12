@@ -155,13 +155,16 @@ class ToyNetQuizScoresByUser(MethodResource):
                     ]
                 }
             ]
-        
+
         curr_quiz = rows[0]['quiz_id']
         count = 0
 
         for row in rows:
             if row['quiz_id'] == curr_quiz:
-                scores[count]['scores'].append({'count_correct': row['count_correct'], 'datetime': row['submitted']})
+                scores[count]['scores'].append(
+                    {
+                        'count_correct': row['count_correct'], 'datetime': row['submitted']
+                    })
             else:
                 curr_quiz = row['quiz_id']
                 count += 1 
