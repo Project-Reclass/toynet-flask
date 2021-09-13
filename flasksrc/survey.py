@@ -57,19 +57,19 @@ class ToyNetSurveyById(MethodResource):
                 current_question_id = row['question_id']
                 if row['option']:
                     entry = {
-                        'type': row['type'],
+                        'item_type': row['type'],
                         'question': row['question'],
                         'options': [row['option']]
                     }
                 elif row['unit']:
                     entry = {
-                        'type': row['type'],
+                        'item_type': row['type'],
                         'question': row['question'],
                         'unit': row['unit']
                     }
                 else:
                     entry = {
-                        'type': row['type'],
+                        'item_type': row['type'],
                         'question': row['question'],
                     }
                 result.append(entry)
