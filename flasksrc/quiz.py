@@ -107,11 +107,11 @@ class ToyNetQuizScore(MethodResource):
             db.execute(
                 'INSERT INTO toynet_quiz_scores(quiz_id,user_id,count_correct,count_wrong)'
                 ' VALUES((?), (?), (?), (?))',
-                (quiz_id, user_id, count_correct, count_wrong)
+                (quiz_id, user_id, count_correct, count_wrong,)
             )
             db.commit()
             rows = db.execute(
-                'SELECT scores.submission_id, scores.submitted'
+                'SELECT scores.submission_id'
                 ' FROM toynet_quiz_scores AS scores'
                 ' WHERE scores.quiz_id = (?) AND scores.user_id = (?)',
                 (quiz_id, user_id,)
@@ -132,8 +132,7 @@ class ToyNetQuizScoresByUser(MethodResource):
             rows = db.execute(
                 'SELECT * FROM toynet_quiz_scores as scores'
                 ' WHERE scores.user_id = (?)'
-                ' GROUP BY scores.quiz_id'
-                ' ORDER BY scores.submission_id',
+                ' GROUP BY scores.quiz_id',
                 (user_id,)
             ).fetchall()
         except Exception as e:
@@ -141,7 +140,7 @@ class ToyNetQuizScoresByUser(MethodResource):
             abort(500, message="query for quiz scores failed: {}".format(user_id))
 
         if not len(rows):
-            return {'scores': []}
+            return {'scores': []}, 200
         else:
             scores = [
                 {
@@ -151,21 +150,25 @@ class ToyNetQuizScoresByUser(MethodResource):
                         {
                             'count_correct': rows[0]['count_correct'],
                             'datetime': rows[0]['submitted']
-                        }
+                        },
                     ]
-                }
+                },
             ]
 
         curr_quiz = rows[0]['quiz_id']
         count = 0
+        first = 1
 
         for row in rows:
+            if first:
+                first = 0
+                continue
             if row['quiz_id'] == curr_quiz:
                 scores[count]['scores'].append(
                     {
                         'count_correct': row['count_correct'],
-                        'datetime': row['submitted']
-                    })
+                        'datetime': row['submitted'],
+                    },)
             else:
                 curr_quiz = row['quiz_id']
                 count += 1
@@ -176,10 +179,10 @@ class ToyNetQuizScoresByUser(MethodResource):
                         'scores': [
                             {
                                 'count_correct': row['count_correct'],
-                                'datetime': row['submitted']
-                            }
-                        ]
-                    }
+                                'datetime': row['submitted'],
+                            },
+                        ],
+                    },
                 )
 
         return {'scores': scores}, 200
