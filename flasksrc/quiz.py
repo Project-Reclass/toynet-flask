@@ -141,48 +141,39 @@ class ToyNetQuizScoresByUser(MethodResource):
 
         if not len(rows):
             return {'scores': []}, 200
-        else:
-            scores = [
+
+        scores = []
+
+        curr_item = {
+            'quiz_id': rows[0]['quiz_id'],
+            'count_total': rows[0]['count_correct'] + rows[0]['count_wrong'],
+            'scores': [
                 {
-                    'quiz_id': rows[0]['quiz_id'],
-                    'count_total': rows[0]['count_correct']+rows[0]['count_wrong'],
-                    'scores': [
-                        {
-                            'count_correct': rows[0]['count_correct'],
-                            'datetime': rows[0]['submitted']
-                        },
-                    ]
+                    'count_correct': rows[0]['count_correct'],
+                    'datetime': rows[0]['submitted']
                 },
-            ]
+            ],
+        }
 
-        curr_quiz = rows[0]['quiz_id']
-        count = 0
-        first = 1
-
-        for row in rows:
-            if first:
-                first = 0
-                continue
-            if row['quiz_id'] == curr_quiz:
-                scores[count]['scores'].append(
+        for row in rows[1:]:
+            if curr_item['quiz_id'] == row['quiz_id']:
+                curr_item['scores'].append(
                     {
                         'count_correct': row['count_correct'],
                         'datetime': row['submitted'],
-                    },)
-            else:
-                curr_quiz = row['quiz_id']
-                count += 1
-                scores.append(
-                    {
-                        'quiz_id': row['quiz_id'],
-                        'count_total': row['count_correct']+row['count_wrong'],
-                        'scores': [
-                            {
-                                'count_correct': row['count_correct'],
-                                'datetime': row['submitted'],
-                            },
-                        ],
                     },
                 )
-
+            else:
+                scores.append(curr_item)
+                curr_item = {
+                    'quiz_id': row['quiz_id'],
+                    'count_total': row['count_correct'] + row['count_wrong'],
+                    'scores': [
+                        {
+                            'count_correct': row['count_correct'],
+                            'datetime': row['submitted']
+                        },
+                    ],
+                }
+        scores.append(curr_item)
         return {'scores': scores}, 200
