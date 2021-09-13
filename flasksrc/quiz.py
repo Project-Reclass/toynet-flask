@@ -132,7 +132,7 @@ class ToyNetQuizScoresByUser(MethodResource):
             rows = db.execute(
                 'SELECT * FROM toynet_quiz_scores as scores'
                 ' WHERE scores.user_id = (?)'
-                ' GROUP BY scores.quiz_id',
+                ' ORDER BY scores.quiz_id',
                 (user_id,)
             ).fetchall()
         except Exception as e:

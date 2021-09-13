@@ -377,6 +377,19 @@ def test_quizScoreByUser_get(client):
     )
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
+    assert len(rv_json['scores'][0]['scores']) == 2
+    assert len(rv_json['scores'][1]['scores']) == 2
+    assert len(rv_json['scores'][2]['scores']) == 1
+
+    # get tay@projectreclass quizscores
+    rv = client.get(
+        '/api/quizscores/tay@projectreclass.org',
+        headers={'Authorization': 'Bearer {}'.format(access_token)}
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
     print(rv_json)
     assert len(rv_json['scores'][0]['scores']) == 2
+    assert len(rv_json['scores'][1]['scores']) == 2
+    assert len(rv_json['scores'][2]['scores']) == 1
     
