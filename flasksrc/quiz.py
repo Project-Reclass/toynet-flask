@@ -163,6 +163,7 @@ class ToyNetQuizScoresByUser(MethodResource):
                         'datetime': row['submitted'],
                     },
                 )
+                print(curr_item['scores'])
             else:
                 scores.append(curr_item)
                 curr_item = {
