@@ -112,9 +112,8 @@ class ToyNetQuizScore(MethodResource):
             rows = db.execute(
                 'SELECT scores.submission_id, scores.submitted'
                 ' FROM toynet_quiz_scores AS scores'
-                ' WHERE scores.quiz_id = (?) AND scores.user_id = (?)'
-                ' ORDER BY scores.submitted DESC',
-                (quiz_id, user_id)
+                ' WHERE scores.quiz_id = (?) AND scores.user_id = (?)',
+                (quiz_id, user_id,)
             ).fetchall()
         except Exception as e:
             print(e.args[0])
@@ -133,7 +132,7 @@ class ToyNetQuizScoresByUser(MethodResource):
                 'SELECT * FROM toynet_quiz_scores as scores'
                 ' WHERE scores.user_id = (?)'
                 ' GROUP BY scores.quiz_id'
-                ' ORDER BY scores.submission_id DESC',
+                ' ORDER BY scores.submission_id',
                 (user_id,)
             ).fetchall()
         except Exception as e:
@@ -163,7 +162,8 @@ class ToyNetQuizScoresByUser(MethodResource):
             if row['quiz_id'] == curr_quiz:
                 scores[count]['scores'].append(
                     {
-                        'count_correct': row['count_correct'], 'datetime': row['submitted']
+                        'count_correct': row['count_correct'], 
+                        'datetime': row['submitted']
                     })
             else:
                 curr_quiz = row['quiz_id']
