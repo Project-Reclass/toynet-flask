@@ -4,6 +4,7 @@ from flasksrc.db import get_db
 from flask_apispec import marshal_with, MethodResource, use_kwargs
 from flask_jwt_extended import jwt_required
 
+
 # Schema definitions
 class ToyNetQuizItem(Schema):
     question = fields.Str()
@@ -162,12 +163,12 @@ class ToyNetQuizScoresByUser(MethodResource):
             if row['quiz_id'] == curr_quiz:
                 scores[count]['scores'].append(
                     {
-                        'count_correct': row['count_correct'], 
+                        'count_correct': row['count_correct'],
                         'datetime': row['submitted']
                     })
             else:
                 curr_quiz = row['quiz_id']
-                count += 1 
+                count += 1
                 scores.append(
                     {
                         'quiz_id': row['quiz_id'],
