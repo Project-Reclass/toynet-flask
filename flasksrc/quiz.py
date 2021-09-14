@@ -95,7 +95,7 @@ class ToyNetQuizScore(MethodResource):
             req = ToyNetQuizScorePostReq().load(kwargs)
         except ValidationError as e:
             abort(400, message=f'malformed create submission request: {e.messages}')
-        
+
         user_id = get_jwt_identity()
         quiz_id = req['quiz_id']
         count_correct = req['count_correct']
