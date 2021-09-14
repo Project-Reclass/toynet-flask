@@ -14,7 +14,7 @@ help:
 	@echo "\t\texample: make test ARGS=test_command.py"
 
 prod: prod-image
-	docker run --privileged -v /lib/modules:/lib/modules -v -v /var/run/docker.sock:/var/run/docker.sock $(prod-tag)
+	docker run --privileged -v /lib/modules:/lib/modules -v -p 5000:5000 /var/run/docker.sock:/var/run/docker.sock $(prod-tag)
 
 prod-test: prod-image
 	docker run --privileged -v /lib/modules:/lib/modules -v /var/run/docker.sock:/var/run/docker.sock --entrypoint "/bin/sh" $(prod-tag) -c "/app/test-entrypoint.sh tests/$(ARGS)"
