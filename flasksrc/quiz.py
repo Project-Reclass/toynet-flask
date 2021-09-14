@@ -2,7 +2,7 @@ from marshmallow import Schema, fields, ValidationError
 from flask_restful import abort
 from flasksrc.db import get_db
 from flask_apispec import marshal_with, MethodResource, use_kwargs
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 
 # Schema definitions
@@ -18,7 +18,6 @@ class ToyNetQuizGetResp(Schema):
 
 class ToyNetQuizScorePostReq(Schema):
     quiz_id = fields.Int()
-    user_id = fields.String()
     count_correct = fields.Int()
     count_wrong = fields.Int()
 
@@ -96,9 +95,9 @@ class ToyNetQuizScore(MethodResource):
             req = ToyNetQuizScorePostReq().load(kwargs)
         except ValidationError as e:
             abort(400, message=f'malformed create submission request: {e.messages}')
-
+        
+        user_id = get_jwt_identity()
         quiz_id = req['quiz_id']
-        user_id = req['user_id']
         count_correct = req['count_correct']
         count_wrong = req['count_wrong']
 
@@ -113,7 +112,8 @@ class ToyNetQuizScore(MethodResource):
             rows = db.execute(
                 'SELECT scores.submission_id'
                 ' FROM toynet_quiz_scores AS scores'
-                ' WHERE scores.quiz_id = (?) AND scores.user_id = (?)',
+                ' WHERE scores.quiz_id = (?) AND scores.user_id = (?)'
+                ' ORDER BY scores.submitted',
                 (quiz_id, user_id,)
             ).fetchall()
         except Exception as e:
@@ -126,7 +126,8 @@ class ToyNetQuizScore(MethodResource):
 class ToyNetQuizScoresByUser(MethodResource):
     @jwt_required()
     @marshal_with(ToyNetQuizScoresGetResp)
-    def get(self, user_id):
+    def get(self):
+        user_id = get_jwt_identity()
         db = get_db()
         try:
             rows = db.execute(

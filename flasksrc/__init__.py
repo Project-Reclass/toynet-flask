@@ -57,7 +57,7 @@ def create_app(test_config=None):
     from .quiz import ToyNetQuizById, ToyNetQuizScore, ToyNetQuizScoresByUser
     api.add_resource(ToyNetQuizById, '/api/quiz/<int:quiz_id>')
     api.add_resource(ToyNetQuizScore, '/api/quizscore')
-    api.add_resource(ToyNetQuizScoresByUser, '/api/quizscores/<string:user_id>')
+    api.add_resource(ToyNetQuizScoresByUser, '/api/quizscores')
     docs.register(ToyNetQuizById)
     docs.register(ToyNetQuizScore)
     docs.register(ToyNetQuizScoresByUser)
