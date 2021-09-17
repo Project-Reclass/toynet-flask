@@ -17,10 +17,10 @@ prod: prod-image
 	docker run --privileged -v /lib/modules:/lib/modules -v -v /var/run/docker.sock:/var/run/docker.sock $(prod-tag)
 
 prod-test: prod-image
-	docker run --privileged -v /lib/modules:/lib/modules -v /var/run/docker.sock:/var/run/docker.sock --entrypoint "/bin/sh" $(prod-tag) -c "/app/test-entrypoint.sh tests/$(ARGS)"
+	. environment/env-prod; docker run --network=$${COMPOSE_NETWORK} --privileged -v /lib/modules:/lib/modules -v /var/run/docker.sock:/var/run/docker.sock --entrypoint "/bin/bash" $(prod-tag) -c "/app/test-entrypoint.sh tests/$(ARGS)"
 
 test: test-image
-	docker run --privileged -v /lib/modules:/lib/modules -v /var/run/docker.sock:/var/run/docker.sock --entrypoint "/bin/sh" $(dev-tag) -c "/app/test-entrypoint.sh tests/$(ARGS)"
+	. environment/env-dev; docker run --network=$${COMPOSE_NETWORK} --privileged -v /lib/modules:/lib/modules -v /var/run/docker.sock:/var/run/docker.sock --entrypoint "/bin/bash" $(dev-tag) -c "/app/test-entrypoint.sh tests/$(ARGS)"
 
 prod-image:
 	docker build -f Dockerfile -t $(prod-tag) .
