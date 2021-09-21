@@ -227,7 +227,7 @@ class ToyNetSessionById(MethodResource):
                 ' WHERE session_id = (?)',
                 (str(toynet_session_id),)
             ).fetchall()
-        except Exception as e:
+        except Exception:
             abort(500, message='Query for session_id failed: {}'.format(toynet_session_id))
 
         if not len(rows):
@@ -291,7 +291,7 @@ class ToyNetSessionById(MethodResource):
                 (new_topo, str(toynet_session_id),)
             )
             db.commit()
-        except Exception as e:
+        except Exception:
             abort(500, message='Query for toynet_session_id failed: {}'.format(toynet_session_id))
 
         container = State.getContainer(toynet_session_id)

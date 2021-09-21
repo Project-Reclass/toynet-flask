@@ -11,7 +11,6 @@ import psutil
 DEV_IMAGE = 'toynet-dev'
 PROD_IMAGE = 'toynet'
 
-
 class ToynetManager():
     '''
     This class enables management of Toynet containers running within a local
@@ -25,7 +24,6 @@ class ToynetManager():
     Public static methods:
         check_cpu_availability
         check_memory_availability
-        check_network_exists
     Instance variables:
         client: a DockerClient to communicate with the Docker daemon
         dev_image: an Image object of the development Toynet image
@@ -34,7 +32,7 @@ class ToynetManager():
         containers, referenced by their names
     '''
 
-    def __init__(self, net):
+    def __init__(self):
         '''
         Creates the DockerClient needed to communicate with the Docker daemon.
         Development and production Docker images are initially None until built
@@ -45,25 +43,21 @@ class ToynetManager():
         self.dev_image = None
         self.prod_image = None
         self.running_containers = dict()
-        if not self.check_network_exists(self.client, net):
-            raise docker.errors.APIError('Docker network does not exist,'
-                                         f'make sure to create it: {net}')
 
-    def run_mininet_container(self, dev=True, net='bridge'):
+    def run_mininet_container(self, dev=True):
         '''
         Runs the specified Docker image as a container and binds the provided
         file for Toynet to parse its initial topology from.
 
         dev: bool - True if we want to run the developer image, False for
                     production
-        net: String - the Docker network we want this container to attach to
 
         returns: String - the name of the container running, empty string if no
                           image is available
         '''
 
         vol = dict()
-        vol['/lib/modules'] = {'bind': '/lib/modules', 'mode': 'ro'}
+        vol['/lib/modules'] = {'bind': '/lib/modules', 'mode':'ro'}
         image_name = ''
 
         if dev and self.dev_image is not None:
@@ -73,13 +67,8 @@ class ToynetManager():
         else:
             return image_name
 
-        # Ensure the network exists already
-        if not self.check_network_exists(self.client, net):
-            return ''
-
         new_container = self.client.containers.run(image_name, privileged=True,
-                                                   remove=True, detach=True,
-                                                   network=net, volumes=vol)
+                                                   remove=True, detach=True, volumes=vol)
         self.running_containers[new_container.name] = new_container
 
         return new_container.name
@@ -161,28 +150,6 @@ class ToynetManager():
         return res
 
     @staticmethod
-    def check_network_exists(client, network_name):
-        '''
-        Checks if the specified network exists and creates it if not.
-
-        client: DockerClient - the client used to interact with the Docker engine
-        network_name: String - the name of the network to check for
-
-        returns: bool - True if the network exists created, False otherwise
-        '''
-
-        try:
-            networks = client.networks.list()
-        except docker.errors.APIError:
-            return False
-
-        for network in networks:
-            if network.name == network_name:
-                return True
-
-        return False
-
-    @staticmethod
     def check_cpu_availability(short_thresh=80.0, med_thresh=75.0, long_thresh=70.0):
         '''
         Polls the CPU load and determines if the system can safely start
@@ -234,7 +201,6 @@ class ToynetManager():
 
         return memory.percent < threshold and memory.available > min_mem * ONE_GB
 
-
 def main():
     '''
     Hello world example code to use this module to test resources, build the
@@ -273,7 +239,6 @@ def main():
         print('Killed production container successfully')
     else:
         print('Error killing production container')
-
 
 if __name__ == '__main__':
     main()
