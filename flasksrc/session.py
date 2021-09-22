@@ -299,7 +299,7 @@ class ToyNetSessionById(MethodResource):
             running = waitForMiniflask(container, toynet_session_id)
 
             if running:
-                args = {'topology': sessionInfo['topology']}
+                args = {'topology': new_topo}
                 res = miniflaskPost(container, '/api/topo', args=args)
 
                 # Propagate the error if there is one
