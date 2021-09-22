@@ -2,3 +2,4 @@ export FLASK_APP=flasksrc
 export FLASK_ENV=production
 export TOYNET_IMAGE_TAG=miniflask-prod
 export MINI_FLASK_PORT=5000
+export COMPOSE_NETWORK=reclass_network

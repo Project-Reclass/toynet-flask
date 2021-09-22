@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
-source /app/environment/env-dev
+#source /app/environment/env-dev
 flask init-db
-pytest -v tests/
+pytest -v $1

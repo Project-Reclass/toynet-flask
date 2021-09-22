@@ -5,13 +5,16 @@ from flasksrc.db import get_db
 
 from xml.etree import ElementTree as ET
 from flasksrc.emulator.commandParser import parseModificationCommand
-from toynet_mininet.toynet_manager import ToynetManager
+from flasksrc.toynet_manager import ToynetManager
 import requests
 import time
 import os
 import sys
 
 MINI_FLASK_PORT = os.environ['MINI_FLASK_PORT']
+COMPOSE_NETWORK = 'bridge'
+if 'COMPOSE_NETWORK' in os.environ and os.environ['COMPOSE_NETWORK'] != '':
+    COMPOSE_NETWORK = os.environ['COMPOSE_NETWORK']
 
 
 # Schema definitions
@@ -50,7 +53,9 @@ class ToyNetSessionByIdPostResp(Schema):
 #   manager: ToynetManager object
 #   containers: dict[session_id - int]: name of Docker Container object - str
 class State():
-    manager = ToynetManager()
+    # Throws an exception when the network does not exist
+    manager = ToynetManager(COMPOSE_NETWORK)
+
     dev_status = os.environ['FLASK_ENV'] == 'development'
     if not manager.import_image(dev_status, os.environ['TOYNET_IMAGE_TAG']):
         print(f'Failed to import image: {os.environ["TOYNET_IMAGE_TAG"]}', file=sys.stderr)
@@ -89,6 +94,9 @@ class State():
 # Post data to a miniflask resource for the provided container
 def miniflaskPost(container, resource, args=None):
     ip = container.attrs['NetworkSettings']['IPAddress']
+    # Stored under the network object if on a non-default network
+    if COMPOSE_NETWORK != 'bridge':
+        ip = container.attrs['NetworkSettings']['Networks'][COMPOSE_NETWORK]['IPAddress']
     res = requests.post(f'http://{ip}:{MINI_FLASK_PORT}{resource}', json=args)
     return res
 
@@ -96,6 +104,9 @@ def miniflaskPost(container, resource, args=None):
 # Get data from a miniflask resource for the provided container
 def miniflaskGet(container, resource, args=None):
     ip = container.attrs['NetworkSettings']['IPAddress']
+    # Stored under the network object if on a non-default network
+    if COMPOSE_NETWORK != 'bridge':
+        ip = container.attrs['NetworkSettings']['Networks'][COMPOSE_NETWORK]['IPAddress']
     res = requests.get(f'http://{ip}:{MINI_FLASK_PORT}{resource}', json=args)
     return res
 
@@ -184,7 +195,7 @@ class ToyNetSession(MethodResource):
 
         # Create corresponding miniflask container
         if manager.check_cpu_availability and manager.check_memory_availability:
-            name = manager.run_mininet_container(dev=State.getDevStatus())
+            name = manager.run_mininet_container(dev=State.getDevStatus(), net=COMPOSE_NETWORK)
             State.setContainer(session_id, name)
 
             container = State.getContainer(session_id)
@@ -195,11 +206,6 @@ class ToyNetSession(MethodResource):
                 res = miniflaskPost(container, '/api/topo', args=args)
 
                 if res.status_code != 200:
-                    print(res.status_code)
-                    print(args)
-                    for k, v in res.__dict__.items():
-                        print(f'{k}: {v}')
-
                     running = False
 
         # Insufficient resources
@@ -221,8 +227,7 @@ class ToyNetSessionById(MethodResource):
                 ' WHERE session_id = (?)',
                 (str(toynet_session_id),)
             ).fetchall()
-        except Exception as e:
-            print(e.args[0])
+        except Exception:
             abort(500, message='Query for session_id failed: {}'.format(toynet_session_id))
 
         if not len(rows):
@@ -243,7 +248,7 @@ class ToyNetSessionById(MethodResource):
         if container is None:
             running = False
             if manager.check_cpu_availability and manager.check_memory_availability:
-                name = manager.run_mininet_container(dev=State.getDevStatus())
+                name = manager.run_mininet_container(dev=State.getDevStatus(), net=COMPOSE_NETWORK)
                 State.setContainer(toynet_session_id, name)
                 container = State.getContainer(toynet_session_id)
 
@@ -286,8 +291,7 @@ class ToyNetSessionById(MethodResource):
                 (new_topo, str(toynet_session_id),)
             )
             db.commit()
-        except Exception as e:
-            print(e.args[0])
+        except Exception:
             abort(500, message='Query for toynet_session_id failed: {}'.format(toynet_session_id))
 
         container = State.getContainer(toynet_session_id)
