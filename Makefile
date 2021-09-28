@@ -18,6 +18,7 @@ prod: prod-image
 
 prod-test: prod-image
 	. environment/env-prod; docker run \
+		-t \
 		--network=$${COMPOSE_NETWORK} \
 		--privileged \
 		-v /lib/modules:/lib/modules \
@@ -26,6 +27,7 @@ prod-test: prod-image
 
 test: test-image
 	. environment/env-dev; docker run \
+		-t \
 		--network=$${COMPOSE_NETWORK} \
 		--privileged \
 		-v /lib/modules:/lib/modules \

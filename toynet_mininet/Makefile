@@ -15,25 +15,51 @@ help:
 	@echo "\tinteractive-container --interacts with the test container"
 
 prod: prod-image
-	docker run --privileged -v /lib/modules:/lib/modules miniflask-prod
+	docker run \
+		--privileged \
+		-v /lib/modules:/lib/modules miniflask-prod
 
 prod-test: prod-image
-	docker run --privileged -v /lib/modules:/lib/modules --entrypoint "/bin/sh" miniflask-prod -c "/root/toynet-mininet/test-entrypoint.sh tests/$(ARGS)"
+	docker run \
+		-t \
+		--privileged \
+		-v /lib/modules:/lib/modules \
+		--entrypoint "/bin/sh" miniflask-prod -c "/root/toynet-mininet/test-entrypoint.sh tests/$(ARGS)"
 
 prod-interactive: prod-image
-	docker run --privileged -it -v /lib/modules:/lib/modules --entrypoint "/bin/sh" miniflask-prod -c /root/toynet-mininet/interactive-entrypoint.sh
+	docker run \
+		--privileged \
+		-it \
+		-v /lib/modules:/lib/modules \
+		--entrypoint "/bin/sh" miniflask-prod -c /root/toynet-mininet/interactive-entrypoint.sh
 
 prod-interactive-container: prod-image
-	docker run --privileged -it -v /lib/modules:/lib/modules --entrypoint "/bin/bash" miniflask-prod
+	docker run \
+		--privileged \
+		-it \
+		-v /lib/modules:/lib/modules \
+		--entrypoint "/bin/bash" miniflask-prod
 
 test: test-image
-	docker run --privileged -v /lib/modules:/lib/modules --entrypoint "/bin/sh" miniflask-dev -c "/root/toynet-mininet/test-entrypoint.sh tests/$(ARGS)"
+	docker run \
+		-t \
+		--privileged \
+		-v /lib/modules:/lib/modules \
+		--entrypoint "/bin/sh" miniflask-dev -c "/root/toynet-mininet/test-entrypoint.sh tests/$(ARGS)"
 
 interactive: test-image
-	docker run --privileged -it -v /lib/modules:/lib/modules --entrypoint "/bin/sh" miniflask-dev -c /root/toynet-mininet/interactive-entrypoint.sh
+	docker run \
+		--privileged \
+		-it \
+		-v /lib/modules:/lib/modules \
+		--entrypoint "/bin/sh" miniflask-dev -c /root/toynet-mininet/interactive-entrypoint.sh
 
 interactive-container: test-image
-	docker run --privileged -it -v /lib/modules:/lib/modules --entrypoint "/bin/bash" miniflask-dev
+	docker run \
+		--privileged \
+		-it \
+		-v /lib/modules:/lib/modules \
+		--entrypoint "/bin/bash" miniflask-dev
 
 prod-image:
 	docker build -f Dockerfile -t miniflask-prod .
