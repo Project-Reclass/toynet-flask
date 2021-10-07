@@ -59,6 +59,16 @@ class ToyNetSessionByIdCreateHostPutResp(Schema):
     pass
 
 
+class ToyNetSessionByIdCreateRouterPutReq(Schema):
+    name = fields.Str()
+    ip = fields.Str()
+    intfs = fields.List(fields.Str())
+
+
+class ToyNetSessionByIdCreateRouterPutResp(Schema):
+    pass
+
+
 class ToyNetSessionByIdCreateSwitchPutReq(Schema):
     name = fields.Str()
 
@@ -491,6 +501,50 @@ class ToyNetSessionByIdCreateSwitch(MethodResource):
 
         # Update the topology
         root.find('switchList').append(switch)
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+        return {
+            }, 200
+
+
+class ToyNetSessionByIdCreateRouter(MethodResource):
+    @use_kwargs(ToyNetSessionByIdCreateRouterPutReq)
+    @marshal_with(ToyNetSessionByIdCreateRouterPutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdCreateRouterPutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        # Separate validation from Marshmallow
+        if 'ip' not in req:
+            abort(400, message='Missing ip from req')
+        elif 'name' not in req:
+            abort(400, message='Missing name from req')
+        elif 'intfs' not in req:
+            abort(400, message='Missing interface list from req')
+
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        # Create XML elements for topology
+        router = ET.Element('router')
+        router.attrib['name'] = req['name']
+        router.attrib['ip'] = req['ip']
+
+        # Create all provided interfaces, separate from the ip given
+        for ip in req['intfs']:
+            interface = ET.Element('intf')
+            interface.text = ip
+            router.append(interface)
+
+        # Update the topology
+        root.find('routerList').append(router)
         new_topology = ET.tostring(root).decode('utf-8')
 
         # Send to mininet and update DB, these functions abort the REST call on

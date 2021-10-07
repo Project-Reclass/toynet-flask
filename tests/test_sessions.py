@@ -179,6 +179,36 @@ def test_session_by_id_put(client):
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['topology'][224:237] == '</switchList>'
 
+    # Confirm router adds
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/router',
+        json={
+            'name': 'r20',
+            'ip': '172.16.1.10/24',
+            'intfs': ['172.16.1.1/24', '192.168.2.2/24']
+            },
+    )
+    
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][159:260] == '<router name="r20" ip="172.16.1.10/24"><intf>172.16.1.1/24</intf><intf>192.168.2.2/24</intf></router>'
+
+    # Confirm router deletes
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router',
+        json={
+            'name': 'r20',
+            },
+    )
+    
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][159:172] == '</routerList>'
+
     # Confirm host does not delete if still connected
     rv = client.put(
         f'/api/toynet/session/{session_id}/delete/host',
