@@ -131,8 +131,8 @@ def test_session_by_id_put(client):
             },
     )
     
-    rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
     rv = client.get(f'/api/toynet/session/{session_id}')
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['topology'][451:555] == '<host name="h20" ip="172.16.1.10/24"><defaultRouter><name>r1</name><intf>2</intf></defaultRouter></host>'
@@ -145,11 +145,51 @@ def test_session_by_id_put(client):
             },
     )
     
-    rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
     rv = client.get(f'/api/toynet/session/{session_id}')
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['topology'][237:462] == '<hostList><host name="h1" ip="172.16.0.2/24"><defaultRouter><name>r1</name><intf>1</intf></defaultRouter></host><host name="h2" ip="172.16.1.2/24"><defaultRouter><name>r1</name><intf>2</intf></defaultRouter></host></hostList>'
+
+    # Confirm switch adds
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/switch',
+        json={
+            'name': 's20',
+            },
+    )
+    
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][224:245] == '<switch name="s20" />'
+
+    # Confirm switch deletes
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/switch',
+        json={
+            'name': 's20',
+            },
+    )
+    
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][224:237] == '</switchList>'
+
+    # Confirm host does not delete if still connected
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/host',
+        json={
+            'name': 'h1',
+            },
+    )
+
+    assert rv.status_code == 400
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['message'] == 'Device h1 is connected to another device'
 
     # Teardown
     rv = client.post(

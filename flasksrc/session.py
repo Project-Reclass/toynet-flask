@@ -49,21 +49,29 @@ class ToyNetSessionByIdPostResp(Schema):
     output = fields.Str()
 
 
-class ToyNetSessionByIdCreateHostPostReq(Schema):
+class ToyNetSessionByIdCreateHostPutReq(Schema):
     name = fields.Str()
     ip = fields.Str()
     def_gateway = fields.Str()
 
 
-class ToyNetSessionByIdCreateHostPostResp(Schema):
+class ToyNetSessionByIdCreateHostPutResp(Schema):
     pass
 
 
-class ToyNetSessionByIdDeleteDevicePostReq(Schema):
+class ToyNetSessionByIdCreateSwitchPutReq(Schema):
     name = fields.Str()
 
 
-class ToyNetSessionByIdDeleteDevicePostResp(Schema):
+class ToyNetSessionByIdCreateSwitchPutResp(Schema):
+    pass
+
+
+class ToyNetSessionByIdDeleteDevicePutReq(Schema):
+    name = fields.Str()
+
+
+class ToyNetSessionByIdDeleteDevicePutResp(Schema):
     pass
 
 
@@ -403,11 +411,11 @@ class ToyNetSessionByIdTerminate(MethodResource):
 
 
 class ToyNetSessionByIdCreateHost(MethodResource):
-    @use_kwargs(ToyNetSessionByIdCreateHostPostReq)
-    @marshal_with(ToyNetSessionByIdCreateHostPostResp)
+    @use_kwargs(ToyNetSessionByIdCreateHostPutReq)
+    @marshal_with(ToyNetSessionByIdCreateHostPutResp)
     def put(self, toynet_session_id, **kwargs):
         try:
-            req = ToyNetSessionByIdCreateHostPostReq().load(kwargs)
+            req = ToyNetSessionByIdCreateHostPutReq().load(kwargs)
         except ValidationError as e:
             abort(400, message='Invalid request: {}'.format(e))
 
@@ -461,9 +469,47 @@ class ToyNetSessionByIdCreateHost(MethodResource):
             }, 200
 
 
+class ToyNetSessionByIdCreateSwitch(MethodResource):
+    @use_kwargs(ToyNetSessionByIdCreateSwitchPutReq)
+    @marshal_with(ToyNetSessionByIdCreateSwitchPutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdCreateSwitchPutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        # Separate validation from Marshmallow
+        if 'name' not in req:
+            abort(400, message='Missing name from req')
+
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        # Create XML elements for topology
+        switch = ET.Element('switch')
+        switch.attrib['name'] = req['name']
+
+        # Update the topology
+        root.find('switchList').append(switch)
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+        return {
+            }, 200
+
+
 class ToyNetSessionByIdDeleteDevice(MethodResource):
     def deleteDevice(self, toynet_session_id, device_type, name, orig_topology):
         root = ET.fromstring(orig_topology)
+
+        # Verify that there is no link to the device
+        for link in root.find('linkList').iter('dvc'):
+            if name == link.attrib['name']:
+                abort(400, message=f'Device {name} is connected to another device')
 
         # Update the topology
         for device in root.find(f'{device_type}List'):
@@ -478,11 +524,11 @@ class ToyNetSessionByIdDeleteDevice(MethodResource):
         sendTopoToMininet(toynet_session_id, new_topology)
         updateTopoInDb(toynet_session_id, new_topology)
 
-    @use_kwargs(ToyNetSessionByIdDeleteDevicePostReq)
-    @marshal_with(ToyNetSessionByIdDeleteDevicePostResp)
+    @use_kwargs(ToyNetSessionByIdDeleteDevicePutReq)
+    @marshal_with(ToyNetSessionByIdDeleteDevicePutResp)
     def put(self, toynet_session_id, device_type, **kwargs):
         try:
-            req = ToyNetSessionByIdDeleteDevicePostReq().load(kwargs)
+            req = ToyNetSessionByIdDeleteDevicePutReq().load(kwargs)
         except ValidationError as e:
             abort(400, message='Invalid request: {}'.format(e))
 

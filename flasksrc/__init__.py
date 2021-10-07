@@ -68,19 +68,22 @@ def create_app(test_config=None):
 
     from .session import ToyNetSession, ToyNetSessionById, \
         ToyNetSessionByIdTerminate, ToyNetSessionByIdCreateHost, \
-        ToyNetSessionByIdDeleteDevice
+        ToyNetSessionByIdCreateSwitch, ToyNetSessionByIdDeleteDevice
     api.add_resource(ToyNetSession, '/api/toynet/session')
     api.add_resource(ToyNetSessionById, '/api/toynet/session/<int:toynet_session_id>')
     api.add_resource(ToyNetSessionByIdTerminate,
                      '/api/toynet/session/<int:toynet_session_id>/terminate')
     api.add_resource(ToyNetSessionByIdCreateHost,
                      '/api/toynet/session/<int:toynet_session_id>/create/host')
+    api.add_resource(ToyNetSessionByIdCreateSwitch,
+                     '/api/toynet/session/<int:toynet_session_id>/create/switch')
     api.add_resource(ToyNetSessionByIdDeleteDevice,
                      '/api/toynet/session/<int:toynet_session_id>/delete/<string:device_type>')
     docs.register(ToyNetSession)
     docs.register(ToyNetSessionById)
     docs.register(ToyNetSessionByIdTerminate)
     docs.register(ToyNetSessionByIdCreateHost)
+    docs.register(ToyNetSessionByIdCreateSwitch)
     docs.register(ToyNetSessionByIdDeleteDevice)
 
     return app
