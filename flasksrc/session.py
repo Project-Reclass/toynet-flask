@@ -3,15 +3,19 @@ from flask_restful import abort
 from flask_apispec import marshal_with, MethodResource, use_kwargs
 from flasksrc.db import get_db
 
-from xml.etree import ElementTree as ET
 from flasksrc.emulator.commandParser import parseModificationCommand
-from toynet_mininet.toynet_manager import ToynetManager
+from flasksrc.toynet_manager import ToynetManager
+
 import requests
 import time
 import os
 import sys
+from xml.etree import ElementTree as ET
 
 MINI_FLASK_PORT = os.environ['MINI_FLASK_PORT']
+COMPOSE_NETWORK = 'bridge'
+if 'COMPOSE_NETWORK' in os.environ and os.environ['COMPOSE_NETWORK'] != '':
+    COMPOSE_NETWORK = os.environ['COMPOSE_NETWORK']
 
 
 # Schema definitions
@@ -33,7 +37,8 @@ class ToyNetSessionByIdGetResp(Schema):
 
 
 class ToyNetSessionByIdPutReq(Schema):
-    command = fields.Str(required=True)
+    command = fields.Str()
+    ip = fields.Str()
 
 
 class ToyNetSessionByIdPostReq(Schema):
@@ -44,13 +49,51 @@ class ToyNetSessionByIdPostResp(Schema):
     output = fields.Str()
 
 
+class ToyNetSessionByIdCreateHostPutReq(Schema):
+    name = fields.Str()
+    ip = fields.Str()
+    def_gateway = fields.Str()
+
+
+class ToyNetSessionByIdCreateHostPutResp(Schema):
+    pass
+
+
+class ToyNetSessionByIdCreateRouterPutReq(Schema):
+    name = fields.Str()
+    ip = fields.Str()
+    intfs = fields.List(fields.Str())
+
+
+class ToyNetSessionByIdCreateRouterPutResp(Schema):
+    pass
+
+
+class ToyNetSessionByIdCreateSwitchPutReq(Schema):
+    name = fields.Str()
+
+
+class ToyNetSessionByIdCreateSwitchPutResp(Schema):
+    pass
+
+
+class ToyNetSessionByIdDeleteDevicePutReq(Schema):
+    name = fields.Str()
+
+
+class ToyNetSessionByIdDeleteDevicePutResp(Schema):
+    pass
+
+
 # Hack to maintain docker container tracking state across requests, should not
 # be an issue at this scale, contains a ToynetManager instance
 # This class contains:
 #   manager: ToynetManager object
 #   containers: dict[session_id - int]: name of Docker Container object - str
 class State():
-    manager = ToynetManager()
+    # Throws an exception when the network does not exist
+    manager = ToynetManager(COMPOSE_NETWORK)
+
     dev_status = os.environ['FLASK_ENV'] == 'development'
     if not manager.import_image(dev_status, os.environ['TOYNET_IMAGE_TAG']):
         print(f'Failed to import image: {os.environ["TOYNET_IMAGE_TAG"]}', file=sys.stderr)
@@ -89,6 +132,9 @@ class State():
 # Post data to a miniflask resource for the provided container
 def miniflaskPost(container, resource, args=None):
     ip = container.attrs['NetworkSettings']['IPAddress']
+    # Stored under the network object if on a non-default network
+    if COMPOSE_NETWORK != 'bridge':
+        ip = container.attrs['NetworkSettings']['Networks'][COMPOSE_NETWORK]['IPAddress']
     res = requests.post(f'http://{ip}:{MINI_FLASK_PORT}{resource}', json=args)
     return res
 
@@ -96,6 +142,9 @@ def miniflaskPost(container, resource, args=None):
 # Get data from a miniflask resource for the provided container
 def miniflaskGet(container, resource, args=None):
     ip = container.attrs['NetworkSettings']['IPAddress']
+    # Stored under the network object if on a non-default network
+    if COMPOSE_NETWORK != 'bridge':
+        ip = container.attrs['NetworkSettings']['Networks'][COMPOSE_NETWORK]['IPAddress']
     res = requests.get(f'http://{ip}:{MINI_FLASK_PORT}{resource}', json=args)
     return res
 
@@ -125,6 +174,61 @@ def waitForMiniflask(container, toynet_session_id):
                 time.sleep(10)
 
     return True
+
+
+# Update the topology in Mininet, aborts REST call on failure
+def sendTopoToMininet(toynet_session_id, new_topology):
+    container = State.getContainer(toynet_session_id)
+    if container is not None:
+        running = waitForMiniflask(container, toynet_session_id)
+
+        if running:
+            args = {'topology': new_topology}
+            res = miniflaskPost(container, '/api/topo', args=args)
+
+            # Propagate the error if there is one
+            if res.status_code != 200:
+                abort(res.status_code, message=res.json()['message'])
+    else:
+        abort(500, message='Container for session does not exist, cannot update topology')
+
+
+# Gets the specified session's topology from the specified DB, aborts REST call
+# on failure
+def getTopologyFromDb(toynet_session_id):
+    db = get_db()
+
+    try:
+        rows = db.execute(
+            'SELECT topo_id, topology, user_id'
+            ' FROM toynet_sessions'
+            ' WHERE session_id = (?)',
+            (str(toynet_session_id),)
+        ).fetchall()
+    except Exception:
+        abort(500, message='Query for session_id failed: {}'.format(toynet_session_id))
+
+    if not len(rows):
+        abort(400, message='session_id {} does not exist'.format(toynet_session_id))
+
+    return rows[0]
+
+
+# Updates the specified session with the specified topology in the DB, aborts
+# REST call on failure
+def updateTopoInDb(toynet_session_id, new_topo):
+    db = get_db()
+
+    try:
+        db.execute(
+            'UPDATE toynet_sessions'
+            ' SET topology = (?)'
+            ' WHERE session_id = (?)',
+            (new_topo, str(toynet_session_id),)
+        )
+        db.commit()
+    except Exception:
+        abort(500, message='Query for toynet_session_id failed: {}'.format(toynet_session_id))
 
 
 class ToyNetSession(MethodResource):
@@ -184,7 +288,7 @@ class ToyNetSession(MethodResource):
 
         # Create corresponding miniflask container
         if manager.check_cpu_availability and manager.check_memory_availability:
-            name = manager.run_mininet_container(dev=State.getDevStatus())
+            name = manager.run_mininet_container(dev=State.getDevStatus(), net=COMPOSE_NETWORK)
             State.setContainer(session_id, name)
 
             container = State.getContainer(session_id)
@@ -195,11 +299,6 @@ class ToyNetSession(MethodResource):
                 res = miniflaskPost(container, '/api/topo', args=args)
 
                 if res.status_code != 200:
-                    print(res.status_code)
-                    print(args)
-                    for k, v in res.__dict__.items():
-                        print(f'{k}: {v}')
-
                     running = False
 
         # Insufficient resources
@@ -213,28 +312,9 @@ class ToyNetSession(MethodResource):
 
 
 class ToyNetSessionById(MethodResource):
-    def getTopologyFromDb(self, db, toynet_session_id):
-        try:
-            rows = db.execute(
-                'SELECT topo_id, topology, user_id'
-                ' FROM toynet_sessions'
-                ' WHERE session_id = (?)',
-                (str(toynet_session_id),)
-            ).fetchall()
-        except Exception as e:
-            print(e.args[0])
-            abort(500, message='Query for session_id failed: {}'.format(toynet_session_id))
-
-        if not len(rows):
-            abort(400, message='session_id {} does not exist'.format(toynet_session_id))
-
-        return rows[0]
-
     @marshal_with(ToyNetSessionByIdGetResp)
     def get(self, toynet_session_id):
-        db = get_db()
-
-        sessionInfo = self.getTopologyFromDb(db, toynet_session_id)
+        sessionInfo = getTopologyFromDb(toynet_session_id)
         container = State.getContainer(toynet_session_id)
         manager = State.getManager()
         running = True
@@ -243,7 +323,7 @@ class ToyNetSessionById(MethodResource):
         if container is None:
             running = False
             if manager.check_cpu_availability and manager.check_memory_availability:
-                name = manager.run_mininet_container(dev=State.getDevStatus())
+                name = manager.run_mininet_container(dev=State.getDevStatus(), net=COMPOSE_NETWORK)
                 State.setContainer(toynet_session_id, name)
                 container = State.getContainer(toynet_session_id)
 
@@ -270,42 +350,21 @@ class ToyNetSessionById(MethodResource):
         except ValidationError as e:
             abort(400, message=f'malformed request: {e.messages}')
 
-        db = get_db()
+        ip = None
+        if 'command' not in req:
+            abort(400, message='missing [command] argument')
+        if 'ip' in req:
+            ip = req['ip']
 
-        sessionInfo = self.getTopologyFromDb(db, toynet_session_id)
-        xmlTopology = ET.fromstring(sessionInfo['topology'])
-        parseModificationCommand(req['command'], xmlTopology)
+        sessionInfo = getTopologyFromDb(toynet_session_id)
+        xmlTopology = sessionInfo['topology']
+        new_topo = parseModificationCommand(req['command'], xmlTopology, ip=ip)
 
-        new_topo = ET.tostring(xmlTopology, encoding='utf-8').decode('utf-8')
-
-        try:
-            db.execute(
-                'UPDATE toynet_sessions'
-                ' SET topology = (?)'
-                ' WHERE session_id = (?)',
-                (new_topo, str(toynet_session_id),)
-            )
-            db.commit()
-        except Exception as e:
-            print(e.args[0])
-            abort(500, message='Query for toynet_session_id failed: {}'.format(toynet_session_id))
-
-        container = State.getContainer(toynet_session_id)
-        if container is not None:
-            running = waitForMiniflask(container, toynet_session_id)
-
-            if running:
-                args = {'topology': sessionInfo['topology']}
-                res = miniflaskPost(container, '/api/topo', args=args)
-
-                # Propagate the error if there is one
-                if res.status_code != 200:
-                    abort(res.status_code, message=res.json()['message'])
-        else:
-            abort(500, message='Container for session does not exist, cannot update topology')
+        sendTopoToMininet(toynet_session_id, new_topo)
+        updateTopoInDb(toynet_session_id, new_topo)
 
         return {
-        }, 200
+            }, 200
 
     @use_kwargs(ToyNetSessionByIdPostReq)
     @marshal_with(ToyNetSessionByIdPostResp)
@@ -359,3 +418,182 @@ class ToyNetSessionByIdTerminate(MethodResource):
         else:
             return {
                 }, 200
+
+
+class ToyNetSessionByIdCreateHost(MethodResource):
+    @use_kwargs(ToyNetSessionByIdCreateHostPutReq)
+    @marshal_with(ToyNetSessionByIdCreateHostPutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdCreateHostPutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        # Separate validation from Marshmallow
+        if 'ip' not in req:
+            abort(400, message='Missing ip from req')
+        elif 'name' not in req:
+            abort(400, message='Missing name from req')
+        elif 'def_gateway' not in req:
+            abort(400, message='Missing def_gateway from req')
+
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        # Create XML elements for topology
+        host = ET.Element('host')
+        host.attrib['name'] = req['name']
+        host.attrib['ip'] = req['ip']
+
+        defaultRouter = ET.Element('defaultRouter')
+        defaultRouterName = ET.Element('name')
+        defaultRouterIntf = ET.Element('intf')
+
+        # Get the router name and interface from the specified IP
+        for router in root.find('routerList'):
+            for intf, router_ip in enumerate(router.findall('intf')):
+                if req['def_gateway'] == router_ip.text.split('/')[0]:
+                    defaultRouterName.text = router.get('name')
+                    defaultRouterIntf.text = str(intf)
+                    break
+            else:
+                continue
+            break  # Used with the above 'else' to break out of both loops
+        else:
+            abort(400, message=f'No router with IP: {req["def_gateway"]}')
+
+        defaultRouter.append(defaultRouterName)
+        defaultRouter.append(defaultRouterIntf)
+        host.append(defaultRouter)
+
+        # Update the topology
+        root.find('hostList').append(host)
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+        return {
+            }, 200
+
+
+class ToyNetSessionByIdCreateSwitch(MethodResource):
+    @use_kwargs(ToyNetSessionByIdCreateSwitchPutReq)
+    @marshal_with(ToyNetSessionByIdCreateSwitchPutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdCreateSwitchPutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        # Separate validation from Marshmallow
+        if 'name' not in req:
+            abort(400, message='Missing name from req')
+
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        # Create XML elements for topology
+        switch = ET.Element('switch')
+        switch.attrib['name'] = req['name']
+
+        # Update the topology
+        root.find('switchList').append(switch)
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+        return {
+            }, 200
+
+
+class ToyNetSessionByIdCreateRouter(MethodResource):
+    @use_kwargs(ToyNetSessionByIdCreateRouterPutReq)
+    @marshal_with(ToyNetSessionByIdCreateRouterPutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdCreateRouterPutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        # Separate validation from Marshmallow
+        if 'ip' not in req:
+            abort(400, message='Missing ip from req')
+        elif 'name' not in req:
+            abort(400, message='Missing name from req')
+        elif 'intfs' not in req:
+            abort(400, message='Missing interface list from req')
+
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        # Create XML elements for topology
+        router = ET.Element('router')
+        router.attrib['name'] = req['name']
+        router.attrib['ip'] = req['ip']
+
+        # Create all provided interfaces, separate from the ip given
+        for ip in req['intfs']:
+            interface = ET.Element('intf')
+            interface.text = ip
+            router.append(interface)
+
+        # Update the topology
+        root.find('routerList').append(router)
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+        return {
+            }, 200
+
+
+class ToyNetSessionByIdDeleteDevice(MethodResource):
+    def deleteDevice(self, toynet_session_id, device_type, name, orig_topology):
+        root = ET.fromstring(orig_topology)
+
+        # Verify that there is no link to the device
+        for link in root.find('linkList').iter('dvc'):
+            if name == link.attrib['name']:
+                abort(400, message=f'Device {name} is connected to another device')
+
+        # Update the topology
+        for device in root.find(f'{device_type}List'):
+            if device.attrib['name'] == name:
+                root.find(f'{device_type}List').remove(device)
+                break
+
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+    @use_kwargs(ToyNetSessionByIdDeleteDevicePutReq)
+    @marshal_with(ToyNetSessionByIdDeleteDevicePutResp)
+    def put(self, toynet_session_id, device_type, **kwargs):
+        try:
+            req = ToyNetSessionByIdDeleteDevicePutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        if 'name' not in req:
+            abort(400, message='No device name specified')
+
+        if device_type in ['host', 'switch', 'router']:
+            topology = getTopologyFromDb(toynet_session_id)['topology']
+            self.deleteDevice(toynet_session_id, device_type, req['name'], topology)
+        else:
+            abort(400, message=f'Invalid device type: {device_type}')
+
+        return {
+            }, 200

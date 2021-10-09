@@ -32,6 +32,7 @@ jobs:
       - name: Run tests with pytest
         run: |
             source environment/env-dev
+            docker network create reclass_network
             flask init-db
             pytest -v --ignore tests/test_sessions.py tests/
       - name: Lint with flake8

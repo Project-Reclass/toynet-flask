@@ -1,11 +1,23 @@
 FROM python:3.8-slim-buster
 
+ARG FLASK_APP
+ARG FLASK_ENV
+ARG TOYNET_IMAGE_TAG
+ARG MINI_FLASK_PORT
+ARG COMPOSE_NETWORK
+
 WORKDIR /app
 
-copy requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 RUN pip3 install -r requirements.txt
 
 COPY . .
+
+ENV FLASK_APP ${FLASK_APP}
+ENV FLASK_ENV ${FLASK_ENV}
+ENV TOYNET_IMAGE_TAG ${TOYNET_IMAGE_TAG}
+ENV MINI_FLASK_PORT ${MINI_FLASK_PORT}
+ENV COMPOSE_NETWORK ${COMPOSE_NETWORK}
 
 EXPOSE 5000
 
