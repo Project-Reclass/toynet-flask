@@ -227,6 +227,202 @@ def test_session_by_id_put(client):
     )
     assert rv.status_code == 200
 
+# Confirms that user created links take effect in mininet, must test each
+# combination of devices
+def test_session_by_id_links(client):
+    # Establish session
+    client.post(
+          '/api/user',
+          json={
+              'username': 'arthur@projectreclass.org',
+              'password': 'BaLtH@$0R',
+              'first_name': 'Arthur',
+          },
+    )
+
+    rv = client.post(
+        '/api/toynet/session',
+        json={
+            'toynet_topo_id': 1,
+            'toynet_user_id': 'arthur@projectreclass.org',
+        },
+    ) 
+    assert rv.status_code == 201
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['running'] == True
+    # Save session id
+    session_id = rv_json['toynet_session_id']
+
+    # Add two routers
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/router',
+        json={
+            'name': 'r20',
+            'ip': '172.16.1.10/24',
+            'intfs': ['172.16.2.1/24', '192.168.2.1/24']
+            },
+    )
+    assert rv.status_code == 200
+
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/router',
+        json={
+            'name': 'r21',
+            'ip': '172.16.1.11/24',
+            'intfs': ['172.16.2.2/24', '10.10.10.10/24']
+            },
+    )
+    assert rv.status_code == 200
+
+    # Add a link between them
+    rv = client.put(
+            f'/api/toynet/session/{session_id}/create/link',
+            json={
+                'dev_1': 'r20',
+                'dev_2': 'r21',
+                },
+    )
+    assert rv.status_code == 200
+
+    # Confirm link is created
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][664:1066] == '<linkList><link><dvc name="r1"><intf>1</intf></dvc><dvc name="s1"><intf>0</intf></dvc></link><link><dvc name="r1"><intf>2</intf></dvc><dvc name="s2"><intf>0</intf></dvc></link><link><dvc name="s1"><intf>1</intf></dvc><dvc name="h1" /></link><link><dvc name="s2"><intf>1</intf></dvc><dvc name="h2" /></link><link><dvc name="r20"><intf>0</intf></dvc><dvc name="r21"><intf>0</intf></dvc></link></linkList>'
+
+    # Confirm they can ping now
+    rv = client.post(
+        f'/api/toynet/session/{session_id}',
+        json={
+            'toynet_command': 'r20 ping r21',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    # Note that the hostname resolution forces the ping between the IP
+    # attributes of each router rather than the connected interfaces' IPs.
+    # However, the fact that they can communicate does in fact indicate that
+    # the link creation succeeded
+    assert rv_json['output'][:91] == 'PING 172.16.1.11 (172.16.1.11) 56(84) bytes of data.\r\n64 bytes from 172.16.1.11: icmp_seq=1'
+
+    # Add two switches
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/switch',
+        json={
+            'name': 's20',
+            },
+    )
+    assert rv.status_code == 200
+
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/switch',
+        json={
+            'name': 's21',
+            },
+    )
+    assert rv.status_code == 200
+
+    # Add a link between them
+    rv = client.put(
+            f'/api/toynet/session/{session_id}/create/link',
+            json={
+                'dev_1': 's20',
+                'dev_2': 's21',
+                },
+    )
+    assert rv.status_code == 200
+
+    # Add two hosts
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/host',
+        json={
+            'name': 'h20',
+            'ip': '192.168.2.10/24',
+            'def_gateway': '192.168.2.1',
+            },
+    )
+    assert rv.status_code == 200
+
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/host',
+        json={
+            'name': 'h21',
+            'ip': '192.168.2.11/24',
+            'def_gateway': '192.168.2.1',
+            },
+    )
+    assert rv.status_code == 200
+
+    # Link each host to a switch
+    rv = client.put(
+            f'/api/toynet/session/{session_id}/create/link',
+            json={
+                'dev_1': 'h20',
+                'dev_2': 's20',
+                },
+    )
+    assert rv.status_code == 200
+
+    rv = client.put(
+            f'/api/toynet/session/{session_id}/create/link',
+            json={
+                'dev_1': 'h21',
+                'dev_2': 's21',
+                },
+    )
+    assert rv.status_code == 200
+
+    # Confirm they can ping through the switches
+    rv = client.post(
+        f'/api/toynet/session/{session_id}',
+        json={
+            'toynet_command': 'h20 ping h21',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['output'][:94] == 'PING 192.168.2.11 (192.168.2.11) 56(84) bytes of data.\r\n64 bytes from 192.168.2.11: icmp_seq=1'
+
+    # Connect a router and a switch
+    rv = client.put(
+            f'/api/toynet/session/{session_id}/create/link',
+            json={
+                'dev_1': 'r20',
+                'dev_2': 's20',
+                },
+    )
+    assert rv.status_code == 200
+
+    # Confirm router and host can ping across switch
+    rv = client.post(
+        f'/api/toynet/session/{session_id}',
+        json={
+            'toynet_command': 'r20 ping h21',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['output'][:94] == 'PING 192.168.2.11 (192.168.2.11) 56(84) bytes of data.\r\n64 bytes from 192.168.2.11: icmp_seq=1'
+
+    # Confirm link deletes
+    rv = client.put(
+            f'/api/toynet/session/{session_id}/delete/link',
+            json={
+                'dev_1': 'r20',
+                'dev_2': 'r21',
+                },
+    )
+    assert rv.status_code == 200
+
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][918:1539] == '<linkList><link><dvc name="r1"><intf>1</intf></dvc><dvc name="s1"><intf>0</intf></dvc></link><link><dvc name="r1"><intf>2</intf></dvc><dvc name="s2"><intf>0</intf></dvc></link><link><dvc name="s1"><intf>1</intf></dvc><dvc name="h1" /></link><link><dvc name="s2"><intf>1</intf></dvc><dvc name="h2" /></link><link><dvc name="s20"><intf>0</intf></dvc><dvc name="s21"><intf>0</intf></dvc></link><link><dvc name="h20" /><dvc name="s20"><intf>1</intf></dvc></link><link><dvc name="h21" /><dvc name="s21"><intf>1</intf></dvc></link><link><dvc name="r20"><intf>1</intf></dvc><dvc name="s20"><intf>2</intf></dvc></link></linkList>'
+
+    # Teardown
+    rv = client.post(
+        f'/api/toynet/session/{session_id}/terminate',
+    )
+    assert rv.status_code == 200
+
 #the /api/toynet/session/<id>:POST endpoint sends a toynet_command to the
 #corresponding session's MiniFlask /api/toynet/command:POST endpoint
 def test_session_by_id_post(client):
