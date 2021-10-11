@@ -6,6 +6,7 @@ from flasksrc.db import get_db
 from flasksrc.emulator.commandParser import parseModificationCommand
 from flasksrc.toynet_manager import ToynetManager
 
+import ipaddress
 import requests
 import time
 import os
@@ -77,11 +78,29 @@ class ToyNetSessionByIdCreateSwitchPutResp(Schema):
     pass
 
 
+class ToyNetSessionByIdCreateLinkPutReq(Schema):
+    dev_1 = fields.Str()
+    dev_2 = fields.Str()
+
+
+class ToyNetSessionByIdCreateLinkPutResp(Schema):
+    pass
+
+
 class ToyNetSessionByIdDeleteDevicePutReq(Schema):
     name = fields.Str()
 
 
 class ToyNetSessionByIdDeleteDevicePutResp(Schema):
+    pass
+
+
+class ToyNetSessionByIdDeleteLinkPutReq(Schema):
+    dev_1 = fields.Str()
+    dev_2 = fields.Str()
+
+
+class ToyNetSessionByIdDeleteLinkPutResp(Schema):
     pass
 
 
@@ -556,6 +575,234 @@ class ToyNetSessionByIdCreateRouter(MethodResource):
             }, 200
 
 
+class ToyNetSessionByIdCreateLink(MethodResource):
+    def getNextIntfForSwitch(self, root, name):
+        intfs = list()
+
+        for link in root.find('linkList'):
+            dvc0 = link.findall('dvc')[0]
+            dvc1 = link.findall('dvc')[1]
+            # Allows for connections from the switch to itself
+            if dvc0.attrib['name'] == name:
+                intfs.append(dvc0.find('intf').text)
+            if dvc1.attrib['name'] == name:
+                intfs.append(dvc1.find('intf').text)
+
+        # Get the lowest possible number (eg: if interface 3 was created and
+        # deleted it will be re-created)
+        next_intf = len(intfs)
+        for idx, intf in enumerate(sorted([int(i) for i in intfs])):
+            if intf > idx:
+                next_intf = idx
+                break
+
+        return str(next_intf)
+
+    def linkRouterRouter(self, dev1_elem, dev2_elem, root, req):
+        link = ET.Element('link')
+        dev1 = ET.Element('dvc')
+        dev2 = ET.Element('dvc')
+        dev1_intf = ET.Element('intf')
+        dev2_intf = ET.Element('intf')
+
+        # Find the first set of interfaces on the same subnet and use them
+        for intf_1, ip_elem1 in enumerate(dev1_elem.findall('intf')):
+            ip = ipaddress.ip_address(ip_elem1.text.split('/')[0])
+            for intf_2, ip_elem2 in enumerate(dev2_elem.findall('intf')):
+                network = ipaddress.ip_network(ip_elem2.text, strict=False)
+
+                # Populate link with first match
+                if ip in network:
+                    dev1.attrib['name'] = req['dev_1']
+                    dev2.attrib['name'] = req['dev_2']
+                    dev1_intf.text = str(intf_1)
+                    dev2_intf.text = str(intf_2)
+
+                    dev1.append(dev1_intf)
+                    dev2.append(dev2_intf)
+                    link.append(dev1)
+                    link.append(dev2)
+                    break
+            else:  # This corresponds to the 'for' loop, not the 'if' statement
+                continue
+            break  # Used with the above 'else' to break out of both loops
+        else:
+            abort(400, message='Router devices have no overlapping IPs')
+
+        # Update topology with changes
+        root.find('linkList').append(link)
+        return ET.tostring(root).decode('utf-8')
+
+    def linkRouterSwitch(self, dev1_elem, dev2_elem, root, req):
+        link = ET.Element('link')
+        dev1 = ET.Element('dvc')
+        dev2 = ET.Element('dvc')
+        dev1_intf = ET.Element('intf')
+        dev2_intf = ET.Element('intf')
+
+        # Always make the router dev1 for simplicity
+        if dev1_elem.tag != 'router':
+            dev2.attrib['name'] = req['dev_1']
+            dev1.attrib['name'] = req['dev_2']
+            dev1_elem, dev2_elem = dev2_elem, dev1_elem
+        else:
+            dev1.attrib['name'] = req['dev_1']
+            dev2.attrib['name'] = req['dev_2']
+
+        # Use the next available router interface, create one for the switch
+        for intf in range(len(dev1_elem.findall('intf'))):
+            # Ensure that the interface is not linked already
+            available_intf = True
+            for link_elem in root.find('linkList'):
+                link_intf0 = link_elem.findall('dvc')[0]
+                link_intf1 = link_elem.findall('dvc')[1]
+                link_interfaces = list()
+
+                # Only check interfaces of the router in question
+                if link_intf0.attrib['name'] == dev1.attrib['name']:
+                    link_interfaces.append(link_intf0.find('intf').text)
+                if link_intf1.attrib['name'] == dev1.attrib['name']:
+                    link_interfaces.append(link_intf1.find('intf').text)
+
+                if str(intf) in link_interfaces:
+                    available_intf = False
+                    break
+
+            # We select the first available interface on the router
+            if available_intf:
+                dev1_intf.text = str(intf)
+                break
+        else:  # Refers to the outer for loop, not the if
+            # No available interfaces
+            abort(400, message='Device {req["dev_1"]} has no available interfaces')
+
+        dev2_intf.text = self.getNextIntfForSwitch(root, dev2.attrib['name'])
+
+        dev1.append(dev1_intf)
+        dev2.append(dev2_intf)
+        link.append(dev1)
+        link.append(dev2)
+
+        # Update topology with changes
+        root.find('linkList').append(link)
+        return ET.tostring(root).decode('utf-8')
+
+    def linkSwitchSwitch(self, dev1_elem, dev2_elem, root, req):
+        link = ET.Element('link')
+        dev1 = ET.Element('dvc')
+        dev2 = ET.Element('dvc')
+        dev1_intf = ET.Element('intf')
+        dev2_intf = ET.Element('intf')
+
+        # Create new interfaces for both switches
+        dev1_intf.text = self.getNextIntfForSwitch(root, req['dev_1'])
+        dev2_intf.text = self.getNextIntfForSwitch(root, req['dev_2'])
+        dev1.attrib['name'] = req['dev_1']
+        dev2.attrib['name'] = req['dev_2']
+
+        dev1.append(dev1_intf)
+        dev2.append(dev2_intf)
+        link.append(dev1)
+        link.append(dev2)
+
+        # Update topology with changes
+        root.find('linkList').append(link)
+        return ET.tostring(root).decode('utf-8')
+
+    def linkHostSwitch(self, dev1_elem, dev2_elem, root, req):
+        link = ET.Element('link')
+        dev1 = ET.Element('dvc')
+        dev2 = ET.Element('dvc')
+        dev2_intf = ET.Element('intf')
+
+        # Always make the host dev1 for simplicity
+        if dev1_elem.tag != 'host':
+            dev2.attrib['name'] = req['dev_1']
+            dev1.attrib['name'] = req['dev_2']
+            dev1_elem, dev2_elem = dev2_elem, dev1_elem
+        else:
+            dev1.attrib['name'] = req['dev_1']
+            dev2.attrib['name'] = req['dev_2']
+
+        # No host interface specification needed, just the switch
+        dev2_intf.text = self.getNextIntfForSwitch(root, dev2.attrib['name'])
+
+        dev2.append(dev2_intf)
+        link.append(dev1)
+        link.append(dev2)
+
+        # Update topology with changes
+        root.find('linkList').append(link)
+        return ET.tostring(root).decode('utf-8')
+
+    def extractEndpoints(self, root, req):
+        dev1_elem = None
+        dev2_elem = None
+
+        # Find the specified devices
+        dev_list = root.find('routerList').findall('router')
+        dev_list += root.find('switchList').findall('switch')
+        dev_list += root.find('hostList').findall('host')
+        for device in dev_list:
+            if device.get('name') == req['dev_1']:
+                dev1_elem = device
+            if device.get('name') == req['dev_2']:
+                dev2_elem = device
+
+        # Error if an endpoint is missing or if a link already exists
+        # Note this and the above checks allow links from a device to itself
+        if dev1_elem is None or dev2_elem is None:
+            abort(400, message='Link endpoint does not exist')
+        for link in root.find('linkList'):
+            if sorted([link[0].attrib['name'], link[1].attrib['name']]) == \
+                        sorted([req['dev_1'], req['dev_2']]):
+                abort(400, message='Link already exists between devices')
+
+        return dev1_elem, dev2_elem
+
+    @use_kwargs(ToyNetSessionByIdCreateLinkPutReq)
+    @marshal_with(ToyNetSessionByIdCreateLinkPutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdCreateLinkPutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        if 'dev_1' not in req or 'dev_2' not in req:
+            abort(400, message='Device endpoint not specified')
+
+        # Confirm both endpoints exist
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        dev1_elem, dev2_elem = self.extractEndpoints(root, req)
+
+        new_topology = orig_topology
+        # Connect router - router
+        if sorted([dev1_elem.tag, dev2_elem.tag]) == ['router', 'router']:
+            new_topology = self.linkRouterRouter(dev1_elem, dev2_elem, root, req)
+        # Connect router - switch
+        elif sorted([dev1_elem.tag, dev2_elem.tag]) == ['router', 'switch']:
+            new_topology = self.linkRouterSwitch(dev1_elem, dev2_elem, root, req)
+        # Connect switch - switch
+        elif sorted([dev1_elem.tag, dev2_elem.tag]) == ['switch', 'switch']:
+            new_topology = self.linkSwitchSwitch(dev1_elem, dev2_elem, root, req)
+        # Connect host - switch
+        elif sorted([dev1_elem.tag, dev2_elem.tag]) == ['host', 'switch']:
+            new_topology = self.linkHostSwitch(dev1_elem, dev2_elem, root, req)
+        # All other connections not allowed
+        else:
+            abort(400, message=f'Cannot link devices of type {dev1_elem.tag} and {dev2_elem.tag}')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+        return {
+            }, 200
+
+
 class ToyNetSessionByIdDeleteDevice(MethodResource):
     def deleteDevice(self, toynet_session_id, device_type, name, orig_topology):
         root = ET.fromstring(orig_topology)
@@ -594,6 +841,41 @@ class ToyNetSessionByIdDeleteDevice(MethodResource):
             self.deleteDevice(toynet_session_id, device_type, req['name'], topology)
         else:
             abort(400, message=f'Invalid device type: {device_type}')
+
+        return {
+            }, 200
+
+
+class ToyNetSessionByIdDeleteLink(MethodResource):
+    @use_kwargs(ToyNetSessionByIdDeleteLinkPutReq)
+    @marshal_with(ToyNetSessionByIdDeleteLinkPutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdDeleteLinkPutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        if 'dev_1' not in req or 'dev_2' not in req:
+            abort(400, message='Both link endpoints not specified')
+
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        # Find and delete the link
+        for link in root.find('linkList'):
+            if sorted([link[0].attrib['name'], link[1].attrib['name']]) == \
+                        sorted([req['dev_1'], req['dev_2']]):
+                root.find('linkList').remove(link)
+                break
+        else:
+            abort(400, message=f'No link between {req["dev_1"]} and {req["dev_2"]}')
+
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
 
         return {
             }, 200
