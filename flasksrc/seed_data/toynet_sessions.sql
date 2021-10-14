@@ -1,3 +1,18 @@
+-- This file is part of Toynet-Flask.
+-- 
+-- Toynet-Flask is free software: you can redistribute it and/or modify
+-- it under the terms of the GNU General Public License as published by
+-- the Free Software Foundation, either version 3 of the License, or
+-- (at your option) any later version.
+-- 
+-- Toynet-Flask is distributed in the hope that it will be useful,
+-- but WITHOUT ANY WARRANTY; without even the implied warranty of
+-- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-- GNU General Public License for more details.
+-- 
+-- You should have received a copy of the GNU General Public License
+-- along with Toynet-Flask.  If not, see <https://www.gnu.org/licenses/>.
+
 BEGIN TRANSACTION;
 
 INSERT INTO toynet_topos (topo_id, topology, author_id) VALUES(1, '<?xml version="1.0" encoding="UTF-8"?><topology><root>r1</root><routerList><router name="r1" ip="172.16.0.1/24"><intf>10.0.0.1/30</intf><intf>172.16.0.1/24</intf><intf>172.16.1.1/24</intf></router></routerList><switchList><switch name="s1" /><switch name="s2" /></switchList><hostList><host name="h1" ip="172.16.0.2/24"><defaultRouter><name>r1</name><intf>1</intf></defaultRouter></host><host name="h2" ip="172.16.1.2/24"><defaultRouter><name>r1</name><intf>2</intf></defaultRouter></host></hostList><linkList><link><dvc name="r1"><intf>1</intf></dvc><dvc name="s1"><intf>0</intf></dvc></link><link><dvc name="r1"><intf>2</intf></dvc><dvc name="s2"><intf>0</intf></dvc></link><link><dvc name="s1"><intf>1</intf></dvc><dvc name="h1" /></link><link><dvc name="s2"><intf>1</intf></dvc><dvc name="h2" /></link></linkList></topology>', 0);

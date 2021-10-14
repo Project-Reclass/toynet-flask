@@ -1,3 +1,18 @@
+# This file is part of Toynet-Flask.
+# 
+# Toynet-Flask is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+# 
+# Toynet-Flask is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with Toynet-Flask.  If not, see <https://www.gnu.org/licenses/>.
+
 import os
 import tempfile
 import pytest
@@ -392,4 +407,3 @@ def test_quizScoreByUser_get(client):
     assert len(rv_json['scores'][0]['scores']) == 2
     assert len(rv_json['scores'][1]['scores']) == 2
     assert len(rv_json['scores'][2]['scores']) == 1
-    
