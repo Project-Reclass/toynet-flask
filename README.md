@@ -33,13 +33,13 @@ $ deactivate
 
 More information [here](https://docs.python.org/3/library/venv.html)
 
-You will also need to initialize the `toynet_mininet` submodule and its `mininet` submodule:
+
+From there, make sure to build the toynet docker image from the `toynet_mininet` directory and tag it with the same tag you use in the below environment variable for `TOYNET_IMAGE_TAG`. First you will need to download mininet. You can do this by initializing the submodule.
 ```
+$ cd toynet_mininet
 $ git submodule update --init --recursive
 ```
-
-From there, make sure to build the toynet docker image from `toynet_mininet` and tag it with the same tag you use in the below environment variable for `TOYNET_IMAGE_TAG`.
-See the `toynet_mininet` submodule for instructions on building the image. The default way, which will work with the Makefile here, is to go into the `toynet_mininet` submodule and run:
+You will then need to build the image.  The default way, which will work with the Makefile here, is to go into the toynet_mininet submodule and run:
 ```
 $ make test-image
 ```
@@ -48,6 +48,8 @@ if you want a test image. If you want a production image then run:
 $ make prod-image
 ```
 also in the `toynet_mininet` directory.
+
+**Note:** See the [toynet_mininet README](https://github.com/Project-Reclass/toynet-flask/blob/main/toynet_mininet/README.md) for more information on building and developing `toynet_mininet`.
 
 # Run the service
 Make sure that, if you are testing anything related to sessions or network emulation, that you build the appropriate image (dev or prod) in `toynet-mininet`.
