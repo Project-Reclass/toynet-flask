@@ -114,7 +114,7 @@ CREATE TABLE toynet_survey_options (
   question_id INTEGER NOT NULL,
   option_id INTEGER NOT NULL,
   option TEXT NOT NULL,
-  PRIMARY KEY (survey_id, question_id, option_id)
+  PRIMARY KEY (survey_id, question_id)
   FOREIGN KEY (survey_id, question_id) REFERENCES toynet_survey_questions (survey_id, question_id)
 );
 
