@@ -152,3 +152,35 @@ def test_command_post(client):
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['output'] == 'Invalid host: h9001'
+
+    # Ping from connected host to unconnected host
+    rv = client.post(
+        '/api/command',
+        json = {
+            'command': 'h1 ping h9',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['output'] == 'Destination host unreachable: h9 is not connected to the network'
+
+    # Ping from unconnected host to connected host
+    rv = client.post(
+        '/api/command',
+        json = {
+            'command': 'h9 ping h1',
+        },
+    )
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    print(rv_json['output'])
+    assert rv_json['output'] == 'connect: Network is unreachable\r\n'
+
+    # Terminate test container
+    rv = client.post(
+        '/api/terminate',
+        json = {
+            'terminate': True,
+        },
+    )
+    assert rv.status_code == 200

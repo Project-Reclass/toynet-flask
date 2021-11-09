@@ -53,6 +53,9 @@
         <host name="h8" ip="172.16.240.104/20">
             <defaultRouter><name>r2</name><intf>2</intf></defaultRouter>
         </host>
+        <host name="h9" ip="172.16.240.105/20">
+            <defaultRouter><name>r2</name><intf>2</intf></defaultRouter>
+        </host>
     </hostList>
     <linkList>
         <link><dvc name="r0"><intf>0</intf></dvc><dvc name="r1"><intf>0</intf></dvc></link>
