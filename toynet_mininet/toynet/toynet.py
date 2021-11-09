@@ -53,11 +53,14 @@ class ToyNet():
         if cmd == 'ping':
             try:
                 host_two = self.mininet.get(toks[2])
+                execute_me = '%s -c 3 %s' % (cmd, host_two.IP())
             except KeyError:
                 return 'Invalid host: ' + toks[2]
             except IndexError:
                 return 'No destination host provided'
-            execute_me = '%s -c 3 %s' % (cmd, host_two.IP())
+            except AttributeError:
+                return 'Destination host unreachable: %s is not connected to the network' \
+                        % host_two
         #all other commands are passed to the host directly; host will return errors as appropriate
         else:
             execute_me = ''.join(toks[1:])
