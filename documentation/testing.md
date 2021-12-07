@@ -29,8 +29,7 @@ You can then use the `Body` tab to provide a JSON key-value set.
 
 <p align="center"> <kbd> <img src="images/postman-requestbody.png" width="500" /> </kbd> </p>
 
-<p align="center"> <kbd> <img src="images/postman-tokenreponse:wq
-.png" width="500" /> </kbd> </p>
+<p align="center"> <kbd> <img src="images/postman-tokenreponse.png" width="500" /> </kbd> </p>
 
 ### (CASE 2) Auth Token required (JWT)
 
