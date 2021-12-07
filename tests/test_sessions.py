@@ -236,6 +236,20 @@ def test_session_by_id_put(client):
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['message'] == 'Device h1 is connected to another device'
 
+    # Validate host name
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/host',
+        json={
+            'name': 'h20 ',
+            'ip': '172.16.1.10/24',
+            'def_gateway': '172.16.1.1',
+            },
+    )
+    
+    assert rv.status_code == 400
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['message'] == 'Invalid hostname'
+
     # Teardown
     rv = client.post(
         f'/api/toynet/session/{session_id}/terminate',
