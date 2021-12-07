@@ -12,6 +12,7 @@ on:
 
 jobs:
   build:
+    name: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -29,14 +30,42 @@ jobs:
         run: |
           git submodule update --init --recursive
           docker build -f toynet_mininet/dev.Dockerfile -t miniflask-dev .
+
+  test:
+    name: unit-test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+      - name: Install dependencies
+        run: |
+          pip3 install --upgrade pip
+          pip3 install -r requirements.txt
+          pip3 install flake8
+          pip3 install pylint
       - name: Run tests with pytest
         run: |
             source environment/env-dev
             docker network create reclass_network
             flask init-db
             pytest -v --ignore tests/test_sessions.py tests/
+
+  lint:
+    name: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install Python 3
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.6
+      - name: Install dependencies
+        run: |
+          pip3 install flake8
+          pip3 install pylint
       - name: Lint with flake8
         run: |
           flake8 flasksrc --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 flasksrc --count --max-complexity=15 --max-line-length=100 --statistics
-
