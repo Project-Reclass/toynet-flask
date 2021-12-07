@@ -12,20 +12,10 @@ on:
 
 jobs:
   build:
-    name: build
+    name: build-miniflask
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Install Python 3
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.6
-      - name: Install dependencies
-        run: |
-          pip3 install --upgrade pip
-          pip3 install -r requirements.txt
-          pip3 install flake8
-          pip3 install pylint
       - name: Build miniflask
         run: |
           git submodule update --init --recursive
@@ -44,8 +34,10 @@ jobs:
         run: |
           pip3 install --upgrade pip
           pip3 install -r requirements.txt
-          pip3 install flake8
-          pip3 install pylint
+      - name: Build miniflask
+        run: |
+          git submodule update --init --recursive
+          docker build -f toynet_mininet/dev.Dockerfile -t miniflask-dev .
       - name: Run tests with pytest
         run: |
             source environment/env-dev
@@ -54,7 +46,7 @@ jobs:
             pytest -v --ignore tests/test_sessions.py tests/
 
   lint:
-    name: test
+    name: lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
