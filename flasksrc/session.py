@@ -12,6 +12,7 @@ import time
 import os
 import sys
 from xml.etree import ElementTree as ET
+from string import ascii_letters, digits
 
 MINI_FLASK_PORT = os.environ['MINI_FLASK_PORT']
 COMPOSE_NETWORK = 'bridge'
@@ -250,6 +251,20 @@ def updateTopoInDb(toynet_session_id, new_topo):
         abort(500, message='Query for toynet_session_id failed: {}'.format(toynet_session_id))
 
 
+# Makes sure the hostname is RFC1123 compliant
+def validateHostname(hostname):
+    valid_chars = ascii_letters + digits + "_-."
+    # MUST allow names up to 63 chars. SHOULD allow names up to 255 characters.
+    # first character can be a number or letter (ignore case)
+    valid = hostname[0].isalnum() and len(hostname) < 256
+
+    for c in hostname:
+        if c not in valid_chars:
+            valid = False
+            break
+    return valid
+
+
 class ToyNetSession(MethodResource):
     @use_kwargs(ToyNetSessionPostReq)
     @marshal_with(ToyNetSessionPostResp)
@@ -455,6 +470,8 @@ class ToyNetSessionByIdCreateHost(MethodResource):
             abort(400, message='Missing name from req')
         elif 'def_gateway' not in req:
             abort(400, message='Missing def_gateway from req')
+        elif not validateHostname(req['name']):
+            abort(400, message='Invalid hostname')
 
         orig_topology = getTopologyFromDb(toynet_session_id)['topology']
         root = ET.fromstring(orig_topology)
