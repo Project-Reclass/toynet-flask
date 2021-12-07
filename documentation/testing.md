@@ -74,11 +74,11 @@ Note: If you lost your last token, you can create another one with the same logi
 
 Now you can hit `Send`! To check that your entry populated, send a `GET` request to the `http://127.0.0.1:5000/api/value/5004/entry` endpoint, again with your JWT.
 
-<p align="center"> <kbd> <img src="images/postman-authtoken.png" width="350" /> </kbd> </p>
+<p align="center"> <kbd> <img src="images/postman-authtoken.png" width="500" /> </kbd> </p>
 
 You can resuse the JWT token until it expires, and you can have different users (Alice and Bob) access the API simultaneously with their respective usernames as long as each provides authentication!
 
-<p align="center"> <kbd> <img src="images/postman-authrepeat.png" width="350" /> </kbd> </p>
+<p align="center"> <kbd> <img src="images/postman-authrepeat.png" width="500" /> </kbd> </p>
 
 ## Unit Testing
 
