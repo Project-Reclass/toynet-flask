@@ -471,7 +471,7 @@ class ToyNetSessionByIdCreateHost(MethodResource):
         # Get the router name and interface from the specified IP
         for router in root.find('routerList'):
             for intf, router_ip in enumerate(router.findall('intf')):
-                if req['def_gateway'] == router_ip.text.split('/')[0]:
+                if req['def_gateway'].split('/')[0] == router_ip.text.split('/')[0]:
                     defaultRouterName.text = router.get('name')
                     defaultRouterIntf.text = str(intf)
                     break

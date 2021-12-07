@@ -144,6 +144,30 @@ def test_session_by_id_put(client):
             'name': 'h20',
             },
     )
+
+    # Confirm host adds with CIDR default gateway
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/host',
+        json={
+            'name': 'h20',
+            'ip': '172.16.1.10/24',
+            'def_gateway': '172.16.1.1/24',
+            },
+    )
+    
+    assert rv.status_code == 200
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][451:555] == '<host name="h20" ip="172.16.1.10/24"><defaultRouter><name>r1</name><intf>2</intf></defaultRouter></host>'
+
+    # Confirm host with CIDR default gateway deletes
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/host',
+        json={
+            'name': 'h20',
+            },
+    )
     
     assert rv.status_code == 200
     rv_json = json.loads(rv.data.decode('utf-8'))
