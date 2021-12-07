@@ -55,6 +55,7 @@ jobs:
 
   lint:
     name: test
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - name: Install Python 3
