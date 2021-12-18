@@ -31,7 +31,7 @@ def test_quizById_get(client):
 
     assert rv_json['items'][1]['options'][0] == 'Physical'
     assert rv_json['items'][1]['answer'] == 1
-    assert rv_json['items'][2]['options'][3] == 'IPA'
+    assert rv_json['items'][2]['options'][3] == 'IPP'
     assert rv_json['items'][2]['answer'] == 2
 
     rv = client.get('/api/quiz/2'
