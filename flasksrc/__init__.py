@@ -39,7 +39,7 @@ def create_app(test_config=None):
 
     # make RESTful
     api = Api(app)
-    api.add_resource(HelloReclass, '/')
+    api.add_resource(HelloReclass,'/')
     docs = FlaskApiSpec(app)
 
     from .user import ToyNetUser, ToyNetUserLogin
@@ -95,6 +95,6 @@ def create_app(test_config=None):
     docs.register(ToyNetSessionByIdCreateRouter)
     docs.register(ToyNetSessionByIdCreateLink)
     docs.register(ToyNetSessionByIdDeleteLink)
-    docs.register(ToyNetSessionByIdDeleteDevice)
+    docs.register(ToyNetSessionByIdDeleteDiver)
 
     return app
