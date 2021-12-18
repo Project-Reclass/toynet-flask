@@ -31,10 +31,11 @@ def test_quizById_get(client):
 
     assert rv_json['items'][1]['options'][0] == 'Physical'
     assert rv_json['items'][1]['answer'] == 1
-    assert rv_json['items'][2]['options'][3] == 'IPP'
+    assert rv_json['items'][2]['options'][3] == 'IPA'
     assert rv_json['items'][2]['answer'] == 2
 
-    rv = client.get('/api/quiz/2')
+    rv = client.get('/api/quiz/2'
+)
     assert rv.status_code == 404
     rv_json = json.loads(rv.data.decode('utf-8'))
     assert rv_json['message'] == 'quiz ID 2 doesn\'t exist'
