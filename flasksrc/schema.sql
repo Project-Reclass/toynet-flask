@@ -131,7 +131,7 @@ CREATE TABLE toynet_survey_submissions (
   submission_id INTEGER NOT NULL AUTOINCREMENT
   time_submitted TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
   survey_id INTEGER NOT NULL
-  username TEXT,
+  username TEXT
   user_group_id TEXT NOT NULL DEFAULT 'DEFAULT'
   FOREIGN KEY (username, user_group_id) REFERENCES users(username, user_group_id)
   PRIMARY KEY (submission_id)
