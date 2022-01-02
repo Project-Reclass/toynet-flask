@@ -21,7 +21,8 @@ from util.error import XMLParseError, TypeCheckError
 from toynet.toynet import ToyNet
 from toynet.state import State
 
-#Schema definitions
+
+# Schema definitions
 class MiniFlaskTopoPostReq(Schema):
     topology = fields.Str()
 
@@ -45,7 +46,7 @@ class MiniFlaskTopo(MethodResource):
             else:
                 State.getInstance().restart(new_topology=req['topology'])
         except (XMLParseError, TypeCheckError):
-            abort(400, message=f'failed to parse XML topology {State.getInstance()}') 
-        
+            abort(400, message=f'failed to parse XML topology {State.getInstance()}')
+
         return {
         }, 200

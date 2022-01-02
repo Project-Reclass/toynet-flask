@@ -19,7 +19,8 @@ from flask_apispec import marshal_with, MethodResource, use_kwargs
 from toynet.toynet import ToyNet
 from toynet.state import State
 
-#Schema definitions
+
+# Schema definitions
 class MiniFlaskTerminatePostReq(Schema):
     terminate = fields.Bool()
 
@@ -40,7 +41,7 @@ class MiniFlaskTerminate(MethodResource):
         # Second validation outside of Marshmallow
         if 'terminate' not in req:
             abort(400, message='invalid terminate request')
-        
+
         res = False
 
         if req['terminate'] and State.getInstance() is not None:

@@ -18,6 +18,7 @@ from flask import Flask
 from flask_restful import Resource, Api
 from flask_apispec import FlaskApiSpec
 
+
 class HelloReclass(Resource):
     def get(self):
         return 'Hello, Reclass!'
@@ -37,7 +38,7 @@ def create_app():
     api = Api(app)
     api.add_resource(HelloReclass, '/')
     docs = FlaskApiSpec(app)
-    
+
     from .topo import MiniFlaskTopo
     api.add_resource(MiniFlaskTopo, '/api/topo')
     docs.register(MiniFlaskTopo)

@@ -19,7 +19,8 @@ from flask_apispec import marshal_with, MethodResource, use_kwargs
 from toynet.toynet import ToyNet
 from toynet.state import State
 
-#Schema definitions
+
+# Schema definitions
 class MiniFlaskCommandPostReq(Schema):
     command = fields.String()
 
@@ -40,7 +41,7 @@ class MiniFlaskCommand(MethodResource):
         # Second validation outside of Marshmallow
         if 'command' not in req:
             abort(400, message='invalid command request')
-        
+
         res = ''
         if State.getInstance() is not None:
             res = State.getInstance().cmd(req['command'])
