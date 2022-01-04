@@ -134,7 +134,6 @@ CREATE TABLE toynet_survey_submissions (
   username TEXT,
   user_group_id TEXT NOT NULL DEFAULT 'DEFAULT',
   FOREIGN KEY (username, user_group_id) REFERENCES users(username, user_group_id)
-  
 );
 
 CREATE TABLE toynet_survey_responses(
@@ -145,7 +144,6 @@ CREATE TABLE toynet_survey_responses(
   response TEXT,
   FOREIGN KEY (submission_id) REFERENCES toynet_survey_submissions(submission_id)
   FOREIGN KEY (question_id, type_id) REFERENCES toynet_survey_questions(question_id, type_id)
- 
 );
 -- emulator submodule
 
