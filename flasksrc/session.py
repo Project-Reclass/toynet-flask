@@ -130,7 +130,7 @@ class State():
     manager = ToynetManager(COMPOSE_NETWORK)
 
     dev_status = os.environ['FLASK_ENV'] == 'development'
-    if not manager.import_image(dev_status, os.environ['TOYNET_IMAGE_TAG']):
+    if not manager.importImage(dev_status, os.environ['TOYNET_IMAGE_TAG']):
         print(f'Failed to import image: {os.environ["TOYNET_IMAGE_TAG"]}', file=sys.stderr)
         sys.exit(1)
     containers = dict()
@@ -158,7 +158,7 @@ class State():
     def delContainer(session):
         res = False
         if session in State.containers:
-            res = State.manager.kill_container(State.containers[session])
+            res = State.manager.killContainer(State.containers[session])
             if res:
                 del State.containers[session]
         return res
@@ -336,8 +336,8 @@ class ToyNetSession(MethodResource):
         running = True
 
         # Create corresponding miniflask container
-        if manager.check_cpu_availability and manager.check_memory_availability:
-            name = manager.run_mininet_container(dev=State.getDevStatus(), net=COMPOSE_NETWORK)
+        if manager.checkCpuAvailability and manager.checkMemoryAvailability:
+            name = manager.runMininetContainer(dev=State.getDevStatus(), net=COMPOSE_NETWORK)
             State.setContainer(session_id, name)
 
             container = State.getContainer(session_id)
@@ -371,8 +371,8 @@ class ToyNetSessionById(MethodResource):
         # Spin up a miniflask container if one does not exist
         if container is None:
             running = False
-            if manager.check_cpu_availability and manager.check_memory_availability:
-                name = manager.run_mininet_container(dev=State.getDevStatus(), net=COMPOSE_NETWORK)
+            if manager.checkCpuAvailability and manager.checkMemoryAvailability:
+                name = manager.runMininetContainer(dev=State.getDevStatus(), net=COMPOSE_NETWORK)
                 State.setContainer(toynet_session_id, name)
                 container = State.getContainer(toynet_session_id)
 

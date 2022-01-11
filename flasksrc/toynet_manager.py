@@ -34,13 +34,13 @@ class ToynetManager():
     Toynet Docker images.
 
     Public methods:
-        run_mininet_container
-        build_mininet_container
-        import_image
+        runMininetContainer
+        buildMininetContainer
+        importImage
     Public static methods:
-        check_cpu_availability
-        check_memory_availability
-        check_network_exists
+        checkCpuAvailability
+        checkMemoryAvailability
+        checkNetworkExists
     Instance variables:
         client: a DockerClient to communicate with the Docker daemon
         dev_image: an Image object of the development Toynet image
@@ -60,11 +60,11 @@ class ToynetManager():
         self.dev_image = None
         self.prod_image = None
         self.running_containers = dict()
-        if not self.check_network_exists(self.client, net):
+        if not self.checkNetworkExists(self.client, net):
             raise docker.errors.APIError('Docker network does not exist,'
                                          f'make sure to create it: {net}')
 
-    def run_mininet_container(self, dev=True, net='bridge'):
+    def runMininetContainer(self, dev=True, net='bridge'):
         '''
         Runs the specified Docker image as a container and binds the provided
         file for Toynet to parse its initial topology from.
@@ -89,7 +89,7 @@ class ToynetManager():
             return image_name
 
         # Ensure the network exists already
-        if not self.check_network_exists(self.client, net):
+        if not self.checkNetworkExists(self.client, net):
             return ''
 
         new_container = self.client.containers.run(image_name, privileged=True,
@@ -99,7 +99,7 @@ class ToynetManager():
 
         return new_container.name
 
-    def build_mininet_container(self, dev=True, docker_file='dev.Dockerfile'):
+    def buildMininetContainer(self, dev=True, docker_file='dev.Dockerfile'):
         '''
         Builds the Toynet container from the local Dockerfile or dev.Dockerfile.
 
@@ -129,7 +129,7 @@ class ToynetManager():
 
         return True
 
-    def import_image(self, dev=True, image_name=DEV_IMAGE):
+    def importImage(self, dev=True, image_name=DEV_IMAGE):
         '''
         Imports the specified Toynet image from the existing Docker environment
 
@@ -155,7 +155,7 @@ class ToynetManager():
 
         return True
 
-    def kill_container(self, container_name):
+    def killContainer(self, container_name):
         '''
         Kills the specified Docker container if running.
 
@@ -176,7 +176,7 @@ class ToynetManager():
         return res
 
     @staticmethod
-    def check_network_exists(client, network_name):
+    def checkNetworkExists(client, network_name):
         '''
         Checks if the specified network exists and creates it if not.
 
@@ -198,7 +198,7 @@ class ToynetManager():
         return False
 
     @staticmethod
-    def check_cpu_availability(short_thresh=80.0, med_thresh=75.0, long_thresh=70.0):
+    def checkCpuAvailability(short_thresh=80.0, med_thresh=75.0, long_thresh=70.0):
         '''
         Polls the CPU load and determines if the system can safely start
         another Toynet container.
@@ -227,7 +227,7 @@ class ToynetManager():
         return True
 
     @staticmethod
-    def check_memory_availability(threshold=75.0, min_mem=2):
+    def checkMemoryAvailability(threshold=75.0, min_mem=2):
         '''
         Polls system memory to determine if the system can safely start another
         Toynet container.
@@ -258,33 +258,33 @@ def main():
     test_toynet = ToynetManager()
 
     # Resource checks
-    if test_toynet.check_cpu_availability(85.0, 75.0, 60.0):
+    if test_toynet.checkCpuAvailability(85.0, 75.0, 60.0):
         print('Sufficient CPU')
     else:
         print('Insufficient CPU')
         sys.exit(1)
-    if test_toynet.check_memory_availability():
+    if test_toynet.checkMemoryAvailability():
         print('Sufficient RAM')
     else:
         print('Insufficient RAM')
         sys.exit(1)
 
     # Build containers
-    test_toynet.build_mininet_container()
-    test_toynet.build_mininet_container(dev=False, docker_file='Dockerfile')
+    test_toynet.buildMininetContainer()
+    test_toynet.buildMininetContainer(dev=False, docker_file='Dockerfile')
     print('Finished building images')
 
     # Run containers
     print('Running containers')
-    dev_container = test_toynet.run_mininet_container()
-    prod_container = test_toynet.run_mininet_container(dev=False)
+    dev_container = test_toynet.runMininetContainer()
+    prod_container = test_toynet.runMininetContainer(dev=False)
 
     # Kill the containers
-    if test_toynet.kill_container(dev_container):
+    if test_toynet.killContainer(dev_container):
         print('Killed development container successfully')
     else:
         print('Error killing dev container')
-    if test_toynet.kill_container(prod_container):
+    if test_toynet.killContainer(prod_container):
         print('Killed production container successfully')
     else:
         print('Error killing production container')
