@@ -476,6 +476,86 @@ def test_session_by_id_links(client):
     )
     assert rv.status_code == 200
 
+def test_session_by_id_router_interface_add_delete(client):
+    # Establish session
+    client.post(
+          '/api/user',
+          json={
+              'username': 'arthur@projectreclass.org',
+              'password': 'BaLtH@$0R',
+              'first_name': 'Arthur',
+          },
+    )
+
+    rv = client.post(
+        '/api/toynet/session',
+        json={
+            'toynet_topo_id': 1,
+            'toynet_user_id': 'arthur@projectreclass.org',
+        },
+    ) 
+    assert rv.status_code == 201
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['running'] == True
+    # Save session id
+    session_id = rv_json['toynet_session_id']
+
+    # Add interface to router
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '100.100.100.100/10',
+        },
+    )
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][150:181] == '<intf>100.100.100.100/10</intf>'
+
+    # Delete the interface from the router
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '100.100.100.100/10',
+        },
+    )
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'][150:172] == '</router></routerList>'
+
+    # Confirm bad delete fails (interface does not exist)
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '100.100.100.100/10',
+        },
+    )
+    assert rv.status_code == 400
+
+    # Confirm bad delete fails (interface in use)
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '10.0.0.1/30',
+        },
+    )
+    assert rv.status_code == 400
+
+    # Confirm bad delete fails (no such router)
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r100',
+            'ip': '10.0.0.1/30',
+        },
+    )
+    assert rv.status_code == 400
+
 #the /api/toynet/session/<id>:POST endpoint sends a toynet_command to the
 #corresponding session's MiniFlask /api/toynet/command:POST endpoint
 def test_session_by_id_post(client):

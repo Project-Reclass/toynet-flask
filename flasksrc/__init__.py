@@ -84,8 +84,9 @@ def create_app(test_config=None):
     from .session import ToyNetSession, ToyNetSessionById, \
         ToyNetSessionByIdTerminate, ToyNetSessionByIdCreateHost, \
         ToyNetSessionByIdCreateSwitch, ToyNetSessionByIdCreateRouter, \
-        ToyNetSessionByIdCreateLink, ToyNetSessionByIdDeleteDevice, \
-        ToyNetSessionByIdDeleteLink
+        ToyNetSessionByIdCreateRouterInterface, ToyNetSessionByIdCreateLink, \
+        ToyNetSessionByIdDeleteDevice, ToyNetSessionByIdDeleteLink, \
+        ToyNetSessionByIdDeleteRouterInterface
     api.add_resource(ToyNetSession, '/api/toynet/session')
     api.add_resource(ToyNetSessionById, '/api/toynet/session/<int:toynet_session_id>')
     api.add_resource(ToyNetSessionByIdTerminate,
@@ -102,14 +103,20 @@ def create_app(test_config=None):
                      '/api/toynet/session/<int:toynet_session_id>/delete/link')
     api.add_resource(ToyNetSessionByIdDeleteDevice,
                      '/api/toynet/session/<int:toynet_session_id>/delete/<string:device_type>')
+    api.add_resource(ToyNetSessionByIdCreateRouterInterface,
+                     '/api/toynet/session/<int:toynet_session_id>/create/router/interface')
+    api.add_resource(ToyNetSessionByIdDeleteRouterInterface,
+                     '/api/toynet/session/<int:toynet_session_id>/delete/router/interface')
     docs.register(ToyNetSession)
     docs.register(ToyNetSessionById)
     docs.register(ToyNetSessionByIdTerminate)
     docs.register(ToyNetSessionByIdCreateHost)
     docs.register(ToyNetSessionByIdCreateSwitch)
     docs.register(ToyNetSessionByIdCreateRouter)
+    docs.register(ToyNetSessionByIdCreateRouterInterface)
     docs.register(ToyNetSessionByIdCreateLink)
     docs.register(ToyNetSessionByIdDeleteLink)
     docs.register(ToyNetSessionByIdDeleteDevice)
+    docs.register(ToyNetSessionByIdDeleteRouterInterface)
 
     return app

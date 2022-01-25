@@ -86,6 +86,15 @@ class ToyNetSessionByIdCreateRouterPutResp(Schema):
     pass
 
 
+class ToyNetSessionByIdCreateRouterInterfacePutReq(Schema):
+    name = fields.Str()
+    ip = fields.Str()
+
+
+class ToyNetSessionByIdCreateRouterInterfacePutResp(Schema):
+    pass
+
+
 class ToyNetSessionByIdCreateSwitchPutReq(Schema):
     name = fields.Str()
 
@@ -117,6 +126,15 @@ class ToyNetSessionByIdDeleteLinkPutReq(Schema):
 
 
 class ToyNetSessionByIdDeleteLinkPutResp(Schema):
+    pass
+
+
+class ToyNetSessionByIdDeleteRouterInterfacePutReq(Schema):
+    name = fields.Str()
+    ip = fields.Str()
+
+
+class ToyNetSessionByIdDeleteRouterInterfacePutResp(Schema):
     pass
 
 
@@ -607,6 +625,105 @@ class ToyNetSessionByIdCreateRouter(MethodResource):
             }, 200
 
 
+class ToyNetSessionByIdCreateRouterInterface(MethodResource):
+    @use_kwargs(ToyNetSessionByIdCreateRouterInterfacePutReq)
+    @marshal_with(ToyNetSessionByIdCreateRouterInterfacePutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdCreateRouterInterfacePutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        # Separate validation from Marshmallow
+        if 'ip' not in req:
+            abort(400, message='Missing ip from req')
+        elif 'name' not in req:
+            abort(400, message='Missing name from req')
+
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        # Get the router to add the interface to, note that we do not validate
+        # that the IP address is "good" (eg: not a duplicate of another
+        # interface)
+        router = None
+        router_list = root.find('routerList').findall('router')
+
+        for device in router_list:
+            if device.get('name') == req['name']:
+                router = device
+
+        if router is None:
+            abort(400, message=f'Router {req["name"]} does not exist')
+
+        # Create XML elements and update topology
+        interface = ET.Element('intf')
+        interface.text = req['ip']
+        router.append(interface)
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+        return {
+            }, 200
+
+
+class ToyNetSessionByIdDeleteRouterInterface(MethodResource):
+    @use_kwargs(ToyNetSessionByIdDeleteRouterInterfacePutReq)
+    @marshal_with(ToyNetSessionByIdDeleteRouterInterfacePutResp)
+    def put(self, toynet_session_id, **kwargs):
+        try:
+            req = ToyNetSessionByIdDeleteRouterInterfacePutReq().load(kwargs)
+        except ValidationError as e:
+            abort(400, message='Invalid request: {}'.format(e))
+
+        # Separate validation from Marshmallow
+        if 'ip' not in req:
+            abort(400, message='Missing ip from req')
+        elif 'name' not in req:
+            abort(400, message='Missing name from req')
+
+        orig_topology = getTopologyFromDb(toynet_session_id)['topology']
+        root = ET.fromstring(orig_topology)
+
+        # Update the topology and get the interface index
+        intf_idx = None
+        for device in root.find('routerList'):
+            if device.attrib['name'] == req['name']:
+                for idx, intf in enumerate(device.findall('intf')):
+                    if intf.text == req['ip']:
+                        device.remove(intf)
+                        intf_idx = idx
+                        break
+                else:  # This corresponds to the 'for' loop, not the 'if' statement
+                    continue
+            else:
+                continue
+            break  # Used with the above commented 'else' to break out of both loops
+        else:
+            abort(400, message=f'No interface with IP {req["ip"]} on {req["name"]}')
+
+        new_topology = ET.tostring(root).decode('utf-8')
+
+        # Verify that the interface is not in use - aborts topo change if needed
+        for link in root.find('linkList').iter('dvc'):
+            intf = link.get('intf')
+            if req['name'] == link.attrib['name'] and intf and intf.text == intf_idx:
+                abort(400, message=f'Interface with IP {req["ip"]} on {req["name"]}'
+                      ' is connected to another device')
+
+        # Send to mininet and update DB, these functions abort the REST call on
+        # failure
+        sendTopoToMininet(toynet_session_id, new_topology)
+        updateTopoInDb(toynet_session_id, new_topology)
+
+        return {
+            }, 200
+
+
 class ToyNetSessionByIdCreateLink(MethodResource):
     def getNextIntfForSwitch(self, root, name):
         intfs = list()
@@ -706,7 +823,7 @@ class ToyNetSessionByIdCreateLink(MethodResource):
                 break
         else:  # Refers to the outer for loop, not the if
             # No available interfaces
-            abort(400, message='Device {req["dev_1"]} has no available interfaces')
+            abort(400, message=f'Device {req["dev_1"]} has no available interfaces')
 
         dev2_intf.text = self.getNextIntfForSwitch(root, dev2.attrib['name'])
 
