@@ -28,10 +28,10 @@ help:
 	@echo "\ttest --runs the tests on the test container; default: all tests; specific tests: 'ARGS=<filename>' "
 	@echo "\t\texample: make test ARGS=test_command.py"
 
-prod: prod-image
+prod: prod-image mininet-prod
 	docker run --privileged -v /lib/modules:/lib/modules -v -p 5000:5000 /var/run/docker.sock:/var/run/docker.sock $(prod-tag)
 
-prod-test: prod-image
+prod-test: prod-image mininet-prod-test
 	. environment/env-prod; docker run \
 		-t \
 		--network=$${COMPOSE_NETWORK} \
@@ -49,7 +49,7 @@ test: test-image
 		-v /var/run/docker.sock:/var/run/docker.sock \
 		--entrypoint "/bin/bash" $(dev-tag) -c "/app/test-entrypoint.sh tests/$(ARGS)"
 
-prod-image:
+prod-image: mininet-prod-image
 	. environment/env-prod; docker build \
 		--build-arg FLASK_APP=$${FLASK_APP} \
 		--build-arg FLASK_ENV=$${FLASK_ENV} \
@@ -58,7 +58,7 @@ prod-image:
 		--build-arg COMPOSE_NETWORK=$${COMPOSE_NETWORK} \
 		-f Dockerfile -t $(prod-tag) .
 
-test-image:
+test-image: mininet-test-image
 	. environment/env-dev; docker build \
 		--build-arg FLASK_APP=$${FLASK_APP} \
 		--build-arg FLASK_ENV=$${FLASK_ENV} \
@@ -66,3 +66,24 @@ test-image:
 		--build-arg MINI_FLASK_PORT=$${MINI_FLASK_PORT} \
 		--build-arg COMPOSE_NETWORK=$${COMPOSE_NETWORK} \
 		-f dev.Dockerfile -t $(dev-tag) .
+
+mininet-prod: mininet-prod-image
+	$(MAKE) -C toynet_mininet prod
+
+mininet-prod-test: mininet-test-image
+	$(MAKE) -C toynet_mininet-prod-test
+
+mininet-prod-image:
+	$(MAKE) -C toynet_mininet prod-image
+
+mininet-test-image:
+	$(MAKE) -C toynet_mininet test-image
+
+#run linting that will be run from CI pipeline
+lint:
+	flake8 flasksrc --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 flasksrc --count --max-complexity=15 --max-line-length=100 --statistics
+
+pr-validate: lint test
+
+
