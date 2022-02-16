@@ -28,6 +28,7 @@ help:
 	@echo "\t\texample: make test ARGS=test_command.py"
 	@echo "\tinteractive --interacts with mininet on the test container"
 	@echo "\tinteractive-container --interacts with the test container"
+	@echo "\tlint --runs the linting"
 
 prod: prod-image
 	docker run \
@@ -81,3 +82,7 @@ prod-image:
 
 test-image:
 	docker build -f dev.Dockerfile -t miniflask-dev .
+
+lint:
+	flake8 flasksrc --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 flasksrc --count --max-complexity=15 --max-line-length=100 --statistics	

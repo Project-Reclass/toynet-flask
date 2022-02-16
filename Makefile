@@ -27,6 +27,17 @@ help:
 	@echo "\ttest-image --builds the test image"
 	@echo "\ttest --runs the tests on the test container; default: all tests; specific tests: 'ARGS=<filename>' "
 	@echo "\t\texample: make test ARGS=test_command.py"
+	@echo "\tlint --runs the flake8 lint tests that are part of the CI pipeline"
+	@echo ""
+	@echo "Toynet Mininet targets:"
+	@echo "\tmininet-prod --runs the mininet container"
+	@echo "\tmininet-prod-image --builds the mininet production image"
+	@echo "\tmininet-prod-test --runs the tests on the mininet production container"
+	@echo "\tmininet-test-image --builds the mininet test image"
+	@echo ""
+	@echo "Pull Request Validation targets:"
+	@echo "pr-validate --runs the linting and testing targets"
+	
 
 prod: prod-image mininet-prod
 	docker run --privileged -v /lib/modules:/lib/modules -v -p 5000:5000 /var/run/docker.sock:/var/run/docker.sock $(prod-tag)
@@ -58,7 +69,7 @@ prod-image: mininet-prod-image
 		--build-arg COMPOSE_NETWORK=$${COMPOSE_NETWORK} \
 		-f Dockerfile -t $(prod-tag) .
 
-test-image: mininet-test-image
+test-image: 
 	. environment/env-dev; docker build \
 		--build-arg FLASK_APP=$${FLASK_APP} \
 		--build-arg FLASK_ENV=$${FLASK_ENV} \
@@ -84,6 +95,6 @@ lint:
 	flake8 flasksrc --count --select=E9,F63,F7,F82 --show-source --statistics
 	flake8 flasksrc --count --max-complexity=15 --max-line-length=100 --statistics
 
-pr-validate: lint test
+pr-validate: test lint 
 
 
