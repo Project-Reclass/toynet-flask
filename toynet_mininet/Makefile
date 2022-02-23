@@ -40,14 +40,14 @@ prod-test: prod-image
 		-t \
 		--privileged \
 		-v /lib/modules:/lib/modules \
-		--entrypoint "/bin/sh" miniflask-prod -c "/root/toynet-mininet/test-entrypoint.sh tests/$(ARGS)"
+		--entrypoint "/bin/sh" miniflask-prod -c "/root/toynet-flask/toynet_mininet/test-entrypoint.sh tests/$(ARGS)"
 
 prod-interactive: prod-image
 	docker run \
 		--privileged \
 		-it \
 		-v /lib/modules:/lib/modules \
-		--entrypoint "/bin/sh" miniflask-prod -c /root/toynet-mininet/interactive-entrypoint.sh
+		--entrypoint "/bin/sh" miniflask-prod -c /root/toynet-flask/toynet_mininet/interactive-entrypoint.sh
 
 prod-interactive-container: prod-image
 	docker run \
@@ -61,14 +61,14 @@ test: test-image
 		-t \
 		--privileged \
 		-v /lib/modules:/lib/modules \
-		--entrypoint "/bin/sh" miniflask-dev -c "/root/toynet-mininet/test-entrypoint.sh tests/$(ARGS)"
+		--entrypoint "/bin/sh" miniflask-dev -c "/root/toynet-flask/toynet_mininet/test-entrypoint.sh tests/$(ARGS)"
 
 interactive: test-image
 	docker run \
 		--privileged \
 		-it \
 		-v /lib/modules:/lib/modules \
-		--entrypoint "/bin/sh" miniflask-dev -c /root/toynet-mininet/interactive-entrypoint.sh
+		--entrypoint "/bin/sh" miniflask-dev -c /root/toynet-flask/toynet_mininet/interactive-entrypoint.sh
 
 interactive-container: test-image
 	docker run \

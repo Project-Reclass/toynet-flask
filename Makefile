@@ -39,10 +39,10 @@ help:
 	@echo "pr-validate --runs the linting and testing targets"
 	
 
-prod: prod-image mininet-prod
-	docker run --privileged -v /lib/modules:/lib/modules -v -p 5000:5000 /var/run/docker.sock:/var/run/docker.sock $(prod-tag)
+prod: prod-image mininet-prod-image
+	docker run --privileged -v /lib/modules:/lib/modules -p 5000:5000 -v /var/run/docker.sock:/var/run/docker.sock $(prod-tag)
 
-prod-test: prod-image mininet-prod-test
+prod-test: prod-image mininet-prod-image
 	. environment/env-prod; docker run \
 		-t \
 		--network=$${COMPOSE_NETWORK} \
@@ -78,10 +78,10 @@ test-image:
 		--build-arg COMPOSE_NETWORK=$${COMPOSE_NETWORK} \
 		-f dev.Dockerfile -t $(dev-tag) .
 
-mininet-prod: mininet-prod-image
+mininet-prod: 
 	$(MAKE) -C toynet_mininet prod
 
-mininet-prod-test: mininet-test-image
+mininet-prod-test:
 	$(MAKE) -C toynet_mininet-prod-test
 
 mininet-prod-image:

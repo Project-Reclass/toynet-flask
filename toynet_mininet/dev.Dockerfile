@@ -48,12 +48,13 @@ ENV FLASK_ENV=development
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-WORKDIR /root/toynet-mininet
+WORKDIR /root/toynet-flask/toynet_mininet
 COPY requirements.txt .
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
 RUN pip3 install -r requirements.txt 
-COPY . . 
-RUN chmod +x /root/toynet-mininet/*.sh
 
-ENTRYPOINT ["/root/toynet-mininet/entrypoint.sh"]
+COPY . . 
+RUN chmod +x /root/toynet-flask/toynet_mininet/*.sh
+
+ENTRYPOINT ["/root/toynet-flask/toynet_mininet/entrypoint.sh"]
