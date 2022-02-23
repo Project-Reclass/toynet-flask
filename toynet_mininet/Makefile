@@ -77,12 +77,15 @@ interactive-container: test-image
 		-v /lib/modules:/lib/modules \
 		--entrypoint "/bin/bash" miniflask-dev
 
-prod-image:
+prod-image: submodule-init
 	docker build -f Dockerfile -t miniflask-prod .
 
-test-image:
+test-image: submodule-init
 	docker build -f dev.Dockerfile -t miniflask-dev .
 
 lint:
 	flake8 flasksrc --count --select=E9,F63,F7,F82 --show-source --statistics
 	flake8 flasksrc --count --max-complexity=15 --max-line-length=100 --statistics	
+
+submodule-init:
+	cd mininet-submodule && git submodule update --init --recursive
