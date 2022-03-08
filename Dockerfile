@@ -29,6 +29,8 @@ RUN pip3 install -r requirements.txt
 
 COPY . .
 
+RUN chmod +x /app/*.sh
+
 ENV FLASK_APP ${FLASK_APP}
 ENV FLASK_ENV ${FLASK_ENV}
 ENV TOYNET_IMAGE_TAG ${TOYNET_IMAGE_TAG}

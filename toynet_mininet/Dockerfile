@@ -56,6 +56,6 @@ WORKDIR /root/toynet-mininet
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
 RUN pip3 install -r requirements.txt 
-RUN chmod +x /root/toynet-mininet/*entrypoint.sh
+RUN chmod +x /root/toynet-mininet/*.sh
 
 ENTRYPOINT ["/root/toynet-mininet/entrypoint.sh"]
