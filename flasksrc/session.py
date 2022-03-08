@@ -87,7 +87,9 @@ class ToyNetSessionByIdCreateRouterPutResp(Schema):
 
 
 class ToyNetSessionByIdCreateRouterInterfacePutReq(Schema):
+    # Router name to create the interface on, eg: r1
     name = fields.Str()
+    # IPv4 address, eg: 192.168.1.1/24
     ip = fields.Str()
 
 
@@ -130,7 +132,9 @@ class ToyNetSessionByIdDeleteLinkPutResp(Schema):
 
 
 class ToyNetSessionByIdDeleteRouterInterfacePutReq(Schema):
+    # Router name to delete the interface on, eg: r1
     name = fields.Str()
+    # IPv4 address, eg: 192.168.1.1/24
     ip = fields.Str()
 
 
@@ -657,9 +661,9 @@ class ToyNetSessionByIdCreateRouterInterface(MethodResource):
             abort(400, message=f'Router {req["name"]} does not exist')
 
         # Create XML elements and update topology
-        interface = ET.Element('intf')
-        interface.text = req['ip']
-        router.append(interface)
+        new_interface = ET.Element('intf')
+        new_interface.text = req['ip']
+        router.append(new_interface)
         new_topology = ET.tostring(root).decode('utf-8')
 
         # Send to mininet and update DB, these functions abort the REST call on
@@ -672,6 +676,38 @@ class ToyNetSessionByIdCreateRouterInterface(MethodResource):
 
 
 class ToyNetSessionByIdDeleteRouterInterface(MethodResource):
+    @classmethod
+    def propagateLinkIndexChanges(cls, intf_idx, root, req_name, req_ip):
+        # Update the links for this device and verify that the interface is not
+        # in use - abort topo change if needed
+        # Also update links so that interface connections are still correct
+        for link in root.find('linkList').iter('link'):
+            for dvc in link:
+                if 'name' in dvc.attrib and dvc.attrib['name'] == req_name:
+                    intf = dvc.find('intf')
+                    if int(intf.text) == intf_idx:
+                        abort(400, message=f'Interface with IP {req_ip} on'
+                              f' {req_name} is connected to another device')
+                    elif int(intf.text) > intf_idx:
+                        intf.text = str(int(intf.text) - 1)
+                    else:
+                        pass
+
+        # Perform the same checks for host default gateways
+        for dvc in root.find('hostList').findall('host'):
+            name = dvc.find('defaultRouter').find('name')
+            intf = dvc.find('defaultRouter').find('intf')
+
+            if name.text == req_name and int(intf.text) == intf_idx:
+                abort(400, message=f'Interface with IP {req_ip} on'
+                      f' {req_name} is the default gateway of {dvc.attrib["name"]}')
+            elif name.text == req_name and int(intf.text) > intf_idx:
+                intf.text = str(int(intf.text) - 1)
+            else:
+                pass
+
+        return root
+
     @use_kwargs(ToyNetSessionByIdDeleteRouterInterfacePutReq)
     @marshal_with(ToyNetSessionByIdDeleteRouterInterfacePutResp)
     def put(self, toynet_session_id, **kwargs):
@@ -706,14 +742,11 @@ class ToyNetSessionByIdDeleteRouterInterface(MethodResource):
         else:
             abort(400, message=f'No interface with IP {req["ip"]} on {req["name"]}')
 
-        new_topology = ET.tostring(root).decode('utf-8')
+        # Will abort if it is invalid to propagate
+        root = ToyNetSessionByIdDeleteRouterInterface.propagateLinkIndexChanges(
+                intf_idx, root, req['name'], req['ip'])
 
-        # Verify that the interface is not in use - aborts topo change if needed
-        for link in root.find('linkList').iter('dvc'):
-            intf = link.get('intf')
-            if req['name'] == link.attrib['name'] and intf and intf.text == intf_idx:
-                abort(400, message=f'Interface with IP {req["ip"]} on {req["name"]}'
-                      ' is connected to another device')
+        new_topology = ET.tostring(root).decode('utf-8')
 
         # Send to mininet and update DB, these functions abort the REST call on
         # failure
