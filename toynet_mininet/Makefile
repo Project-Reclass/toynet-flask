@@ -78,7 +78,7 @@ interactive-container: test-image
 		--entrypoint "/bin/bash" miniflask-dev
 
 prod-image: submodule-init
-	docker build -f Dockerfile -t miniflask-prod .
+	docker build --no-cache -f Dockerfile -t miniflask-prod .
 
 test-image: submodule-init
 	docker build -f dev.Dockerfile -t miniflask-dev .
