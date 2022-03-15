@@ -45,8 +45,8 @@ class MiniFlaskTopo(MethodResource):
                 State.getInstance().start()
             else:
                 State.getInstance().restart(new_topology=req['topology'])
-        except (XMLParseError, TypeCheckError):
-            abort(400, message=f'failed to parse XML topology {State.getInstance()}')
+        except (XMLParseError, TypeCheckError) as e:
+            abort(400, message=f'failed to parse XML topology {State.getInstance()}; ' + str(e))
 
         return {
         }, 200

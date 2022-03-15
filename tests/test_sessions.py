@@ -476,6 +476,190 @@ def test_session_by_id_links(client):
     )
     assert rv.status_code == 200
 
+def test_session_by_id_router_interface_add_delete(client):
+    # Establish session
+    client.post(
+          '/api/user',
+          json={
+              'username': 'arthur@projectreclass.org',
+              'password': 'BaLtH@$0R',
+              'first_name': 'Arthur',
+          },
+    )
+
+    rv = client.post(
+        '/api/toynet/session',
+        json={
+            'toynet_topo_id': 1,
+            'toynet_user_id': 'arthur@projectreclass.org',
+        },
+    ) 
+    assert rv.status_code == 201
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['running'] == True
+    # Save session id
+    session_id = rv_json['toynet_session_id']
+
+    # Add interface to router
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '100.100.100.100/10',
+        },
+    )
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'].count('100.100.100.100/10') == 1
+
+    # Add a duplicate interface to router (this should pass to let students
+    # troubleshoot bad configurations)
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '100.100.100.100/10',
+        },
+    )
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'].count('100.100.100.100/10') == 2
+
+    # Add another interface to router
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/create/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '200.200.200.200/20',
+        },
+    )
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'].count('200.200.200.200/20') == 1
+
+    # Delete the interface from the router
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '100.100.100.100/10',
+        },
+    )
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'].count('100.100.100.100/10') == 1
+
+    # Delete the duplicate interface from the router
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '100.100.100.100/10',
+        },
+    )
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'].count('100.100.100.100/10') == 0
+
+    # Delete the non-duplicate interface from the router
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '200.200.200.200/20',
+        },
+    )
+    assert rv.status_code == 200
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'].count('200.200.200.200/20') == 0
+
+    # Confirm bad delete fails (interface does not exist)
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '100.100.100.100/10',
+        },
+    )
+    assert rv.status_code == 400
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['message'] == 'No interface with IP 100.100.100.100/10 on r1'
+
+    # Confirm bad delete fails (interface in use)
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '172.16.1.1/24',
+        },
+    )
+    assert rv.status_code == 400
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['message'] == 'Interface with IP 172.16.1.1/24 on r1 is connected to another device'
+
+    # Confirm bad delete fails (no such router)
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r100',
+            'ip': '10.0.0.1/30',
+        },
+    )
+    assert rv.status_code == 400
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['message'] == 'No interface with IP 10.0.0.1/30 on r100'
+
+    # Confirm that we can add up to 25 interfaces
+    # These are not all valid IPs (accepting invalid IPs is intended behavior
+    # so that students can debug networking errors resulting from them)
+    intf_num = 25
+    while intf_num > 0:
+        rv = client.put(
+            f'/api/toynet/session/{session_id}/create/router/interface',
+            json={
+                'name': 'r1',
+                'ip': f'200.200.200.{intf_num}/20',
+            },
+        )
+        assert rv.status_code == 200
+        intf_num -= 1
+
+    assert intf_num == 0
+
+    # Delete an interface of low number so that higher links and default
+    # gateways have to be updated
+    # Delete link to low-number interface
+    rv = client.put(
+            f'/api/toynet/session/{session_id}/delete/link',
+            json={
+                'dev_1': 'r1',
+                'dev_2': 's1',
+                },
+    )
+    assert rv.status_code == 200
+
+    # Delete the interface
+    rv = client.put(
+        f'/api/toynet/session/{session_id}/delete/router/interface',
+        json={
+            'name': 'r1',
+            'ip': '10.0.0.1/30',
+        },
+    )
+    assert rv.status_code == 200
+
+    # Verify that other interfaces updated correctly
+    rv = client.get(f'/api/toynet/session/{session_id}')
+    rv_json = json.loads(rv.data.decode('utf-8'))
+    assert rv_json['topology'].count('<name>r1</name><intf>0</intf>') == 1
+    assert rv_json['topology'].count('<name>r1</name><intf>1</intf>') == 1
+
 #the /api/toynet/session/<id>:POST endpoint sends a toynet_command to the
 #corresponding session's MiniFlask /api/toynet/command:POST endpoint
 def test_session_by_id_post(client):
