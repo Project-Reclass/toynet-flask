@@ -28,6 +28,7 @@ help:
 	@echo "\t\texample: make test ARGS=test_command.py"
 	@echo "\tinteractive --interacts with mininet on the test container"
 	@echo "\tinteractive-container --interacts with the test container"
+	@echo "\tlint --runs the linting"
 
 prod: prod-image
 	docker run \
@@ -39,14 +40,14 @@ prod-test: prod-image
 		-t \
 		--privileged \
 		-v /lib/modules:/lib/modules \
-		--entrypoint "/bin/sh" miniflask-prod -c "/root/toynet-mininet/test-entrypoint.sh tests/$(ARGS)"
+		--entrypoint "/bin/sh" miniflask-prod -c "/root/toynet-flask/toynet_mininet/test-entrypoint.sh tests/$(ARGS)"
 
 prod-interactive: prod-image
 	docker run \
 		--privileged \
 		-it \
 		-v /lib/modules:/lib/modules \
-		--entrypoint "/bin/sh" miniflask-prod -c /root/toynet-mininet/interactive-entrypoint.sh
+		--entrypoint "/bin/sh" miniflask-prod -c /root/toynet-flask/toynet_mininet/interactive-entrypoint.sh
 
 prod-interactive-container: prod-image
 	docker run \
@@ -60,14 +61,14 @@ test: test-image
 		-t \
 		--privileged \
 		-v /lib/modules:/lib/modules \
-		--entrypoint "/bin/sh" miniflask-dev -c "/root/toynet-mininet/test-entrypoint.sh tests/$(ARGS)"
+		--entrypoint "/bin/sh" miniflask-dev -c "/root/toynet-flask/toynet_mininet/test-entrypoint.sh tests/$(ARGS)"
 
 interactive: test-image
 	docker run \
 		--privileged \
 		-it \
 		-v /lib/modules:/lib/modules \
-		--entrypoint "/bin/sh" miniflask-dev -c /root/toynet-mininet/interactive-entrypoint.sh
+		--entrypoint "/bin/sh" miniflask-dev -c /root/toynet-flask/toynet_mininet/interactive-entrypoint.sh
 
 interactive-container: test-image
 	docker run \
@@ -76,8 +77,15 @@ interactive-container: test-image
 		-v /lib/modules:/lib/modules \
 		--entrypoint "/bin/bash" miniflask-dev
 
-prod-image:
-	docker build -f Dockerfile -t miniflask-prod .
+prod-image: submodule-init
+	docker build --no-cache -f Dockerfile -t miniflask-prod .
 
-test-image:
+test-image: submodule-init
 	docker build -f dev.Dockerfile -t miniflask-dev .
+
+lint:
+	flake8 flasksrc --count --select=E9,F63,F7,F82 --show-source --statistics
+	flake8 flasksrc --count --max-complexity=15 --max-line-length=100 --statistics	
+
+submodule-init:
+	cd mininet-submodule && git submodule update --init --recursive

@@ -46,16 +46,17 @@ RUN apt-get update && apt-get install -y apt-transport-https && apt-get install 
 EXPOSE 5000
 
 ENV FLASK_APP=flasksrc
-ENV FLASK_ENV=development
+ENV FLASK_ENV=production
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 
-RUN git clone https://github.com/Project-Reclass/toynet-mininet.git && cd toynet-mininet && git submodule update --init --recursive && chmod +x /root/toynet-mininet/entrypoint.sh
+RUN git clone https://github.com/Project-Reclass/toynet-flask.git && cd toynet-flask && git submodule update --init --recursive
 
-WORKDIR /root/toynet-mininet
+WORKDIR /root/toynet-flask/toynet_mininet
 RUN pip3 install --upgrade pip
 RUN pip3 install --upgrade setuptools
 RUN pip3 install -r requirements.txt 
-RUN chmod +x /root/toynet-mininet/*.sh
 
-ENTRYPOINT ["/root/toynet-mininet/entrypoint.sh"]
+RUN chmod +x /root/toynet-flask/toynet_mininet/*.sh
+
+ENTRYPOINT ["/root/toynet-flask/toynet_mininet/entrypoint.sh"]

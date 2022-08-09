@@ -16,7 +16,6 @@
 from marshmallow import Schema, fields, ValidationError
 from flask_restful import abort
 from flask_apispec import marshal_with, MethodResource, use_kwargs
-from toynet.toynet import ToyNet
 from toynet.state import State
 
 
@@ -35,7 +34,7 @@ class MiniFlaskTerminate(MethodResource):
     def post(self, **kwargs):
         try:
             req = MiniFlaskTerminatePostReq().load(kwargs)
-        except ValidationError as e:
+        except ValidationError:
             abort(400, message='invalid terminate request')
 
         # Second validation outside of Marshmallow
@@ -49,7 +48,7 @@ class MiniFlaskTerminate(MethodResource):
                 State.getInstance().stop()
                 State.setInstance(None)
                 res = True
-            except Exception as e:
+            except Exception:
                 abort(500, message='terminate request failed')
 
         return {

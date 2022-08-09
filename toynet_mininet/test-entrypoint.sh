@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 # This file is part of Toynet-Flask.
 #
 # Toynet-Flask is free software: you can redistribute it and/or modify
@@ -13,7 +15,6 @@
 # You should have received a copy of the GNU General Public License
 # along with Toynet-Flask.  If not, see <https://www.gnu.org/licenses/>.
 
-#!/usr/bin/env bash
 service openvswitch-switch start
 ovs-vsctl set-manager ptcp:6640
 pytest -v --ignore tests/test_orchestration.py $1
