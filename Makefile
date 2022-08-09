@@ -90,11 +90,20 @@ mininet-prod-image:
 mininet-test-image:
 	$(MAKE) -C toynet_mininet test-image
 
+mininet-test:
+	$(MAKE) -C toynet_mininet test
+
+mininet-lint:
+	$(MAKE) -C toynet_mininet lint
+
+mininet-submodule-init:
+	$(MAKE) -C toynet_mininet submodule-init
+
 #run linting that will be run from CI pipeline
 lint:
 	flake8 flasksrc --count --select=E9,F63,F7,F82 --show-source --statistics
 	flake8 flasksrc --count --max-complexity=15 --max-line-length=100 --statistics
 
-pr-validate: test lint 
+pr-validate: test lint mininet-lint mininet-test
 
 
