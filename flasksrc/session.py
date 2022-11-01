@@ -20,6 +20,7 @@ from flasksrc.db import get_db
 
 from flasksrc.emulator.commandParser import parseModificationCommand
 from flasksrc.toynet_manager import ToynetManager
+from flasksrc import app
 
 import ipaddress
 import requests
@@ -33,6 +34,7 @@ MINI_FLASK_PORT = os.environ['MINI_FLASK_PORT']
 COMPOSE_NETWORK = 'bridge'
 if 'COMPOSE_NETWORK' in os.environ and os.environ['COMPOSE_NETWORK'] != '':
     COMPOSE_NETWORK = os.environ['COMPOSE_NETWORK']
+SESSION_TIMEOUT = 60 * 15  # 15 minute session timeout
 
 
 # Schema definitions
@@ -147,6 +149,7 @@ class ToyNetSessionByIdDeleteRouterInterfacePutResp(Schema):
 # This class contains:
 #   manager: ToynetManager object
 #   containers: dict[session_id - int]: name of Docker Container object - str
+#   last_used: dict[session_id - int]: timestamp of last interaction - int
 class State():
     # Throws an exception when the network does not exist
     manager = ToynetManager(COMPOSE_NETWORK)
@@ -156,6 +159,8 @@ class State():
         print(f'Failed to import image: {os.environ["TOYNET_IMAGE_TAG"]}', file=sys.stderr)
         sys.exit(1)
     containers = dict()
+    last_used = dict()
+    reaper_queue = list()
 
     @staticmethod
     def getDevStatus():
@@ -168,6 +173,7 @@ class State():
     @staticmethod
     def getContainer(session):
         if session in State.containers:
+            State.last_used[session] = time.time()
             return State.manager.running_containers[State.containers[session]]
         else:
             return None
@@ -175,15 +181,68 @@ class State():
     @staticmethod
     def setContainer(session, container):
         State.containers[session] = container
+        State.last_used[session] = time.time()
 
     @staticmethod
     def delContainer(session):
         res = False
         if session in State.containers:
             res = State.manager.killContainer(State.containers[session])
-            if res:
-                del State.containers[session]
+            if not res:
+                print(f'Failed to terminate container for session {session}, added to reaper queue')
+                # Enqueue to hopefully delete later
+                State.reaper_queue.append(State.containers[session])
+
+            # Invalidate container references for that session
+            State.containers.pop(session, None)
+            State.last_used.pop(session, None)
+        else:
+            print(f'Session not tracked in State.containers: {session}')
         return res
+
+    @staticmethod
+    def expireContainer():
+        '''This method iterates through all current sessions and times them out
+        if they are stale for longer than 15 minutes.
+
+        It is intended to be called every time there is a call to this API.
+        This is another stopgap measure to conserve resources until we offload
+        state from the backend.
+        '''
+        # First pass, put expired containers into reaper queue
+        candidates = list(State.last_used.keys()).copy()
+        for session in candidates:
+            now = time.time()
+            # Guard against modifying the dict mid-iteration
+            if session in State.last_used:
+                a_time = State.last_used[session]
+                if now - a_time > SESSION_TIMEOUT:
+                    State.reaper_queue.append(State.containers[session])
+                    State.containers.pop(session, None)
+                    State.last_used.pop(session, None)
+
+        # Iterate through and kill expired containers, only do 2 at a time to
+        # reduce lateny if many containers expire
+        tmp_queue = State.reaper_queue.copy()
+        killed = 0
+        for container_name in tmp_queue:
+            res = State.manager.killContainer(container_name)
+            if res:
+                print(f'Container killed successfully: {container_name}')
+                State.reaper_queue.remove(container_name)
+                killed += 1
+            if killed > 1:
+                break
+
+
+@app.before_request
+def checkSessions():
+    '''Wrapper that will call the above State.sessionExpire() method so we can
+    apply it to all below API calls.
+
+    Again, this is a temporary measure until we offload state.
+    '''
+    State.expireContainer()
 
 
 # Post data to a miniflask resource for the provided container
