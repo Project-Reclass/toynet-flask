@@ -19,6 +19,8 @@ from flask_restful import Resource, Api
 from flask_jwt_extended import JWTManager
 from flask_apispec import FlaskApiSpec
 
+app = None
+
 
 class HelloReclass(Resource):
     def get(self):
@@ -27,7 +29,9 @@ class HelloReclass(Resource):
 
 def create_app(test_config=None):
     # create and configure the app
+    global app
     app = Flask(__name__, instance_relative_config=True)
+
     JWTManager(app)
 
     if test_config is None:
