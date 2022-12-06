@@ -13,7 +13,7 @@ on:
 jobs:
   build:
     name: build-miniflask
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - name: Build miniflask
@@ -23,13 +23,13 @@ jobs:
 
   test:
     name: unit-test
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - name: Install Python 3
         uses: actions/setup-python@v1
         with:
-          python-version: 3.6
+          python-version: 3.11.0
       - name: Install dependencies
         run: |
           pip3 install --upgrade pip
@@ -47,7 +47,7 @@ jobs:
 
   lint:
     name: lint
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies
