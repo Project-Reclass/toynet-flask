@@ -1,6 +1,6 @@
 aniso8601==9.0.1
 apispec==4.7.0
-argon2-cffi==20.1.0
+argon2-cffi==21.3.0
 attrs==21.2.0
 certifi==2021.5.30
 cffi==1.14.5
@@ -23,7 +23,7 @@ MarkupSafe==2.0.1
 marshmallow==3.12.1
 packaging==20.9
 pluggy==0.13.1
-psutil==5.8.0
+psutil==5.9.4
 py==1.10.0
 pycparser==2.20
 PyJWT==2.1.0
