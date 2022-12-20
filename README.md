@@ -56,12 +56,17 @@ Make sure that, if you are testing anything related to sessions or network emula
 
 The following tutorial applies to Linux / MacOS development environments. Visit Windows documentation [here](documentation/windows.md).
 
+type: "cd .." to go back to the toynet-flask directory
+
 ```
 # populate environment variables for testing
-$ source instances/env-dev
+$ source environment/env-dev
 
 # Populate environment variables for production
-$ source instances/env-prod
+$ source environment/env-prod
+
+# create reclass_network
+$ docker network create reclass_network
 
 # creates instance/toynet.sqlite
 $ flask init-db 
