@@ -1,4 +1,4 @@
-# toynet-flask
+# ToyNet Flask
 This is the Backend service of the ToyNet emulator and learning platform.
 
 # Requirements
@@ -50,23 +50,23 @@ $ cd toynet_mininet
 $ git submodule update --init --recursive
 ```
 
-You will then need to build the image. The default way, which will work with the Makefile here, is to go into the `toynet_mininet` submodule and run:
+You will then need to build the image which will work with the Makefile here. The default way is to go into the `toynet_mininet` submodule and run one of the following, also in the `toynet_mininet` directory:
+
+*If you want a TEST(dev) image then run:*
 ```
 $ make test-image
 ```
 
-if you want a test image. If you want a production image then run:
-
+*If you want a PRODUCTION(prod) image then run:*
 ```
 $ make prod-image
 ```
 
-also in the `toynet_mininet` directory.
 
 **Note:** See the [toynet_mininet README](https://github.com/Project-Reclass/toynet-flask/blob/main/toynet_mininet/README.md) for more information on building and developing `toynet_mininet`.
 
 # Run the service
-Make sure that, if you are testing anything related to sessions or network emulation, that you build the appropriate image (dev or prod) in `toynet-mininet`.
+**Make sure that if you are testing anything related to sessions or network emulation, that you build the appropriate image (dev or prod) in `toynet-mininet`.**
 
 The following tutorial applies to Linux / MacOS development environments. Visit Windows documentation [here](documentation/windows.md).
 
