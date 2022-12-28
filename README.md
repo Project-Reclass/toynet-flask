@@ -41,7 +41,7 @@ ___
 ## ToyNet Docker Image
 
 From there, make sure to build the toynet docker image from the `toynet_mininet` directory.   
-Make sure  you tag it with the same tag you use for the below environment variable for `TOYNET_IMAGE_TAG`.   
+*Make sure* you tag it with the same tag you use for the below environment variable for `TOYNET_IMAGE_TAG`.   
 
 First you will need to download mininet. You can do this by initializing the submodule with these commands:
 ```
@@ -51,7 +51,9 @@ $ cd toynet_mininet
 $ git submodule update --init --recursive
 ```
 
-You will then need to build the image which will work with the Makefile. The default way is to go into the `toynet_mininet` submodule and run one of the following, also in the `toynet_mininet` directory:
+
+
+You will then need to build the image which will work with the top-level Makefile (refer to note in the Makefile section below). The default way is to go into the `toynet_mininet` submodule and run one of the following, also in the `toynet_mininet` directory:
 
 ##### *If you want a TEST(dev) image then run:*
 ```
@@ -120,8 +122,9 @@ Click on `http://127.0.0.1:5000/` to open the program in your browser.
 _____
 
 ### About the Makefile
-The `Makefile` facilitates common workflows, run `make help` for detailed instructions.
-You can use it to run everything in Docker containers, as opposed to running Flask locally as described above.
+The `Makefile` facilitates common workflows. You can use the Makefile to run everything in Docker containers, as opposed to running Flask locally as described above. The Makefile has build targets that build the Docker image and other build targets that run the image as a container. 
+
+**Note** Run `$ make help` for more detailed instructions about the build targets to help understand the above steps. The instructions above are basically saying that the commands listed or building the image are compatible with how the Makefile works (specifically, that they will tag the images in a way that other Makefile commands will also work). 
 
 ### About Swagger API Documentation
 
