@@ -166,9 +166,10 @@ ___
 
 ## FYIs
 
-1. We have not rigorously tested different `USER_GROUP_ID`s.**   
-2. This project is licensed under [GPLv3](/LICENSE)
-3. We would like to acknowledge our amazing Contributors for all of there help with Project Reclass:
+**1. We have not rigorously tested different `USER_GROUP_ID`s.**   
+
+
+## Contributors
     * Tay Nishimura
     * John Chung
     * Arthur Lacey
@@ -177,4 +178,5 @@ ___
     * Yujing Gao
     * Berkan Yilmaz   
 
-
+## License
+This project is licensed under [GPLv3](/LICENSE)
