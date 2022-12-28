@@ -2,33 +2,34 @@
 Backend service of ToyNet emulator and learning platform
 
 # Requirements
-The following tutorial applies to Linux / MacOS development environment. Visit Windows documentation [here](documentation/windows.md).
+The following tutorial applies to Linux/MacOS development environment. 
+
+For Windows OS: Visit Windows documentation [here](documentation/windows.md).
 
 ## Python
-
-Install Python3.7
+Install [Python3.7](https://www.python.org/downloads/)
 
 ## venv
-Create a project folder and a venv folder within:
+This will create a project folder and a venv folder within:
 ```
- git clone https://github.com/Project-Reclass/toynet-flask
- cd toynet-flask
- python3 -m venv venv
+$ git clone https://github.com/Project-Reclass/toynet-flask
+$ cd toynet-flask
+$ python3 -m venv venv
 ```
 
 Before you work on your project, activate the corresponding environment:
 ```
- . venv/bin/activate
+$ . venv/bin/activate
 ```
 
 Install Python Requirements (add new requirements via `pip3 freeze > requirements.txt.`)
 ```
- pip3 install -r requirements.txt
+$ pip3 install -r requirements.txt
 ```
 
 You can exit this virtual environment anytime via running:
 ```
- deactivate
+$ deactivate
 ```
 
 More information [here](https://docs.python.org/3/library/venv.html)
@@ -37,20 +38,20 @@ More information [here](https://docs.python.org/3/library/venv.html)
 From there, make sure to build the toynet docker image from the `toynet_mininet` directory and tag it with the same tag you use in the below environment variable for `TOYNET_IMAGE_TAG`. First you will need to download mininet. You can do this by initializing the submodule.
 
 ```
- cd toynet_mininet
- git submodule update --init --recursive
+$ cd toynet_mininet
+$ git submodule update --init --recursive
 ```
 
 You will then need to build the image.  The default way, which will work with the Makefile here, is to go into the toynet_mininet submodule and run:
 
 ```
- make test-image
+$ make test-image
 ```
 
 if you want a test image. If you want a production image then run:
 
 ```
- make prod-image
+$ make prod-image
 ```
 
 also in the `toynet_mininet` directory.
@@ -68,33 +69,33 @@ type: "cd .." to go back to the toynet-flask directory
 populate environment variables for testing
 
 ```
- source environment/env-dev
+$ source environment/env-dev
 ```
 
 Populate environment variables for production
 
 ```
- source environment/env-prod
+$ source environment/env-prod
 ```
 
 create reclass_network
 
 ```
- docker network create reclass_network
+$ docker network create reclass_network
 ```
 
  creates instance/toynet.sqlite
 
 ```
- flask init-db 
+$ flask init-db 
 ```
 
 Initialized the database.
 
 ```
- flask run
+$ flask run
 ```
-
+```
  * Serving Flask app "flasksrc" (lazy loading)
  * Environment: development
  * Debug mode: on
@@ -102,7 +103,7 @@ Initialized the database.
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 220-725-712
-
+```
 
 Go to: `http://127.0.0.1:5000/`
 <p align="center"> <kbd> <img src="documentation/images/hello-reclass.png" width="300" /> </kbd> </p>
