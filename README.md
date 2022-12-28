@@ -1,5 +1,5 @@
 # toynet-flask
-Backend service of ToyNet emulator and learning platform
+This is the Backend service of the ToyNet emulator and learning platform.
 
 # Requirements
 The following tutorial applies to Linux/MacOS development environment. 
@@ -9,7 +9,7 @@ For Windows OS: Visit Windows documentation [here](documentation/windows.md).
 ## Python
 Install [Python3.7](https://www.python.org/downloads/)
 
-## venv
+## venv --Creation of virtual environments
 This will create a project folder and a venv folder within:
 ```
 $ git clone https://github.com/Project-Reclass/toynet-flask
