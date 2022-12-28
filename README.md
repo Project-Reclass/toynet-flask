@@ -25,7 +25,7 @@ Before you work on your project, activate the corresponding environment:
 $ . venv/bin/activate
 ```
 
-Install the Python Requirements (add new requirements via: `pip3 freeze > requirements.txt.`)
+Install the Python Requirements (add new requirements via: `$ pip3 freeze > requirements.txt`)
 ```
 $ pip3 install -r requirements.txt
 ```
@@ -51,7 +51,7 @@ $ cd toynet_mininet
 $ git submodule update --init --recursive
 ```
 
-You will then need to build the image which will work with the Makefile here. The default way is to go into the `toynet_mininet` submodule and run one of the following, also in the `toynet_mininet` directory:
+You will then need to build the image which will work with the Makefile. The default way is to go into the `toynet_mininet` submodule and run one of the following, also in the `toynet_mininet` directory:
 
 ##### *If you want a TEST(dev) image then run:*
 ```
@@ -76,7 +76,7 @@ For Windows OS: Visit Windows documentation [here](documentation/windows.md).
 
 To go back to the toynet-flask directory, type: 
 ```
-cd .. 
+$ cd .. 
 ```
 
 Populate environment variables for testing:
