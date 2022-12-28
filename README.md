@@ -124,7 +124,7 @@ _____
 ### About the Makefile
 The `Makefile` facilitates common workflows. You can use the Makefile to run everything in Docker containers, as opposed to running Flask locally as described above. The Makefile has build targets that build the Docker image and other build targets that run the image as a container. 
 
-**Note** Run `$ make help` for more detailed instructions about the build targets to help understand the above steps. The instructions above are basically saying that the commands listed or building the image are compatible with how the Makefile works (specifically, that they will tag the images in a way that other Makefile commands will also work). 
+**Note:** Run `$ make help` for more detailed instructions about the build targets to help understand the above steps. The instructions above are basically saying that the commands listed or building the image are compatible with how the Makefile works (specifically, that they will tag the images in a way that other Makefile commands will also work). 
 
 ### About Swagger API Documentation
 
