@@ -5,7 +5,7 @@ This is the Backend service of the ToyNet emulator and learning platform.
 The following tutorial applies to Linux/MacOS development environment. 
 For Windows OS: Visit Windows documentation [here](documentation/windows.md).
 
-## Python
+### Python
 Install [Python3.7](https://www.python.org/downloads/)
 
 ## venv - Virtual Environments
@@ -37,6 +37,7 @@ $ deactivate
 
 Look here for more information on [venvs](https://docs.python.org/3/library/venv.html).
 ___
+
 ## ToyNet Docker Image
 
 From there, make sure to build the toynet docker image from the `toynet_mininet` directory.   
@@ -52,12 +53,12 @@ $ git submodule update --init --recursive
 
 You will then need to build the image which will work with the Makefile here. The default way is to go into the `toynet_mininet` submodule and run one of the following, also in the `toynet_mininet` directory:
 
-*If you want a TEST(dev) image then run:*
+##### *If you want a TEST(dev) image then run:*
 ```
 $ make test-image
 ```
 
-*If you want a PRODUCTION(prod) image then run:*
+##### *If you want a PRODUCTION(prod) image then run:*
 ```
 $ make prod-image
 ```
@@ -65,7 +66,8 @@ $ make prod-image
 
 **Note:** See the [toynet_mininet README](https://github.com/Project-Reclass/toynet-flask/blob/main/toynet_mininet/README.md) for more information on building and developing `toynet_mininet`.
 
-# Run the service
+_____
+## Run the service
 **Make sure that if you are testing anything related to sessions or network emulation, that you build the appropriate image (dev or prod) in `toynet-mininet`.**
 
 ### Requirements
@@ -83,13 +85,11 @@ $ source environment/env-dev
 ```
 
 Populate environment variables for production:
-
 ```
 $ source environment/env-prod
 ```
 
 Create the reclass_network:
-
 ```
 $ docker network create reclass_network
 ```
@@ -116,21 +116,23 @@ After you have entered `flask run`, you should see the following in the terminal
 
 Click on `http://127.0.0.1:5000/` to open the program in your browser.
 <p align="center"> <kbd> <img src="documentation/images/hello-reclass.png" width="300" /> </kbd> </p>
-___
 
-# About the Makefile
+_____
+
+### About the Makefile
 The `Makefile` facilitates common workflows, run `make help` for detailed instructions.
 You can use it to run everything in Docker containers, as opposed to running Flask locally as described above.
 
-# About Swagger API Documentation
+### About Swagger API Documentation
 
 Visit [swagger documentation](documentation/swagger.md) to generate living documentation about available API endpoints alongside your flask instance.
 
-# To Learn how to Test the Service
+### To Learn how to Test the Service
 
 Visit [testing documentation](documentation/testing.md) to learn how to unit test, run manual tests in development, and query SQLite files.
+
 ___
-# Dependencies
+## Dependencies
 
 This project was created using:
 - [Pallet Projects Flask Tutorial](https://flask.palletsprojects.com/en/1.1.x/) for application structure and SQLite database (will become PostgreSQL)
@@ -142,7 +144,7 @@ This project was created using:
 - [Marshmallow](https://marshmallow.readthedocs.io/en/stable/index.html) & [Marshmallow Tutorial](https://www.cameronmacleod.com/blog/better-validation-flask-marshmallow) for parsing REST request body
 ___
 
-# For Troubleshooting
+## For Troubleshooting
 
 **Q: How do I use a table I added in `schema.sql` or `seed_data/<resource>.sql`?**<br/>
 A: Delete instance/toynet.sqlite and run flask init-db again.
@@ -153,14 +155,14 @@ A: Delete `instance/toynet.sqlite` and run `flask init-db` again.
 **Q: I added a test file but it isn't being picked up by pytest**<br/>
 A: Make sure the file is named `test_***.py`
 
+___
 
-
-# FYIs
+## FYIs
 
 **1. We have not rigorously tested different `USER_GROUP_ID`s.**
 
 
-# Contributors
+### Contributors
 
 * Tay Nishimura
 * John Chung
@@ -171,5 +173,5 @@ A: Make sure the file is named `test_***.py`
 * Berkan Yilmaz
 
 
-# License
+### License
 This project is licensed under [GPLv3](/LICENSE)
