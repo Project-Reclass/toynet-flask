@@ -9,11 +9,15 @@ For Windows OS: Visit Windows documentation [here](documentation/windows.md).
 ## Python
 Install [Python3.7](https://www.python.org/downloads/)
 
-## venv --Creation of virtual environments
+## venv - creation of virtual environments
 This will create a project folder and a venv folder within:
 ```
 $ git clone https://github.com/Project-Reclass/toynet-flask
+```
+```
 $ cd toynet-flask
+```
+```
 $ python3 -m venv venv
 ```
 
@@ -22,7 +26,7 @@ Before you work on your project, activate the corresponding environment:
 $ . venv/bin/activate
 ```
 
-Install Python Requirements (add new requirements via `pip3 freeze > requirements.txt.`)
+Install the Python Requirements (add new requirements via: `pip3 freeze > requirements.txt.`)
 ```
 $ pip3 install -r requirements.txt
 ```
@@ -35,15 +39,17 @@ $ deactivate
 More information [here](https://docs.python.org/3/library/venv.html)
 
 
-From there, make sure to build the toynet docker image from the `toynet_mininet` directory and tag it with the same tag you use in the below environment variable for `TOYNET_IMAGE_TAG`. First you will need to download mininet. You can do this by initializing the submodule.
+From there, make sure to build the toynet docker image from the `toynet_mininet` directory and tag it with the same tag you use in the below environment variable for `TOYNET_IMAGE_TAG`. 
 
+First you will need to download mininet. You can do this by initializing the submodule.
 ```
 $ cd toynet_mininet
+```
+```
 $ git submodule update --init --recursive
 ```
 
-You will then need to build the image.  The default way, which will work with the Makefile here, is to go into the toynet_mininet submodule and run:
-
+You will then need to build the image. The default way, which will work with the Makefile here, is to go into the `toynet_mininet` submodule and run:
 ```
 $ make test-image
 ```
