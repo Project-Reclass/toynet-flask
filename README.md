@@ -40,7 +40,7 @@ ___
 
 ## ToyNet Docker Image
 
-From there, make sure to build the toynet docker image from the `toynet_mininet` directory.   
+From there, make sure to build the toynet [docker](https://www.docker.com) image from the `toynet_mininet` directory.   
 *Make sure* you tag it with the same tag you use for the below environment variable for `TOYNET_IMAGE_TAG`.   
 
 First you will need to download mininet. You can do this by initializing the submodule with these commands:
@@ -124,8 +124,12 @@ _____
 ### About the Makefile
 The `Makefile` facilitates common workflows. You can use the Makefile to run everything in Docker containers, as opposed to running Flask locally as described above. The Makefile has build targets that build the Docker image and other build targets that run the image as a container. 
 
-**Note:** Run `$ make help` for more detailed instructions about the build targets to help understand the above steps. The instructions above are basically saying that the commands listed or building the image are compatible with how the Makefile works (specifically, that they will tag the images in a way that other Makefile commands will also work). 
+**Note:** Run the command below for more detailed instructions about the build targets to help understand the above steps. The instructions above are basically saying that the commands listed or building the image are compatible with how the Makefile works (specifically, that they will tag the images in a way that other Makefile commands will also work). 
+```
+$ make help
+```
 
+___ 
 ### About Swagger API Documentation
 
 Visit [swagger documentation](documentation/swagger.md) to generate living documentation about available API endpoints alongside your flask instance.
@@ -162,19 +166,15 @@ ___
 
 ## FYIs
 
-**1. We have not rigorously tested different `USER_GROUP_ID`s.**
+1. We have not rigorously tested different `USER_GROUP_ID`s.**   
+2. This project is licensed under [GPLv3](/LICENSE)
+3. We would like to acknowledge our amazing Contributors for all of there help with Project Reclass:
+    * Tay Nishimura
+    * John Chung
+    * Arthur Lacey
+    * Blaze Bissar
+    * Shaili Smith
+    * Yujing Gao
+    * Berkan Yilmaz   
 
 
-### Contributors
-
-* Tay Nishimura
-* John Chung
-* Arthur Lacey
-* Blaze Bissar
-* Shaili Smith
-* Yujing Gao
-* Berkan Yilmaz
-
-
-### License
-This project is licensed under [GPLv3](/LICENSE)
