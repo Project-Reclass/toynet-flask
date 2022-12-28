@@ -31,17 +31,18 @@ Install the Python Requirements (add new requirements via: `pip3 freeze > requir
 $ pip3 install -r requirements.txt
 ```
 
-You can exit this virtual environment anytime via running:
+You can exit this virtual environment at anytime via running:
 ```
 $ deactivate
 ```
 
-More information [here](https://docs.python.org/3/library/venv.html)
+Look here for more information on [venv](https://docs.python.org/3/library/venv.html)
 
 
-From there, make sure to build the toynet docker image from the `toynet_mininet` directory and tag it with the same tag you use in the below environment variable for `TOYNET_IMAGE_TAG`. 
+From there, make sure to build the toynet docker image from the `toynet_mininet` directory.
+Make sure  you tag it with the same tag you use for the below environment variable for `TOYNET_IMAGE_TAG`. 
 
-First you will need to download mininet. You can do this by initializing the submodule.
+First you will need to download mininet. You can do this by initializing the submodule with these commands:
 ```
 $ cd toynet_mininet
 ```
