@@ -170,13 +170,14 @@ ___
 
 
 ## Contributors
-    * Tay Nishimura
-    * John Chung
-    * Arthur Lacey
-    * Blaze Bissar
-    * Shaili Smith
-    * Yujing Gao
-    * Berkan Yilmaz   
+
+* Tay Nishimura
+* John Chung
+* Arthur Lacey
+* Blaze Bissar
+* Shaili Smith
+* Yujing Gao
+* Berkan Yilmaz   
 
 ## License
 This project is licensed under [GPLv3](/LICENSE)
