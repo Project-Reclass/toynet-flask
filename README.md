@@ -154,7 +154,7 @@ ___
 ## For Troubleshooting
 
 **Q: How do I use a table I added in `schema.sql` or `seed_data/<resource>.sql`?**<br/>
-A: Delete instance/toynet.sqlite and run flask init-db again.
+A: Delete `instance/toynet.sqlite` and run `flask init-db` again.
 
 **Q: How do I get rid of a table?**<br/>
 A: Delete `instance/toynet.sqlite` and run `flask init-db` again.
